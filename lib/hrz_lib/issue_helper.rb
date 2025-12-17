@@ -778,6 +778,232 @@ module HrzLib
 
 
     # ------------------------------------------------------------------------------------------------------------------------------
+    # Related Issue and Sub-Task Search
+    # ------------------------------------------------------------------------------------------------------------------------------
+
+    # Finds the ID of a related issue that has the search text in its subject
+    # This is the inner method that returns the actual issue ID found
+    #
+    # @param j_issue_main_id [Integer] The ID of the main issue whose related issues should be searched
+    # @param b_txt_find [String] The text to search for in related issue subjects (case-insensitive)
+    #
+    # @return [Integer, nil] The ID of the first related issue found with the search text in its subject,
+    #   or nil if no match found, no related issues exist, or an error occurred
+    #
+    # @example Find related issue with keyword
+    #   found_id = HrzLib::IssueHelper.find_related_with_subject(42, 'deployment')
+    #   if found_id
+    #     puts "Found issue ##{found_id}"
+    #     issue = Issue.find(found_id)
+    #   end
+    #
+    def self.find_related_with_subject(j_issue_main_id, b_txt_find)
+      begin
+        # Find the main issue
+        issue = Issue.find(j_issue_main_id)
+
+        # Normalize search text for case-insensitive search
+        search_text = b_txt_find.to_s.downcase
+
+        # Return nil if search text is empty
+        return nil if search_text.empty?
+
+        # Get all relations where this issue is the source
+        relations_from = IssueRelation.where(issue_from_id: issue.id)
+
+        # Get all relations where this issue is the target (need to check both directions)
+        relations_to = IssueRelation.where(issue_to_id: issue.id)
+
+        # Check relations where this issue is the source
+        relations_from.each do |relation|
+          begin
+            related_issue = Issue.find(relation.issue_to_id)
+            if related_issue.subject.downcase.include?(search_text)
+              Rails.logger.info "HRZ Lib: Found text '#{b_txt_find}' in related issue ##{related_issue.id} (relation from ##{issue.id})"
+              return related_issue.id
+            end
+          rescue ActiveRecord::RecordNotFound
+            Rails.logger.warn "HRZ Lib: Related issue ##{relation.issue_to_id} not found"
+            next
+          end
+        end
+
+        # Check relations where this issue is the target
+        relations_to.each do |relation|
+          begin
+            related_issue = Issue.find(relation.issue_from_id)
+            if related_issue.subject.downcase.include?(search_text)
+              Rails.logger.info "HRZ Lib: Found text '#{b_txt_find}' in related issue ##{related_issue.id} (relation to ##{issue.id})"
+              return related_issue.id
+            end
+          rescue ActiveRecord::RecordNotFound
+            Rails.logger.warn "HRZ Lib: Related issue ##{relation.issue_from_id} not found"
+            next
+          end
+        end
+
+        # No match found
+        Rails.logger.info "HRZ Lib: No related issues with text '#{b_txt_find}' found for issue ##{issue.id}"
+        return nil
+
+      rescue ActiveRecord::RecordNotFound => e
+        Rails.logger.error "HRZ Lib: Issue ##{j_issue_main_id} not found: #{e.message}"
+        return nil
+      rescue => e
+        Rails.logger.error "HRZ Lib: Error searching related issues: #{e.message}"
+        Rails.logger.error e.backtrace.join("\n")
+        return nil
+      end
+    end  # find_related_with_subject
+
+
+
+    # Checks if any related issue has the search text in its subject
+    # This is the outer method that returns a boolean result
+    #
+    # @param j_issue_main_id [Integer] The ID of the main issue whose related issues should be searched
+    # @param b_txt_find [String] The text to search for in related issue subjects (case-insensitive)
+    #
+    # @return [Boolean, nil] true if at least one related issue contains the search text in its subject,
+    #   false if no related issues contain the text or no related issues exist,
+    #   nil if the main issue was not found or an error occurred
+    #
+    # @example Check for keyword in related issues
+    #   has_match = HrzLib::IssueHelper.has_related_with_subject?(42, 'deployment')
+    #   if has_match
+    #     puts "Found related issue with 'deployment' in subject"
+    #   end
+    #
+    # @example Check across all relation types
+    #   # Searches in all related issues regardless of relation type (relates, blocks, precedes, etc.)
+    #   has_match = HrzLib::IssueHelper.has_related_with_subject?(42, 'critical bug')
+    #
+    def self.has_related_with_subject?(j_issue_main_id, b_txt_find)
+      begin
+        # Find the main issue first to distinguish between "not found" and "no matches"
+        Issue.find(j_issue_main_id)
+
+        # Use the inner method to find a matching issue
+        found_id = find_related_with_subject(j_issue_main_id, b_txt_find)
+
+        # Return true if found, false if not found (but issue exists)
+        return found_id.present?
+
+      rescue ActiveRecord::RecordNotFound => e
+        Rails.logger.error "HRZ Lib: Issue ##{j_issue_main_id} not found: #{e.message}"
+        return nil
+      rescue => e
+        Rails.logger.error "HRZ Lib: Error in has_related_with_subject?: #{e.message}"
+        Rails.logger.error e.backtrace.join("\n")
+        return nil
+      end
+    end  # has_related_with_subject?
+
+
+
+    # Finds the ID of a sub-task that has the search text in its subject
+    # This is the inner method that returns the actual issue ID found
+    #
+    # @param j_issue_main_id [Integer] The ID of the parent issue whose sub-tasks should be searched
+    # @param b_txt_find [String] The text to search for in sub-task subjects (case-insensitive)
+    #
+    # @return [Integer, nil] The ID of the first sub-task found with the search text in its subject,
+    #   or nil if no match found, no sub-tasks exist, or an error occurred
+    #
+    # @example Find sub-task with keyword
+    #   found_id = HrzLib::IssueHelper.find_subtask_with_subject(42, 'testing')
+    #   if found_id
+    #     puts "Found subtask ##{found_id}"
+    #     subtask = Issue.find(found_id)
+    #   end
+    #
+    def self.find_subtask_with_subject(j_issue_main_id, b_txt_find)
+      begin
+        # Find the parent issue
+        issue = Issue.find(j_issue_main_id)
+
+        # Normalize search text for case-insensitive search
+        search_text = b_txt_find.to_s.downcase
+
+        # Return nil if search text is empty
+        return nil if search_text.empty?
+
+        # Get all sub-tasks (children) of this issue
+        subtasks = issue.children
+
+        # Return nil if no sub-tasks exist
+        if subtasks.empty?
+          Rails.logger.info "HRZ Lib: No sub-tasks found for issue ##{issue.id}"
+          return nil
+        end
+
+        # Search through all sub-tasks
+        subtasks.each do |subtask|
+          if subtask.subject.downcase.include?(search_text)
+            Rails.logger.info "HRZ Lib: Found text '#{b_txt_find}' in sub-task ##{subtask.id} of issue ##{issue.id}"
+            return subtask.id
+          end
+        end
+
+        # No match found
+        Rails.logger.info "HRZ Lib: No sub-tasks with text '#{b_txt_find}' found for issue ##{issue.id} (checked #{subtasks.count} sub-tasks)"
+        return nil
+
+      rescue ActiveRecord::RecordNotFound => e
+        Rails.logger.error "HRZ Lib: Issue ##{j_issue_main_id} not found: #{e.message}"
+        return nil
+      rescue => e
+        Rails.logger.error "HRZ Lib: Error searching sub-tasks: #{e.message}"
+        Rails.logger.error e.backtrace.join("\n")
+        return nil
+      end
+    end  # find_subtask_with_subject
+
+
+
+    # Checks if any sub-task has the search text in its subject
+    # This is the outer method that returns a boolean result
+    #
+    # @param j_issue_main_id [Integer] The ID of the parent issue whose sub-tasks should be searched
+    # @param b_txt_find [String] The text to search for in sub-task subjects (case-insensitive)
+    #
+    # @return [Boolean, nil] true if at least one sub-task contains the search text in its subject,
+    #   false if no sub-tasks contain the text or no sub-tasks exist,
+    #   nil if the parent issue was not found or an error occurred
+    #
+    # @example Check for keyword in sub-tasks
+    #   has_match = HrzLib::IssueHelper.has_subtask_with_subject?(42, 'testing')
+    #   if has_match
+    #     puts "Found sub-task with 'testing' in subject"
+    #   end
+    #
+    # @example Search for multiple words
+    #   has_match = HrzLib::IssueHelper.has_subtask_with_subject?(42, 'code review completed')
+    #
+    def self.has_subtask_with_subject?(j_issue_main_id, b_txt_find)
+      begin
+        # Find the parent issue first to distinguish between "not found" and "no matches"
+        Issue.find(j_issue_main_id)
+
+        # Use the inner method to find a matching subtask
+        found_id = find_subtask_with_subject(j_issue_main_id, b_txt_find)
+
+        # Return true if found, false if not found (but parent issue exists)
+        return found_id.present?
+
+      rescue ActiveRecord::RecordNotFound => e
+        Rails.logger.error "HRZ Lib: Issue ##{j_issue_main_id} not found: #{e.message}"
+        return nil
+      rescue => e
+        Rails.logger.error "HRZ Lib: Error in has_subtask_with_subject?: #{e.message}"
+        Rails.logger.error e.backtrace.join("\n")
+        return nil
+      end
+    end  # has_subtask_with_subject?
+
+
+
+    # ------------------------------------------------------------------------------------------------------------------------------
     # Time entries
     # ------------------------------------------------------------------------------------------------------------------------------
 

@@ -1,0 +1,129 @@
+#-------------------------------------------------------------------------------------------#
+# Redmine utility/library plugin.                                                           #
+# Provides common functions to other plugins,                                               #
+#          a REST API for CustomField creation/modification,                                #
+#          a transport utility for developers/admins.                                       #
+# Copyright (C) 2025 Franz Apeltauer                                                        #
+#                                                                                           #
+# This program is free software: you can redistribute it and/or modify it under the terms   #
+# of the GNU Affero General Public License as published by the Free Software Foundation,    #
+# either version 3 of the License, or (at your option) any later version.                   #
+#                                                                                           #
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; #
+# without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. #
+# See the GNU Affero General Public License for more details.                               #
+#                                                                                           #
+# You should have received a copy of the GNU Affero General Public License                  #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.                    #
+#-------------------------------------------------------------------------------------eohdr-#
+# Purpose: Test fixtures for custom fields used in hrz_lib plugin tests.
+#
+# * Pre-defined custom fields for tests
+# * Different types (issue, project, user)
+# * Different formats (string, list, int, float, date, bool, user, link)
+
+hrz_test_string_field:
+  id: 1000
+  type: IssueCustomField
+  name: HRZ Test String Field
+  field_format: string
+  is_required: false
+  is_for_all: true
+  position: 1
+  searchable: true
+  visible: true
+
+hrz_test_list_field:
+  id: 1001
+  type: IssueCustomField
+  name: HRZ Test List Field
+  field_format: list
+  is_required: false
+  is_for_all: true
+  position: 2
+  possible_values: 
+    - Low
+    - Medium
+    - High
+  default_value: Medium
+
+hrz_test_int_field:
+  id: 1002
+  type: IssueCustomField
+  name: HRZ Test Integer Field
+  field_format: int
+  is_required: false
+  is_for_all: true
+  position: 3
+
+hrz_test_float_field:
+  id: 1003
+  type: IssueCustomField
+  name: HRZ Test Float Field
+  field_format: float
+  is_required: false
+  is_for_all: true
+  position: 4
+
+hrz_test_date_field:
+  id: 1004
+  type: IssueCustomField
+  name: HRZ Test Date Field
+  field_format: date
+  is_required: false
+  is_for_all: true
+  position: 5
+
+hrz_test_bool_field:
+  id: 1005
+  type: IssueCustomField
+  name: HRZ Test Boolean Field
+  field_format: bool
+  is_required: false
+  is_for_all: true
+  position: 6
+
+hrz_test_user_field:
+  id: 1006
+  type: IssueCustomField
+  name: HRZ Test User Field
+  field_format: user
+  is_required: false
+  is_for_all: true
+  position: 7
+
+hrz_test_link_field:
+  id: 1007
+  type: IssueCustomField
+  name: HRZ Test Link Field
+  field_format: link
+  is_required: false
+  is_for_all: true
+  position: 8
+
+hrz_test_required_field:
+  id: 1008
+  type: IssueCustomField
+  name: HRZ Test Required Field
+  field_format: string
+  is_required: true
+  is_for_all: true
+  position: 9
+
+hrz_test_project_field:
+  id: 1009
+  type: ProjectCustomField
+  name: HRZ Test Project Field
+  field_format: string
+  is_required: false
+  is_for_all: true
+  position: 10
+
+hrz_test_user_cf:
+  id: 1010
+  type: UserCustomField
+  name: HRZ Test User Custom Field
+  field_format: string
+  is_required: false
+  is_for_all: true
+  position: 11
