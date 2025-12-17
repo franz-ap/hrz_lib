@@ -28,7 +28,7 @@
 
 
 
-require_relative '../test_helper'
+require_relative '../../test_helper'
 
 class CustomFieldHelperTest < ActiveSupport::TestCase
   fixtures :projects, :users, :trackers, :issue_statuses, :roles

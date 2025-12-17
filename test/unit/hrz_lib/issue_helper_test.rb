@@ -29,7 +29,7 @@
 
 
 
-require_relative '../test_helper'
+require_relative '../../test_helper'
 
 class IssueHelperTest < ActiveSupport::TestCase
   fixtures :projects, :users, :trackers, :issue_statuses, :issues, 
