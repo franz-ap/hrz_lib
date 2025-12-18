@@ -21,36 +21,54 @@
 class HrzCustomFieldsController < ApplicationController
   accept_api_auth :index, :show, :create, :update, :destroy, :validate_formula, :formula_fields, :instance_info
   
+  # Skip sudo mode for API endpoints - they use API key authentication
+  skip_before_action :require_sudo_mode
+  
   before_action :require_admin, except: [:index, :show, :validate_formula, :formula_fields, :instance_info]
+  before_action :require_api_authentication, only: [:instance_info]
   before_action :find_custom_field, only: [:show, :update, :destroy]
   
   # GET /hrz_custom_fields/instance_info.xml
   # GET /hrz_custom_fields/instance_info.json
   # Returns information about this Redmine instance
   def instance_info
-    info = {
-      app_title: Setting.app_title,
-      app_subtitle: Setting.app_subtitle,
-      host_name: Setting.host_name,
-      protocol: Setting.protocol,
-      redmine_version: Redmine::VERSION.to_s,
-      plugin_version: Redmine::Plugin.find(:hrz_lib).version,
-      custom_fields_count: CustomField.count,
-      issue_custom_fields_count: IssueCustomField.count,
-      project_custom_fields_count: ProjectCustomField.count,
-      api_enabled: Setting.rest_api_enabled?,
-      current_user: {
-        id: User.current.id,
-        login: User.current.login,
-        firstname: User.current.firstname,
-        lastname: User.current.lastname,
-        admin: User.current.admin?
-      }
-    }
+    Rails.logger.info "HRZ API: instance_info called by user ##{User.current.id}"
     
-    respond_to do |format|
-      format.json { render json: {instance_info: info} }
-      format.xml { render xml: {instance_info: info} }
+    begin
+      info = {
+        app_title: Setting.app_title || 'Redmine',
+        host_name: Setting.host_name || request.host,
+        protocol: Setting.protocol || 'https',
+        redmine_version: Redmine::VERSION.to_s,
+        plugin_version: Redmine::Plugin.find(:hrz_lib).version,
+        custom_fields_count: CustomField.count,
+        issue_custom_fields_count: IssueCustomField.count,
+        project_custom_fields_count: ProjectCustomField.count,
+        api_enabled: Setting.rest_api_enabled?,
+        current_user: {
+          id: User.current.id,
+          login: User.current.login,
+          firstname: User.current.firstname,
+          lastname: User.current.lastname,
+          admin: User.current.admin?
+        }
+      }
+      
+      Rails.logger.info "HRZ API: instance_info successful - #{info[:app_title]}"
+      
+      respond_to do |format|
+        format.json { render json: {instance_info: info} }
+        format.xml { render xml: {instance_info: info} }
+      end
+      
+    rescue => e
+      Rails.logger.error "HRZ API: instance_info failed: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      
+      respond_to do |format|
+        format.json { render json: {error: e.message}, status: :internal_server_error }
+        format.xml { render xml: {error: e.message}, status: :internal_server_error }
+      end
     end
   end
   
@@ -219,5 +237,12 @@ class HrzCustomFieldsController < ApplicationController
       tracker_ids: [],
       role_ids: []
     )
+  end
+  
+  def require_api_authentication
+    unless User.current.logged?
+      render_error status: 401
+      return false
+    end
   end
 end
