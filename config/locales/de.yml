@@ -6,11 +6,12 @@ de:
   help_hrz_transport_target_url: "Geben Sie die vollständige URL der Ziel-Redmine-Instanz an (z.B. https://target-redmine.example.com). Mit oder ohne abschließenden Schrägstrich."
   
   # Transport page
-  label_hrz_transports: "Transports"
+  label_hrz_transports: "Transport"
   label_hrz_comparison_options: "Vergleichsoptionen"
   label_hrz_comparison_scope: "Vergleichsumfang"
   label_hrz_compare_all_fields: "Alle Custom Fields vergleichen"
   label_hrz_compare_project_fields: "Nur Custom Fields des lokalen Projekts vergleichen"
+  notice_hrz_please_select_project: "Bitte wählen Sie ein Projekt aus, um die Custom Fields zu vergleichen."
   label_hrz_transport_direction: "Transport-Richtung"
   label_hrz_readonly: "Kein Transport, nur Vergleich (schreibgeschützt)"
   label_hrz_local_to_target: "Transport von lokaler Instanz zum Ziel aktivieren"

@@ -39,8 +39,8 @@ class HrzTransportsController < ApplicationController
       return
     end
     
-    # Perform comparison if requested
-    if params[:compare]
+    # Perform comparison automatically if scope is 'all' OR if project is selected
+    if @comparison_scope == 'all' || (@comparison_scope == 'project' && @selected_project_id.present?)
       perform_comparison
     end
   end
@@ -72,8 +72,7 @@ class HrzTransportsController < ApplicationController
       project_id: params[:project_id],
       transport_direction: params[:transport_direction],
       doc_issue_local: doc_issue_local,
-      doc_issue_target: doc_issue_target,
-      compare: 'true'
+      doc_issue_target: doc_issue_target
     )
   end
   

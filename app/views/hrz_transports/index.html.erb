@@ -1,4 +1,4 @@
-<%#-------------------------------------------------------------------------------------------#
+<%#-----------------------------------------------------------------------------------------#
 # Redmine utility/library plugin.                                                           #
 # Provides common functions to other plugins,                                               #
 #          a REST API for CustomField creation/modification,                                #
@@ -38,18 +38,18 @@
                        [l(:label_hrz_compare_all_fields), 'all'],
                        [l(:label_hrz_compare_project_fields), 'project']
                      ], @comparison_scope),
-                     onchange: 'this.form.submit()' %>
+                     onchange: 'handleScopeChange(this)' %>
     </p>
     
-    <% if @comparison_scope == 'project' %>
+    <div id="project-selection" style="<%= @comparison_scope == 'all' ? 'display:none;' : '' %>">
       <p>
         <label><%= l(:label_project) %> <span class="required">*</span></label>
         <%= select_tag 'project_id',
                        options_from_collection_for_select(@projects, :id, :name, @selected_project_id),
                        prompt: l(:label_please_select),
-                       required: true %>
+                       onchange: 'this.form.submit()' %>
       </p>
-    <% end %>
+    </div>
     
     <p>
       <label><%= l(:label_hrz_transport_direction) %></label>
@@ -77,10 +77,6 @@
       <em class="info"><%= l(:help_hrz_doc_issue) %></em>
     </p>
   </fieldset>
-  
-  <p>
-    <%= submit_tag l(:button_compare), name: 'compare', class: 'button-primary' %>
-  </p>
 <% end %>
 
 <% if @comparison_results %>
@@ -168,9 +164,26 @@
       <% end %>
     </tbody>
   </table>
+<% elsif @comparison_scope == 'project' && @selected_project_id.blank? %>
+  <div class="flash notice">
+    <%= l(:notice_hrz_please_select_project) %>
+  </div>
 <% end %>
 
 <% end %>
+
+<script>
+  function handleScopeChange(select) {
+    var projectSelection = document.getElementById('project-selection');
+    if (select.value === 'project') {
+      projectSelection.style.display = 'block';
+    } else {
+      projectSelection.style.display = 'none';
+      // Submit form immediately for 'all' scope
+      select.form.submit();
+    }
+  }
+</script>
 
 <style>
   .hrz-transport-form fieldset {

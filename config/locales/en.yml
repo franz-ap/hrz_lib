@@ -11,6 +11,7 @@ en:
   label_hrz_comparison_scope: "Comparison Scope"
   label_hrz_compare_all_fields: "Compare all Custom Fields"
   label_hrz_compare_project_fields: "Compare only Custom Fields of local project"
+  notice_hrz_please_select_project: "Please select a project to compare custom fields."
   label_hrz_transport_direction: "Transport Direction"
   label_hrz_readonly: "No transport, only comparison (read-only)"
   label_hrz_local_to_target: "Enable transport from local instance to target"
