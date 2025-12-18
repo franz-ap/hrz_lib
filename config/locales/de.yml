@@ -20,6 +20,10 @@ de:
   label_hrz_doc_issue_local: "Dokumentations-Ticket lokal"
   label_hrz_doc_issue_target: "Dokumentations-Ticket Ziel"
   help_hrz_doc_issue: "Optionale Ticket-ID für Transport-Dokumentation"
+  notice_hrz_please_select_project: "Bitte wählen Sie ein Projekt aus, um die Custom Fields zu vergleichen."
+  warning_hrz_no_fields_to_compare: "Keine Custom Fields zum Vergleichen gefunden."
+  error_hrz_cannot_connect_to_target: "Verbindung zur Zielinstanz fehlgeschlagen. Bitte prüfen Sie die Ziel-URL und Ihren API-Key."
+  error_hrz_connection_failed: "Verbindungsfehler: %{error}"
   
   # Comparison results
   label_hrz_comparison_results: "Vergleichsergebnisse"

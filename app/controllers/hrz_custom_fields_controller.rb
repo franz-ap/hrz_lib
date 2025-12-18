@@ -19,10 +19,40 @@
 # Purpose: REST API controller for managing custom fields.
 
 class HrzCustomFieldsController < ApplicationController
-  accept_api_auth :index, :show, :create, :update, :destroy, :validate_formula, :formula_fields
+  accept_api_auth :index, :show, :create, :update, :destroy, :validate_formula, :formula_fields, :instance_info
   
-  before_action :require_admin, except: [:index, :show, :validate_formula, :formula_fields]
+  before_action :require_admin, except: [:index, :show, :validate_formula, :formula_fields, :instance_info]
   before_action :find_custom_field, only: [:show, :update, :destroy]
+  
+  # GET /hrz_custom_fields/instance_info.xml
+  # GET /hrz_custom_fields/instance_info.json
+  # Returns information about this Redmine instance
+  def instance_info
+    info = {
+      app_title: Setting.app_title,
+      app_subtitle: Setting.app_subtitle,
+      host_name: Setting.host_name,
+      protocol: Setting.protocol,
+      redmine_version: Redmine::VERSION.to_s,
+      plugin_version: Redmine::Plugin.find(:hrz_lib).version,
+      custom_fields_count: CustomField.count,
+      issue_custom_fields_count: IssueCustomField.count,
+      project_custom_fields_count: ProjectCustomField.count,
+      api_enabled: Setting.rest_api_enabled?,
+      current_user: {
+        id: User.current.id,
+        login: User.current.login,
+        firstname: User.current.firstname,
+        lastname: User.current.lastname,
+        admin: User.current.admin?
+      }
+    }
+    
+    respond_to do |format|
+      format.json { render json: {instance_info: info} }
+      format.xml { render xml: {instance_info: info} }
+    end
+  end
   
   # GET /hrz_custom_fields.xml
   # GET /hrz_custom_fields.json

@@ -24,6 +24,7 @@ RedmineApp::Application.routes.draw do
     collection do
       post :validate_formula
       get :formula_fields
+      get :instance_info
     end
   end
   

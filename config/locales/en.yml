@@ -20,6 +20,10 @@ en:
   label_hrz_doc_issue_local: "Documentation Issue local"
   label_hrz_doc_issue_target: "Documentation Issue target"
   help_hrz_doc_issue: "Optional issue ID for transport documentation"
+  notice_hrz_please_select_project: "Please select a project to compare custom fields."
+  warning_hrz_no_fields_to_compare: "No custom fields found to compare."
+  error_hrz_cannot_connect_to_target: "Cannot connect to target instance. Please check the target URL and your API key."
+  error_hrz_connection_failed: "Connection error: %{error}"
   
   # Comparison results
   label_hrz_comparison_results: "Comparison Results"

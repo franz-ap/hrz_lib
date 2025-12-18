@@ -25,6 +25,51 @@ require 'uri'
 module HrzLib
   module TransportHelper
     
+    # Fetches instance information from target instance
+    #
+    # @param api_key [String] API key for authentication
+    #
+    # @return [Hash, nil] Instance info hash, or nil on error
+    def self.fetch_target_instance_info(api_key)
+      begin
+        target_url = Setting.plugin_hrz_lib['transport_target_url']
+        return nil if target_url.blank?
+        
+        # Normalize URL (remove trailing slash if present)
+        target_url = target_url.chomp('/')
+        
+        uri = URI("#{target_url}/hrz_custom_fields/instance_info.json")
+        
+        Rails.logger.info "HRZ Transport: Fetching instance info from #{uri}"
+        
+        request = Net::HTTP::Get.new(uri)
+        request['X-Redmine-API-Key'] = api_key
+        request['Content-Type'] = 'application/json'
+        
+        response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == 'https') do |http|
+          http.request(request)
+        end
+        
+        Rails.logger.info "HRZ Transport: Response code: #{response.code}"
+        
+        if response.code.to_i == 200
+          data = JSON.parse(response.body)
+          Rails.logger.info "HRZ Transport: Successfully fetched instance info: #{data['instance_info']['app_title']}"
+          return data['instance_info'].deep_symbolize_keys
+        else
+          Rails.logger.error "HRZ Transport: Failed to fetch instance info. Status: #{response.code}, Body: #{response.body}"
+          return nil
+        end
+        
+      rescue => e
+        Rails.logger.error "HRZ Transport: Error fetching instance info: #{e.message}"
+        Rails.logger.error e.backtrace.join("\n")
+        return nil
+      end
+    end  # fetch_target_instance_info
+
+    
+    
     # Fetches custom fields from target instance
     #
     # @param api_key [String] API key for authentication
@@ -40,6 +85,8 @@ module HrzLib
         
         uri = URI("#{target_url}/hrz_custom_fields.json")
         
+        Rails.logger.info "HRZ Transport: Fetching custom fields from #{uri}"
+        
         request = Net::HTTP::Get.new(uri)
         request['X-Redmine-API-Key'] = api_key
         request['Content-Type'] = 'application/json'
@@ -48,11 +95,15 @@ module HrzLib
           http.request(request)
         end
         
+        Rails.logger.info "HRZ Transport: Response code: #{response.code}"
+        
         if response.code.to_i == 200
           data = JSON.parse(response.body)
+          fields_count = data['custom_fields'].length
+          Rails.logger.info "HRZ Transport: Successfully fetched #{fields_count} custom fields"
           return data['custom_fields'].map(&:deep_symbolize_keys)
         else
-          Rails.logger.error "HRZ Transport: Failed to fetch target fields. Status: #{response.code}"
+          Rails.logger.error "HRZ Transport: Failed to fetch target fields. Status: #{response.code}, Body: #{response.body}"
           return nil
         end
         
@@ -61,7 +112,8 @@ module HrzLib
         Rails.logger.error e.backtrace.join("\n")
         return nil
       end
-    end
+    end  # fetch_target_custom_fields
+
     
     
     # Fetches detailed information about a specific custom field from target instance
@@ -78,6 +130,8 @@ module HrzLib
         target_url = target_url.chomp('/')
         uri = URI("#{target_url}/hrz_custom_fields/#{field_id}.json")
         
+        Rails.logger.info "HRZ Transport: Fetching field details for field ##{field_id} from #{uri}"
+        
         request = Net::HTTP::Get.new(uri)
         request['X-Redmine-API-Key'] = api_key
         request['Content-Type'] = 'application/json'
@@ -88,8 +142,10 @@ module HrzLib
         
         if response.code.to_i == 200
           data = JSON.parse(response.body)
+          Rails.logger.info "HRZ Transport: Successfully fetched field details for ##{field_id}"
           return data['custom_field'].deep_symbolize_keys
         else
+          Rails.logger.error "HRZ Transport: Failed to fetch field details. Status: #{response.code}"
           return nil
         end
         
@@ -97,9 +153,10 @@ module HrzLib
         Rails.logger.error "HRZ Transport: Error fetching target field details: #{e.message}"
         return nil
       end
-    end
+    end  # fetch_target_field_details
     
     
+
     # Compares local and target custom fields
     #
     # @param local_fields [Array<Hash>] Local custom fields
@@ -108,6 +165,8 @@ module HrzLib
     # @return [Array<Hash>] Array of comparison results
     def self.compare_custom_fields(local_fields, target_fields)
       results = []
+      
+      Rails.logger.info "HRZ Transport: Comparing #{local_fields.length} local fields with #{target_fields.length} target fields"
       
       local_fields.each do |local_field|
         # Find matching field in target by name and type
@@ -141,10 +200,13 @@ module HrzLib
         results << comparison
       end
       
+      Rails.logger.info "HRZ Transport: Comparison complete. Found #{results.count { |r| r[:is_identical] }} identical and #{results.count { |r| !r[:is_identical] }} different fields"
+      
       results
-    end
+    end  # compare_custom_fields
     
     
+
     # Compares properties of two custom fields
     #
     # @param local_field [Hash] Local field properties
@@ -226,8 +288,9 @@ module HrzLib
       end
       
       identical
-    end
+    end  # compare_field_properties
     
+
     
     # Executes a transport operation
     #
@@ -261,9 +324,10 @@ module HrzLib
         Rails.logger.error e.backtrace.join("\n")
         {success: false, error: e.message}
       end
-    end
+    end  # execute_transport
     
     
+
     # Transports a custom field definition from local to target instance
     #
     # @param local_field_id [Integer] Local custom field ID
@@ -321,7 +385,8 @@ module HrzLib
       rescue => e
         {success: false, error: e.message}
       end
-    end
+    end  # transport_local_to_target
+
     
     
     # Transports a custom field definition from target to local instance
@@ -365,9 +430,10 @@ module HrzLib
       rescue => e
         {success: false, error: e.message}
       end
-    end
+    end  # transport_target_to_local
     
     
+
     # Prepares field data for transport (removes read-only and instance-specific fields)
     #
     # @param field [Hash] Field details
@@ -384,7 +450,8 @@ module HrzLib
       data[:role_ids] = data[:role_ids].to_a if data[:role_ids]
       
       data
-    end
+    end  # prepare_field_data_for_transport
+
     
     
     # Adds a documentation note to an issue
@@ -428,7 +495,7 @@ module HrzLib
       rescue => e
         Rails.logger.error "HRZ Transport: Failed to add documentation note: #{e.message}"
       end
-    end
+    end  # add_documentation_note
     
-  end
-end
+  end  # module TransportHelper
+end  # module HrzLib
