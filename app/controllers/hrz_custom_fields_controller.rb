@@ -22,7 +22,7 @@ class HrzCustomFieldsController < ApplicationController
   accept_api_auth :index, :show, :create, :update, :destroy, :validate_formula, :formula_fields, :instance_info
   
   # Skip sudo mode for API endpoints - they use API key authentication
-  skip_before_action :require_sudo_mode
+  #skip_before_action :require_sudo_mode
   
   before_action :require_admin, except: [:index, :show, :validate_formula, :formula_fields, :instance_info]
   before_action :require_api_authentication, only: [:instance_info]
