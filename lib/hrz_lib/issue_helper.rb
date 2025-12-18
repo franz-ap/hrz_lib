@@ -781,6 +781,12 @@ module HrzLib
     # Related Issue and Sub-Task Search
     # ------------------------------------------------------------------------------------------------------------------------------
 
+    # The methods below have the following things in common:
+    # * find_* ............... returns an issue ID, if one was found or nil, if no such issue was found.
+    # * has_*with_subject? ... returns true = found, false = not found.
+    # * All of them .......... return nil, if the main_issue was not found.
+
+
     # Finds the ID of a related issue that has the search text in its subject
     # This is the inner method that returns the actual issue ID found
     #
