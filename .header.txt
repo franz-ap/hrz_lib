@@ -1,4 +1,4 @@
-Redmine utility/library plugin. Provides common functions to other plugins, a REST API for CustomField creation/modification, a transport utility for developers/admins.
+Redmine utility/library plugin. Provides common functions to other plugins + REST API.
 2025
 Franz Apeltauer
 GNU Affero General Public License

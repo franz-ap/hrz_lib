@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU Affero General Public License                  #
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.                    #
 #-------------------------------------------------------------------------------------eohdr-#
-# Purpose: Routes configuration for HRZ Lib plugin REST API and transport functionality.
+# Purpose: Routes configuration for HRZ Lib plugin REST API.
 
 RedmineApp::Application.routes.draw do
   # Custom Fields REST API
@@ -27,8 +27,4 @@ RedmineApp::Application.routes.draw do
       get :instance_info
     end
   end
-  
-  # Transport functionality
-  get 'hrz_transports', to: 'hrz_transports#index', as: 'hrz_transports'
-  post 'hrz_transports/execute', to: 'hrz_transports#execute', as: 'hrz_transports_execute'
 end
