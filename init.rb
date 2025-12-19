@@ -25,6 +25,7 @@ Redmine::Plugin.register :hrz_lib do
   url '' #'https://github.com/franz-ap/hrz_lib'
   author_url ''
   requires_redmine version_or_higher: '6.1.0'
+end
 
 # Load library modules
 require_relative 'lib/hrz_lib/issue_helper'
