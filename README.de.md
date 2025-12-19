@@ -2,8 +2,8 @@
 
 Dieses Redmine-Plugin stellt Hilfs-Methoden/-Funktionen für andere Plugins und ein REST API bereit.
 
-[![en](https://img.shields.io/badge/lang-en-grey.svg)](https://github.com/franz-ap/hrz_lib/README.md)
-[![de](https://img.shields.io/badge/lang-de-green.svg)](https://github.com/franz-ap/hrz_lib/README.de.md)
+[![en](https://img.shields.io/badge/lang-en-grey.svg)](https://github.com/franz-ap/hrz_lib/blob/main/README.md)
+[![de](https://img.shields.io/badge/lang-de-green.svg)](https://github.com/franz-ap/hrz_lib/blob/main/README.de.md)
 
 
 ## Überblick
