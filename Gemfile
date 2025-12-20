@@ -13,22 +13,6 @@
 # You should have received a copy of the GNU Affero General Public License                  #
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.                    #
 #-------------------------------------------------------------------------------------eohdr-#
-# Purpose: Plugin registration file for the Redmine utility/library plugin.
+# Purpose: Gemfile for hrz_lib Redmine plugin. Lists required, additional gems.
 
-require 'redmine'
-
-Redmine::Plugin.register :hrz_lib do
-  name 'HRZ Lib'
-  author 'Franz Apeltauer, Claude'
-  description 'Redmine utility/library plugin. Provides common functions to other plugins and a REST API for CustomField creation/modification.'
-  version '0.4.4'
-  url '' #'https://github.com/franz-ap/hrz_lib'
-  author_url ''
-  requires_redmine version_or_higher: '6.1.0'
-end
-
-# Load library modules
-require_relative 'lib/hrz_lib/issue_helper'
-require_relative 'lib/hrz_lib/custom_field_helper'
-require_relative 'lib/hrz_lib/hrz_tag_parser'
-require_relative 'lib/hrz_lib/hrz_tag_functions'
+gem 'parslet', '~> 2.0'
