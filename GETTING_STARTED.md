@@ -22,7 +22,7 @@ This guide will help you install and use the HRZ Lib plugin in your Redmine plug
 
 Before installing HRZ Lib, ensure you have:
 
-- **Redmine**: Version 6.1.0 or higher
+- **Redmine**: Version 6.1.0 or higher. If you have that, then most likely the remaining prerequisites will also be available.
 - **Ruby**: Version 3.0 or higher (check with `ruby -v`)
 - **Rails**: Version 7.0 or higher (bundled with Redmine)
 - **Database**: PostgreSQL, MySQL, or SQLite
