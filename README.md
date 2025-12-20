@@ -5,6 +5,46 @@ This Redmine plugin provides helper methods/functions for other plugins and a RE
 [![en](https://img.shields.io/badge/lang-en-green.svg)](https://github.com/franz-ap/hrz_lib/blob/main/README.md)
 [![de](https://img.shields.io/badge/lang-de-grey.svg)](https://github.com/franz-ap/hrz_lib/blob/main/README.de.md)
 
+[![getting started](https://img.shields.io/badge/🚀_getting-started-blue.svg)](https://github.com/franz-ap/hrz_lib/blob/main/GETTING_STARTED.md)
+
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Part 1: Ruby Helper Modules](#part-1-ruby-helper-modules)
+  - [Usage in Other Plugins](#usage-in-other-plugins)
+    - [Define Plugin Dependency](#define-plugin-dependency)
+    - [Using Helper Methods](#using-helper-methods)
+  - [IssueHelper Module](#issuehelper-module)
+    - [Issue Creation](#issue-creation)
+    - [File Attachments](#file-attachments)
+    - [Issue Relations](#issue-relations)
+    - [Issue Updates](#issue-updates)
+    - [Comments](#comments)
+    - [Watchers](#watchers)
+    - [Search Related Issues and Subtasks](#search-related-issues-and-subtasks)
+    - [Time Tracking](#time-tracking)
+  - [CustomFieldHelper Module](#customfieldhelper-module)
+    - [Create Custom Field](#create-custom-field)
+    - [Computed Custom Fields](#computed-custom-fields)
+    - [Additional Custom Field Methods](#additional-custom-field-methods)
+- [Part 2: Custom Fields REST API](#part-2-custom-fields-rest-api)
+  - [Authentication](#authentication)
+  - [Endpoints](#endpoints)
+    - [List All Custom Fields](#list-all-custom-fields)
+    - [Computed Custom Fields API](#computed-custom-fields-api)
+    - [Validate Formula](#validate-formula)
+    - [Get Available Fields for Formulas](#get-available-fields-for-formulas)
+    - [Custom Field Details](#custom-field-details)
+    - [Create Custom Field](#create-custom-field-1)
+    - [Update Custom Field](#update-custom-field)
+    - [Delete Custom Field](#delete-custom-field)
+  - [Error Handling](#error-handling)
+  - [Tips and Best Practices](#tips-and-best-practices)
+  - [Known Limitations](#known-limitations)
+  - [Plugin Compatibility](#plugin-compatibility)
+
+---
 
 ## Overview
 
@@ -792,7 +832,370 @@ GET /hrz_custom_fields.json?customized_type=issue
 curl -X GET \
   -H "X-Redmine-API-Key: your_api_key" \
   -H "Content-Type: application/json" \
+  https://your-redmine.com/hrz_custom_fields/1.json
+```
+
+---
+
+### Create Custom Field
+
+```
+POST /hrz_custom_fields.json
+POST /hrz_custom_fields.xml
+```
+
+**Required Parameters:**
+- `name`: Custom field name
+- `field_format`: Format type (see below)
+- `customized_type`: Type (see below)
+
+**Optional Parameters:**
+- `description`: Description
+- `is_required`: Required field (true/false)
+- `is_for_all`: For all projects (true/false)
+- `visible`: Visible (true/false)
+- `searchable`: Searchable (true/false)
+- `multiple`: Multiple selection (true/false, only for lists)
+- `default_value`: Default value
+- `regexp`: Validation regex
+- `min_length`: Minimum length
+- `max_length`: Maximum length
+- `possible_values`: Array of possible values (for lists)
+- `project_ids`: Array of project IDs
+- `tracker_ids`: Array of tracker IDs (for issue custom fields)
+- `role_ids`: Array of role IDs
+
+#### Valid Field Formats:
+- `string`: Single-line text
+- `text`: Multi-line text
+- `int`: Integer
+- `float`: Decimal number
+- `date`: Date
+- `bool`: Yes/No (checkbox)
+- `list`: Select list
+- `user`: User selection
+- `version`: Version selection
+- `link`: URL/Link
+- `attachment`: File attachment
+
+#### Valid Customized Types:
+- `issue`: Ticket/Issue
+- `project`: Project
+- `user`: User
+- `time_entry`: Time entry
+- `version`: Version
+- `document`: Document
+- `group`: Group
+
+**Example 1: Simple Text Field**
+```json
+{
+  "custom_field": {
+    "name": "Customer Name",
+    "field_format": "string",
+    "customized_type": "issue",
+    "is_required": true,
+    "description": "Name of the customer",
+    "max_length": 100
+  }
+}
+```
+
+**cURL:**
+```bash
+curl -X POST \
+  -H "X-Redmine-API-Key: your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "custom_field": {
+      "name": "Customer Name",
+      "field_format": "string",
+      "customized_type": "issue",
+      "is_required": true,
+      "max_length": 100
+    }
+  }' \
   https://your-redmine.com/hrz_custom_fields.json
+```
+
+**Example 2: Select List**
+```json
+{
+  "custom_field": {
+    "name": "Priority Level",
+    "field_format": "list",
+    "customized_type": "issue",
+    "possible_values": ["Low", "Medium", "High", "Critical"],
+    "default_value": "Medium",
+    "is_required": false
+  }
+}
+```
+
+**cURL:**
+```bash
+curl -X POST \
+  -H "X-Redmine-API-Key: your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "custom_field": {
+      "name": "Priority Level",
+      "field_format": "list",
+      "customized_type": "issue",
+      "possible_values": ["Low", "Medium", "High", "Critical"],
+      "default_value": "Medium"
+    }
+  }' \
+  https://your-redmine.com/hrz_custom_fields.json
+```
+
+**Example 3: Multi-Select List**
+```json
+{
+  "custom_field": {
+    "name": "Tags",
+    "field_format": "list",
+    "customized_type": "issue",
+    "multiple": true,
+    "possible_values": ["Bug", "Feature", "Enhancement", "Documentation", "Security"]
+  }
+}
+```
+
+**Example 4: Date Field**
+```json
+{
+  "custom_field": {
+    "name": "Deadline",
+    "field_format": "date",
+    "customized_type": "issue",
+    "is_required": true,
+    "description": "Final deadline for this task"
+  }
+}
+```
+
+**Example 5: Numeric Field with Validation**
+```json
+{
+  "custom_field": {
+    "name": "Estimated Cost",
+    "field_format": "float",
+    "customized_type": "issue",
+    "description": "Estimated cost in EUR"
+  }
+}
+```
+
+**Example 6: Custom Field for Specific Projects Only**
+```json
+{
+  "custom_field": {
+    "name": "Internal Reference",
+    "field_format": "string",
+    "customized_type": "issue",
+    "is_for_all": false,
+    "project_ids": [1, 3, 5]
+  }
+}
+```
+
+**Example 7: Custom Field for Specific Trackers Only**
+```json
+{
+  "custom_field": {
+    "name": "Bug Category",
+    "field_format": "list",
+    "customized_type": "issue",
+    "tracker_ids": [1],
+    "possible_values": ["UI", "Backend", "Database", "API"]
+  }
+}
+```
+
+---
+
+### Update Custom Field
+
+```
+PUT /hrz_custom_fields/:id.json
+PUT /hrz_custom_fields/:id.xml
+PATCH /hrz_custom_fields/:id.json
+PATCH /hrz_custom_fields/:id.xml
+```
+
+**Example:**
+```json
+{
+  "custom_field": {
+    "description": "Updated description",
+    "is_required": true
+  }
+}
+```
+
+**cURL:**
+```bash
+curl -X PUT \
+  -H "X-Redmine-API-Key: your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "custom_field": {
+      "description": "Updated description",
+      "is_required": true
+    }
+  }' \
+  https://your-redmine.com/hrz_custom_fields/1.json
+```
+
+**Example: Update Selection Options**
+```bash
+curl -X PUT \
+  -H "X-Redmine-API-Key: your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "custom_field": {
+      "possible_values": ["Low", "Medium", "High", "Critical", "Emergency"]
+    }
+  }' \
+  https://your-redmine.com/hrz_custom_fields/2.json
+```
+
+---
+
+### Delete Custom Field
+
+```
+DELETE /hrz_custom_fields/:id.json
+DELETE /hrz_custom_fields/:id.xml
+```
+
+**cURL:**
+```bash
+curl -X DELETE \
+  -H "X-Redmine-API-Key: your_api_key" \
+  https://your-redmine.com/hrz_custom_fields/1.json
+```
+
+**Successful Response:** HTTP 204 No Content
+
+---
+
+## Error Handling
+
+### HTTP Status Codes
+
+- **200 OK**: Successful GET/PUT request
+- **201 Created**: Custom field successfully created
+- **204 No Content**: Custom field successfully deleted
+- **401 Unauthorized**: Missing or invalid authentication
+- **403 Forbidden**: No administrator rights
+- **404 Not Found**: Custom field not found
+- **422 Unprocessable Entity**: Validation error
+
+### Error Responses
+
+```json
+{
+  "error": "Missing required parameters: name, field_format, customized_type"
+}
+```
+
+```json
+{
+  "error": "Failed to create custom field"
+}
+```
+
+---
+
+## Tips and Best Practices
+
+1. **Unique Names**: Use unique, descriptive names for custom fields
+2. **Descriptions**: Always add helpful descriptions
+3. **Validation**: Use `regexp`, `min_length`, `max_length` for data quality
+4. **Project Assignment**: Consider whether the field really needs to be for all projects
+5. **Tracker Assignment**: Limit issue custom fields to relevant trackers
+6. **Default Values**: Set sensible default values for better UX
+7. **Testing**: Test custom fields in a test project first
+
+### Computed Custom Fields Best Practices
+
+8. **Formula Validation**: Use `/validate_formula` before creating
+9. **Null Checks**: Always check for `nil` in formulas: `if cfs[1] && cfs[2]`
+10. **Type Casting**: Use `.to_f`, `.to_i`, `.to_s` for safe conversion
+11. **Safe Navigation**: Use `.try()` for optional values
+12. **Rounding**: Round floating-point numbers: `.round(2)`
+13. **Re-save**: After formula updates, objects must be re-saved
+14. **Available Fields**: Use `/formula_fields` to see which fields are available
+15. **Documentation**: Document complex formulas in the description
+
+### Formula Examples for Common Use Cases
+
+**Calculate sum:**
+```ruby
+cfs[1].to_f + cfs[2].to_f + cfs[3].to_f
+```
+
+**Calculate average:**
+```ruby
+(cfs[1].to_f + cfs[2].to_f + cfs[3].to_f) / 3
+```
+
+**Percentage calculation:**
+```ruby
+(cfs[1].to_f / cfs[2].to_f * 100).round(2) if cfs[2] && cfs[2].to_f > 0
+```
+
+**Date difference:**
+```ruby
+(cfs[2].to_date - cfs[1].to_date).to_i if cfs[1] && cfs[2]
+```
+
+**Conditional formatting:**
+```ruby
+cfs[1].to_i >= 100 ? "High" : "Low"
+```
+
+**Multiple conditions:**
+```ruby
+if cfs[1].to_i < 10
+  "Low"
+elsif cfs[1].to_i < 50
+  "Medium"
+else
+  "High"
+end
+```
+
+---
+
+## Known Limitations
+
+- Custom fields cannot be converted to another class (e.g., IssueCustomField to ProjectCustomField)
+- Changing `field_format` after creation is not recommended
+- Deleting a custom field removes all associated values
+- **Computed Custom Fields**: Require the installed Computed Custom Field Plugin
+- **Computed Custom Fields**: Are calculated when the object is saved, not when displayed
+- **Computed Custom Fields**: After formula changes, objects must be re-saved
+- **Computed Custom Fields**: Complex formulas can impact performance
+
+## Plugin Compatibility
+
+This plugin has been tested with:
+- Redmine 6.1.x
+- Computed Custom Field Plugin 1.0.7+
+
+Not yet tested with:
+- Computed Custom Field NextGen
+
+To use Computed Custom Fields, install:
+```bash
+cd plugins
+git clone https://github.com/annikoff/redmine_plugin_computed_custom_field.git computed_custom_field
+cd ..
+bundle exec rake redmine:plugins:migrate
+```https://your-redmine.com/hrz_custom_fields.json
 ```
 
 ---

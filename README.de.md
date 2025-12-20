@@ -2,9 +2,49 @@
 
 Dieses Redmine-Plugin stellt Hilfs-Methoden/-Funktionen für andere Plugins und ein REST API bereit.
 
-[![en](https://img.shields.io/badge/lang-en-grey.svg)](https://github.com/franz-ap/hrz_lib/blob/main/README.md)
-[![de](https://img.shields.io/badge/lang-de-green.svg)](https://github.com/franz-ap/hrz_lib/blob/main/README.de.md)
+[![en](https://img.shields.io/badge/lang-en-green.svg)](https://github.com/franz-ap/hrz_lib/blob/main/README.md)
+[![de](https://img.shields.io/badge/lang-de-grey.svg)](https://github.com/franz-ap/hrz_lib/blob/main/README.de.md)
 
+[![getting started](https://img.shields.io/badge/🚀_getting-started-blue.svg)](https://github.com/franz-ap/hrz_lib/blob/main/GETTING_STARTED.md)
+
+
+## Inhaltsverzeichnis
+
+- [Überblick](#überblick)
+- [Teil 1: Ruby Helper-Module](#teil-1-ruby-helper-module)
+  - [Verwendung in anderen Plugins](#verwendung-in-anderen-plugins)
+    - [Plugin-Abhängigkeit definieren](#plugin-abhängigkeit-definieren)
+    - [Verwendung der Helper-Methoden](#verwendung-der-helper-methoden)
+  - [IssueHelper Modul](#issuehelper-modul)
+    - [Issue-Erstellung](#issue-erstellung)
+    - [Dateianhänge](#dateianhänge)
+    - [Issue-Beziehungen](#issue-beziehungen)
+    - [Issue-Aktualisierung](#issue-aktualisierung)
+    - [Kommentare](#kommentare)
+    - [Beobachter (Watchers)](#beobachter-watchers)
+    - [Verwandte Issues und Unteraufgaben suchen](#verwandte-issues-und-unteraufgaben-suchen)
+    - [Zeiterfassung](#zeiterfassung)
+  - [CustomFieldHelper Modul](#customfieldhelper-modul)
+    - [Custom Field erstellen](#custom-field-erstellen)
+    - [Berechnete Custom Fields (Computed Fields)](#berechnete-custom-fields-computed-fields)
+    - [Weitere Custom Field Methoden](#weitere-custom-field-methoden)
+- [Teil 2: Custom Fields REST API](#teil-2-custom-fields-rest-api)
+  - [Authentifizierung](#authentifizierung)
+  - [Endpunkte](#endpunkte)
+    - [Liste aller Custom Fields](#liste-aller-custom-fields)
+    - [Computed Custom Fields (Berechnete Felder)](#computed-custom-fields-berechnete-felder)
+    - [Formel validieren](#formel-validieren)
+    - [Verfügbare Felder für Formeln abrufen](#verfügbare-felder-für-formeln-abrufen)
+    - [Details eines Custom Fields](#details-eines-custom-fields)
+    - [Custom Field erstellen](#custom-field-erstellen-1)
+    - [Custom Field aktualisieren](#custom-field-aktualisieren)
+    - [Custom Field löschen](#custom-field-löschen)
+  - [Fehlerbehandlung](#fehlerbehandlung)
+  - [Tipps und Best Practices](#tipps-und-best-practices)
+  - [Bekannte Einschränkungen](#bekannte-einschränkungen)
+  - [Plugin-Kompatibilität](#plugin-kompatibilität)
+
+---
 
 ## Überblick
 
