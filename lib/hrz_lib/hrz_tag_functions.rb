@@ -16,36 +16,39 @@
 # Purpose: Implementation of HRZ tag functions
 
 module HrzLib
-  # Container für alle HRZ-Tag-Funktionen
+  # Container for all HRZ tag functions
   class HrzTagFunctions
-    # Zentrale Dispatcher-Methode
-    # @param function_name [String] Name der aufzurufenden Funktion
-    # @param params [Array<String>] Array mit String-Parametern
-    # @return [String] Ergebnis der Funktion
-    def self.call_function(function_name, params = [])
+    # Central dispatcher
+    # @param b_function [String] Name of hrz_tag function to be called.
+    # @param params [Array<String>] Array of string parameters
+    # @return [String] Result
+    def self.call_dispatcher(b_function, params = [])
       # Im Dry-Run-Modus: Dummy-Wert zurückgeben ohne Funktion auszuführen
       if TagStringHelper.dry_run_mode?
-        Rails.logger.debug "Dry-run: #{function_name}(#{params.inspect})"
+        HrzLogger.logger.debug_msg "Dry-run: call_dispatcher #{b_function}(#{params.inspect})"
         return "1"  # Standard-Dummy-Wert für Dry-Run
       end
-      
-      case function_name
-      when 'get_param'
-        hrz_strfunc_get_param(params)
-      when 'set_param'
-        hrz_strfunc_set_param(params)
-      else
-        Rails.logger.warn "Unknown HRZ function: #{function_name}"
-        raise HrzError.new("Unknown function: #{function_name}", { function: function_name })
-      end
+      HrzLogger.logger.debug_msg "call_dispatcher ('#{b_function}, #{params})"
+
+      case b_function
+        when         'get_param'
+          hrz_strfunc_get_param(params)
+        when         'set_param'
+          hrz_strfunc_set_param(params)
+        else
+          HrzLogger.logger.warning_msg "Unknown HRZ function: #{b_function}"
+          raise HrzError.new("Unknown function: #{b_function}", { function: b_function })
+      end  # case
     rescue HrzError
       # HrzError weitergeben
       raise
     rescue StandardError => e
-      Rails.logger.error "Error in HRZ function #{function_name}: #{e.message}"
-      raise HrzError.new("Error in function #{function_name}: #{e.message}", 
-                        { function: function_name, params: params, cause: e })
-    end
+      HrzLogger.logger.error_msg "Error in HRZ function #{b_function}: #{e.message}"
+      raise HrzError.new("Error in function #{b_function}: #{e.message}",
+                        { function: b_function, params: params, cause: e })
+    end  # call_dispatcher
+
+
     
     # ============================================================================
     # Implementierung der einzelnen Funktionen
@@ -76,7 +79,7 @@ module HrzLib
       value = context[param_name.to_sym]
       
       if value.nil?
-        Rails.logger.debug "Parameter '#{param_name}' not found, using default: '#{default_value}'"
+        HrzLogger.logger.debug_msg "Parameter '#{param_name}' not found, using default: '#{default_value}'"
         default_value
       else
         value.to_s
@@ -106,14 +109,14 @@ module HrzLib
       Thread.current[:hrz_context] ||= {}
       Thread.current[:hrz_context][param_name.to_sym] = param_value
       
-      Rails.logger.debug "Parameter '#{param_name}' set to '#{param_value}'"
+      HrzLogger.logger.debug_msg "Parameter '#{param_name}' set to '#{param_value}'"
       
       # set_param gibt keinen Text zurück
       ""
     end
     
     # ============================================================================
-    # Hilfsmethoden für Context-Management
+    # Context management utilities
     # ============================================================================
     
     # Initialisiert den Kontext für eine neue Verarbeitung
@@ -149,5 +152,6 @@ module HrzLib
       context = Thread.current[:hrz_context] || {}
       context[key.to_sym] || default
     end
-  end
-end
+
+  end  # class HrzTagFunctions
+end  # module HrzLib

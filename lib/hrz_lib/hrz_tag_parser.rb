@@ -15,11 +15,46 @@
 #-------------------------------------------------------------------------------------eohdr-#
 # Purpose: Parser and processor for HRZ tags in text strings
 
-require 'parslet'
+require 'parslet'    # https://kschiess.github.io/parslet/
 require_relative 'hrz_tag_functions'
 
 module HrzLib
-  # Fehlerklasse für HRZ-spezifische Fehler
+  # Logger wrapper, enabling standalone tests without Rails.
+  class HrzLogger
+    def self.debug_msg(msg)
+      return unless ENV['HRZ_DEBUG']
+      puts "[DEBUG] #{msg}"
+    end
+
+    def self.transform_beg(b_rule, b_msg)
+      HrzLogger.debug_msg("Transform '#{b_rule}': #{b_msg}")
+    end
+
+    def self.transform_res(b_msg)
+      HrzLogger.debug_msg("  ----->  #{b_msg}")
+    end
+
+    def self.info_msg(msg)
+      puts "[INFO] #{msg}"
+    end
+    
+    def self.warning_msg(msg)
+      puts "[WARN] #{msg}"
+    end
+    
+    def self.error_msg(msg)
+      puts "[ERROR] #{msg}"
+    end
+    
+    # Rails compatible interface
+    def self.logger
+      defined?(Rails) ? Rails.logger : self
+    end
+  end  # class HrzLogger
+  
+
+  
+  # Error class for HRZ tag errors
   class HrzError < StandardError
     attr_reader :context
     
@@ -27,52 +62,76 @@ module HrzLib
       super(message)
       @context = context
     end
-  end
+  end  # class HrzError
   
-  # Parser für HRZ-Tags
+
+  # -------------------------------------------------------------------------------------------------------------------------------
+
+
+  # Parser for HRZ tags
   class HrzTagParser < Parslet::Parser
-    # Whitespace innerhalb von Tags (wird ignoriert)
+    # Whitespace inside of tags (ignored)
     rule(:space) { match('\s').repeat(1) }
     rule(:space?) { space.maybe }
     
-    # Tag-Tokens
+    # Tag tokens
     rule(:tag_start) { str('<HRZ') >> space }
     rule(:tag_start_cl) { str('</HRZ') >> space }
     rule(:tag_end_more) { str('+>') }
-    rule(:tag_end_closed) { str('>') }
+    rule(:tag_end_closed) { space? >> str('>') }
     
-    # Funktionsnamen
-    rule(:func_get_param) { str('get_param').as(:func) }
+    # HRZ tag function names
+    rule(:func_get_param) { str('get_param').as(:func) }   # Creates a hash {:func => "get_param"}
     rule(:func_set_param) { str('set_param').as(:func) }
-    rule(:func_if) { str('if').as(:func) }
-    rule(:func_then) { str('then').as(:func) }
-    rule(:func_else) { str('else').as(:func) }
-    rule(:func_end_if) { str('end_if').as(:func) }
+    rule(:func_if) { str('if') }
+    rule(:func_then) { str('then') }
+    rule(:func_else) { str('else') }
+    rule(:func_end_if) { str('end_if') }
     rule(:func_on_error) { str('on_error').as(:func) }
-    
+
     rule(:hrz_function) { 
       func_get_param | func_set_param | func_on_error
     }
     
-    # OTHER_TEXT: Text ohne TAG_* und ohne Whitespace, mindestens 1 Zeichen
-    rule(:other_text_word) { 
-      match('[^<>\s]').repeat(1).as(:text) 
+    # Any text without a tag_start:
+    rule(:any_text_wo_tag_start) {
+      (tag_start.absent? >> any).repeat(1).as(:text)
     }
+
+    # OTHER_TEXT: Text without TAG_* and without whitespace or comma, at least 1 character
+    rule(:other_text_word) { 
+      match('[^<>,\s]').repeat(1).as(:text)                                                |   # Without a '<' inside, it cannot contain a tag_start.
+      match('\w').repeat >> str('<') >> match('[^H,\s]').repeat(1) >> match('\w').repeat      # If there is a '<' but it is not folloed by 'H': ---"---
+    }
+    # Same thing again, but comma allowed inside
+    rule(:other_text_word_incl_comma) {
+      match('[^<\s]').repeat(1).as(:text)  |
+      match('\w').repeat >> str('<') >> match('[^H\s]').repeat(1) >> match('\w').repeat.as(:text)
+    }
+
     
-    # OTextList: Eine nicht-leere Zeichenkette ohne TAG_* 
-    # Wichtig: Whitespace zwischen Wörtern wird erhalten!
+    # Numbers (Integer and Float)
+    rule(:number) {
+      (str('-').maybe >> match('[0-9]').repeat(1) >>
+       (str('.') >> match('[0-9]').repeat(1)).maybe).as(:number)
+    }
+
+    # OTextList: A non-empty text string without any TAG_*
+    # Whitespace between words will be retained.
     rule(:otext_list) {
-      (other_text_word >> (space >> other_text_word).repeat).as(:otext)
+      (other_text_word_incl_comma >> (space >> other_text_word_incl_comma).repeat).as(:otext)
     }
     
     # Parameter
     rule(:hrz_param1) {
       # Quoted string
       (str('"') >> space? >> otext_list.maybe.as(:quoted) >> space? >> str('"')) |
+      # Number (before single_hrz_tag to avoid ambiguity)
+      number |
       # Single HRZ tag
       single_hrz_tag |
       # Plain text word
-      other_text_word
+      (tag_end_more | tag_end_closed).absent? >> other_text_word
     }
     
     rule(:hrz_param_list) {
@@ -81,26 +140,20 @@ module HrzLib
     }
     
     rule(:hrz_params_arr) {
-      # Mit eckigen Klammern
+      # With square brackets
       (str('[') >> space? >> hrz_param_list.maybe.as(:params) >> space? >> str(']')) |
-      # Ohne eckige Klammern
+      # Without square brackets
       hrz_param_list.as(:params) |
-      # Leer
+      # Empty
       str('').as(:params)
     }
     
     # Boolean Expression Parser
-    # Konstanten
+    # Constants
     rule(:bool_true) { (str('true') | str('TRUE')).as(:bool_const) >> space? }
     rule(:bool_false) { (str('false') | str('FALSE')).as(:bool_const) >> space? }
-    
-    # Zahlen (Integer und Float)
-    rule(:number) { 
-      (str('-').maybe >> match('[0-9]').repeat(1) >> 
-       (str('.') >> match('[0-9]').repeat(1)).maybe).as(:number) >> space?
-    }
-    
-    # Operatoren
+
+    # Operators
     rule(:op_and) { (str('AND') | str('&&')).as(:op) >> space? }
     rule(:op_or) { (str('OR') | str('||')).as(:op) >> space? }
     rule(:op_not) { (str('NOT') | str('!')).as(:op) >> space? }
@@ -114,10 +167,10 @@ module HrzLib
     rule(:op_add) { str('+').as(:op) >> space? }
     rule(:op_sub) { str('-').as(:op) >> space? }
     
-    # Arithmetische Ausdrücke mit Präzedenz
+    # Arithmetic Expressions with precedence
     rule(:arith_primary) {
       str('(') >> space? >> arith_expr >> str(')') >> space? |
-      number |
+      number >> space? |
       single_hrz_tag.as(:tag_value)
     }
     
@@ -131,12 +184,12 @@ module HrzLib
       arith_factor
     }
     
-    # Vergleichsausdrücke
+    # Comparison expressions
     rule(:comparison) {
       (arith_expr.as(:left) >> (op_eq | op_le | op_ge | op_lt | op_gt) >> arith_expr.as(:right)).as(:comparison)
     }
     
-    # Boolean Primärausdrücke
+    # Boolean primary expressions
     rule(:bool_primary) {
       str('(') >> space? >> bool_expr >> str(')') >> space? |
       comparison |
@@ -145,130 +198,80 @@ module HrzLib
       single_hrz_tag.as(:tag_bool)
     }
     
-    # NOT hat höchste Präzedenz
+    # NOT has highest precedence
     rule(:bool_not) {
       (op_not >> bool_primary.as(:expr)).as(:not_expr) |
       bool_primary
     }
     
-    # AND hat mittlere Präzedenz
+    # AND has medium precedence
     rule(:bool_and) {
       (bool_not.as(:left) >> op_and >> bool_and.as(:right)).as(:binary_bool) |
       bool_not
     }
     
-    # OR hat niedrigste Präzedenz
+    # OR has lowest precedence
     rule(:bool_expr) {
       (bool_and.as(:left) >> op_or >> bool_expr.as(:right)).as(:binary_bool) |
       bool_and
     }
     
-    # Single HRZ Tag (verschiedene Varianten)
+    # Single HRZ Tag
     rule(:single_hrz_tag) {
-      # IF-THEN-ELSE Struktur
-      (tag_start >> 
-       func_if >> 
-       space? >> 
-       tag_end_closed >> 
-       space? >>
-       bool_expr.as(:condition) >>
-       space? >>
-       tag_start >> 
-       func_then >> 
-       space? >> 
-       tag_end_closed >> 
-       space? >>
-       hrz_tag_text.as(:then_branch) >>
-       space? >>
-       tag_start >> 
-       func_else >> 
-       space? >> 
-       tag_end_closed >> 
-       space? >>
-       hrz_tag_text.as(:else_branch) >>
-       space? >>
-       tag_start >> 
-       func_end_if >> 
-       space? >> 
-       tag_end_closed).as(:if_else_tag) |
-      
-      # IF-THEN Struktur (ohne ELSE)
-      (tag_start >> 
-       func_if >> 
-       space? >> 
-       tag_end_closed >> 
-       space? >>
-       bool_expr.as(:condition) >>
-       space? >>
-       tag_start >> 
-       func_then >> 
-       space? >> 
-       tag_end_closed >> 
-       space? >>
-       hrz_tag_text.as(:then_branch) >>
-       space? >>
-       tag_start >> 
-       func_end_if >> 
-       space? >> 
-       tag_end_closed).as(:if_then_tag) |
-      
-      # ON_ERROR Struktur
-      (tag_start >> 
-       func_on_error >> 
-       space? >>
-       hrz_params_arr.as(:error_params) >>
-       space? >>
-       tag_end_more >> 
-       space? >>
-       hrz_tag_text.as(:protected_content) >>
-       space? >>
-       tag_start_cl >> 
-       func_on_error >> 
-       space? >> 
-       tag_end_closed).as(:on_error_tag) |
-      
-      # Variante 1: <HRZ func params />
-      (tag_start >> 
-       hrz_function >> 
-       space? >> 
-       hrz_params_arr >> 
-       space? >> 
-       tag_end_closed).as(:hrz_tag_short) |
-      
-      # Variante 2: <HRZ func params1 +> params2 </HRZ func />
-      (tag_start >> 
-       hrz_function.as(:func_open) >> 
-       space? >> 
-       hrz_params_arr.as(:params1) >> 
-       space? >> 
-       tag_end_more >> 
-       space? >>
-       hrz_params_arr.as(:params2) >>
-       space? >>
-       tag_start_cl >> 
-       hrz_function.as(:func_close) >> 
-       space? >> 
-       tag_end_closed).as(:hrz_tag_long)
+      result = (
+        # Type 1: <HRZ func params />
+        (tag_start >> hrz_function >>                space? >> hrz_params_arr >>              tag_end_closed).as(:hrz_tag_short) |
+
+        # Type 2: <HRZ func params1 +> params2 </HRZ func >
+        (tag_start >> hrz_function.as(:func_open) >> space? >> hrz_params_arr.as(:params1) >> tag_end_more >>
+        space? >> hrz_params_arr.as(:params2) >> space? >> tag_start_cl >> hrz_function.as(:func_close) >> space? >> tag_end_closed).as(:hrz_tag_long) |
+
+        # IF-THEN-ELSE
+        (tag_start >> func_if     >> space? >> tag_end_closed >> space? >> bool_expr.as(:condition)      >> space? >>
+        tag_start >> func_then   >> space? >> tag_end_closed >> space? >> hrz_tag_text.as(:then_branch) >> space? >>
+        tag_start >> func_else   >> space? >> tag_end_closed >> space? >> hrz_tag_text.as(:else_branch) >> space? >>
+        tag_start >> func_end_if >> space? >> tag_end_closed).as(:if_else_tag) |
+
+        # IF-THEN (without ELSE)
+        (tag_start >> func_if     >> space? >> tag_end_closed >> space? >> bool_expr.as(:condition)      >> space? >>
+        tag_start >> func_then   >> space? >> tag_end_closed >> space? >> hrz_tag_text.as(:then_branch) >> space? >>
+        tag_start >> func_end_if >> space? >> tag_end_closed).as(:if_then_tag) |
+
+        # ON_ERROR <HRZ on_error replacement_text +> params2 </HRZ on_error >
+        (tag_start    >> func_on_error >> space? >> hrz_params_arr.as(:error_params) >> space? >> tag_end_more >> space? >>
+            hrz_tag_text.as(:protected_content) >> space? >>
+        tag_start_cl >> func_on_error >> space? >> tag_end_closed).as(:on_error_tag)
+      )
+      HrzLogger.debug_msg("Parsing single_hrz_tag")
+      result
     }
     
-    # Text-Elemente auf oberster Ebene
+    # Top level text elements
     rule(:hrz_tag_text1) {
-      single_hrz_tag | otext_list
+      single_hrz_tag        |
+      any_text_wo_tag_start
     }
     
     rule(:hrz_tag_text) {
-      hrz_tag_text1.repeat(1)
+      hrz_tag_text1.repeat
     }
     
     root(:hrz_tag_text)
-  end
-  
-  # Transform für die Verarbeitung des Parse-Trees
+  end  # HrzTagParser
+
+
+  # -------------------------------------------------------------------------------------------------------------------------------
+
+
+  # Transform: process the parse tree
   class HrzTagTransform < Parslet::Transform
-    # Einfacher Text-Knoten
-    rule(text: simple(:t)) { t.to_s }
-    
-    # OTextList - behält Whitespace bei
+    # Simple text node
+    rule(text: simple(:t)) do
+      HrzLogger.transform_beg 'text', t.to_s.inspect
+      t.to_s
+    end
+
+    # OTextList - retains whitespace
     rule(otext: sequence(:parts)) do
       parts.map(&:to_s).join(' ')
     end
@@ -278,10 +281,12 @@ module HrzLib
     end
     
     # Quoted parameter
-    rule(quoted: simple(:text)) { text.to_s }
-    rule(quoted: { otext: simple(:text) }) { text.to_s }
+    rule(quoted: simple(:text))            { HrzLogger.transform_beg 'qouted param/text',  text.to_s; text.to_s }
+    rule(quoted: { otext: simple(:text) }) { HrzLogger.transform_beg 'qouted param/otext', text.to_s; text.to_s }
     rule(quoted: { otext: sequence(:parts) }) do
-      parts.map(&:to_s).join(' ')
+      result = parts.map(&:to_s).join(' ')
+      HrzLogger.transform_beg 'qouted param/parts', result.inspect
+      result
     end
     
     # Parameter
@@ -289,7 +294,7 @@ module HrzLib
     rule(param: { text: simple(:t) }) { t.to_s }
     rule(param: { quoted: simple(:q) }) { q.to_s }
     
-    # Parameter-Array aufbauen
+    # Build parameter array
     rule(params: simple(:p)) do
       p.to_s.empty? ? [] : [p.to_s]
     end
@@ -298,7 +303,7 @@ module HrzLib
       p.map { |param| param.is_a?(Hash) ? param[:param] : param }.compact
     end
     
-    # Boolean Konstanten
+    # Boolean constants
     rule(bool_const: simple(:val)) do
       val.to_s.upcase == 'TRUE'
     end
@@ -308,7 +313,7 @@ module HrzLib
       n.to_s.include?('.') ? n.to_s.to_f : n.to_s.to_i
     end
     
-    # Arithmetische Binäroperationen
+    # Arithmetic binary operations
     rule(binary_arith: { left: simple(:l), op: simple(:o), right: simple(:r) }) do
       left_val = l.is_a?(Numeric) ? l : l.to_f
       right_val = r.is_a?(Numeric) ? r : r.to_f
@@ -325,7 +330,7 @@ module HrzLib
       end
     end
     
-    # Vergleichsoperationen
+    # Comparison operations
     rule(comparison: { left: simple(:l), op: simple(:o), right: simple(:r) }) do
       left_val = l.is_a?(Numeric) ? l : l.to_s.to_f
       right_val = r.is_a?(Numeric) ? r : r.to_s.to_f
@@ -339,7 +344,7 @@ module HrzLib
       end
     end
     
-    # Boolean Binäroperationen
+    # Boolean binary operation
     rule(binary_bool: { left: simple(:l), op: simple(:o), right: simple(:r) }) do
       left_val = l.is_a?(TrueClass) || l.is_a?(FalseClass) ? l : (l.to_s.upcase == 'TRUE')
       right_val = r.is_a?(TrueClass) || r.is_a?(FalseClass) ? r : (r.to_s.upcase == 'TRUE')
@@ -350,17 +355,17 @@ module HrzLib
       end
     end
     
-    # NOT Operation
+    # NOT operation
     rule(not_expr: { op: simple(:o), expr: simple(:e) }) do
       expr_val = e.is_a?(TrueClass) || e.is_a?(FalseClass) ? e : (e.to_s.upcase == 'TRUE')
       !expr_val
     end
     
-    # Tag-Wert in Expression
+    # Tag value in expression
     rule(tag_value: simple(:t)) { t.to_s.to_f }
     rule(tag_bool: simple(:t)) { t.to_s.upcase == 'TRUE' }
     
-    # IF-THEN-ELSE Tag
+    # IF-THEN-ELSE tag
     rule(if_else_tag: {
       condition: simple(:cond),
       then_branch: sequence(:then_content),
@@ -375,7 +380,7 @@ module HrzLib
       end
     end
     
-    # IF-THEN Tag (ohne ELSE)
+    # IF-THEN tag (without ELSE)
     rule(if_then_tag: {
       condition: simple(:cond),
       then_branch: sequence(:then_content)
@@ -389,7 +394,7 @@ module HrzLib
       end
     end
     
-    # ON_ERROR Tag
+    # ON_ERROR tag
     rule(on_error_tag: {
       error_params: simple(:params),
       protected_content: sequence(:content)
@@ -397,7 +402,7 @@ module HrzLib
       begin
         content.map(&:to_s).join
       rescue HrzError => e
-        # HRZ-spezifische Fehler: Replacement-Text verwenden
+        # HRZ error. Use replacement text.
         params.to_s
       end
     end
@@ -409,18 +414,18 @@ module HrzLib
       begin
         content.map(&:to_s).join
       rescue HrzError => e
-        # HRZ-spezifische Fehler: Replacement-Text verwenden
+        # HRZ error. Use replacement text.
         params.first.to_s
       end
     end
     
-    # Kurze HRZ-Tag Variante: <HRZ func params />
+    # Short HRZ tag type: <HRZ func params />
     rule(hrz_tag_short: {
       func: simple(:func_name),
       params: simple(:params)
     }) do
       params_array = params.to_s.empty? ? [] : [params.to_s]
-      HrzTagFunctions.call_function(func_name.to_s, params_array)
+      HrzTagFunctions.call_dispatcher(func_name.to_s, params_array)
     end
     
     rule(hrz_tag_short: {
@@ -428,54 +433,40 @@ module HrzLib
       params: sequence(:params)
     }) do
       params_array = params.map { |p| p.is_a?(String) ? p : p.to_s }
-      HrzTagFunctions.call_function(func_name.to_s, params_array)
+      HrzTagFunctions.call_dispatcher(func_name.to_s, params_array)
     end
     
-    # Lange HRZ-Tag Variante: <HRZ func params1 +> params2 </HRZ func />
+    # Long HRZ tag type: <HRZ func params1 +> params2 </HRZ func >
     rule(hrz_tag_long: {
-      func_open: simple(:func_open),
-      params1: simple(:p1),
-      params2: simple(:p2),
-      func_close: simple(:func_close)
+      func_open: { func: simple(:func_open) },
+      params1: subtree(:p1),
+      params2: subtree(:p2),
+      func_close: { func: simple(:func_close) }
     }) do
-      # Prüfen ob Funktionsnamen übereinstimmen
+      # Verify, that the 2 function names are equal
       if func_open.to_s != func_close.to_s
         raise HrzError.new("Function name mismatch: #{func_open} != #{func_close}")
       end
       
-      # Beide Parameter-Arrays kombinieren
-      params_array = []
-      params_array << p1.to_s unless p1.to_s.empty?
-      params_array << p2.to_s unless p2.to_s.empty?
-      
-      HrzTagFunctions.call_function(func_open.to_s, params_array)
-    end
-    
-    rule(hrz_tag_long: {
-      func_open: simple(:func_open),
-      params1: sequence(:p1),
-      params2: sequence(:p2),
-      func_close: simple(:func_close)
-    }) do
-      if func_open.to_s != func_close.to_s
-        raise HrzError.new("Function name mismatch: #{func_open} != #{func_close}")
-      end
-      
-      params_array = []
-      params_array += p1.map { |p| p.is_a?(String) ? p : p.to_s }
-      params_array += p2.map { |p| p.is_a?(String) ? p : p.to_s }
-      
-      HrzTagFunctions.call_function(func_open.to_s, params_array)
-    end
-  end
-  
-  # Hauptklasse für die String-Verarbeitung
+      # Normalize both parameter subtrees to arrays and combine them into a single arry in the call:
+      p1_array = [p1].flatten.reject { |x| x.to_s.empty? }.map(&:to_s)
+      p2_array = [p2].flatten.reject { |x| x.to_s.empty? }.map(&:to_s)
+      HrzTagFunctions.call_dispatcher(func_open.to_s, p1_array + p2_array)
+    end  # rule hrz_tag_long
+
+  end  # class HrzTagTransform
+
+
+  # -------------------------------------------------------------------------------------------------------------------------------
+
+
+  # Main class for string processing
   class TagStringHelper
-    # Verarbeitet einen Text mit HRZ-Tags
-    # @param input_text [String] Eingabetext mit HRZ-Tags
-    # @param dry_run [Boolean] Wenn true, werden Funktionen nicht ausgeführt (nur Syntaxprüfung)
-    # @return [String] Verarbeiteter Text
-    # @raise [HrzError] Bei Fehlern, wenn kein on_error Tag vorhanden ist
+    # Processes a text, that may contain HRZ tags
+    # @param input_text [String] Input text, may contain HRZ tags
+    # @param dry_run [Boolean, default false] If true, tag functions will not be perfomed. Only syntax check.
+    # @return [String] Processed string
+    # @raise [HrzError] In case of errors, that were not caught by a surrounding on_error tag.
     def self.str_hrz(input_text, dry_run: false)
       clear_errors
       set_dry_run_mode(dry_run)
@@ -483,16 +474,15 @@ module HrzLib
       return "" if input_text.nil? || input_text.empty?
       
       begin
-        parser = HrzTagParser.new
+        parser    = HrzTagParser.new
         transform = HrzTagTransform.new
         
-        # Parsen
+        # Parse
         parse_tree = parser.parse(input_text)
-        
-        # Transformieren
+        # Transform
         result = transform.apply(parse_tree)
         
-        # Ergebnis zusammenbauen
+        # Combine results into a single string
         output = if result.is_a?(Array)
           result.map(&:to_s).join
         else
@@ -502,30 +492,32 @@ module HrzLib
         output
         
       rescue Parslet::ParseFailed => e
-        # Bei Parse-Fehlern
+        # Parse errors
         error_msg = "Parse error at position #{e.parse_failure_cause.pos}: #{e.parse_failure_cause.to_s}"
         add_error(error_msg)
-        Rails.logger.error "HRZ Tag Parse Error: #{e.parse_failure_cause.ascii_tree}"
+        HrzLogger.logger.error_msg "HRZ Tag str_hrz: Parse tree: #{e.parse_failure_cause.ascii_tree}"
         raise HrzError.new(error_msg, { cause: e })
         
       rescue HrzError => e
-        # HRZ-spezifische Fehler weitergeben
+        # Pass HRZ errors on
         add_error(e.message)
         raise
         
       rescue StandardError => e
-        # Bei anderen Fehlern
+        # Other error
         error_msg = "Error processing HRZ tags: #{e.message}"
         add_error(error_msg)
-        Rails.logger.error "HRZ Tag Error: #{e.message}\n#{e.backtrace.join("\n")}"
+        HrzLogger.logger.error_msg "HRZ Tag Error: #{e.message}\n#{e.backtrace.join("\n")}"
         raise HrzError.new(error_msg, { cause: e })
       ensure
         set_dry_run_mode(false)
       end
-    end
+    end  # str_hrz
     
-    # Führt eine Syntaxprüfung durch ohne die Funktionen auszuführen
-    # @param input_text [String] Zu prüfender Text
+
+    
+    # Performs a syntax check
+    # @param input_text [String] Text to be tested.
     # @return [Hash] { valid: Boolean, errors: Array<String> }
     def self.validate_syntax(input_text)
       begin
@@ -534,25 +526,27 @@ module HrzLib
       rescue HrzError => e
         { valid: false, errors: errors + [e.message] }
       end
-    end
+    end  # validate_syntax
     
-    # Evaluiert einen Boolean-Ausdruck
-    # @param condition_text [String] Boolean-Ausdruck als Text
-    # @param dry_run [Boolean] Wenn true, werden Funktionen nicht ausgeführt
-    # @return [Boolean] Ergebnis der Auswertung
-    # @raise [HrzError] Bei Fehlern in der Auswertung
+
+    
+    # Evaluate boolean expression
+    # @param condition_text [String]  boolean expression as text
+    # @param dry_run [Boolean, default false] If true, tag functions will not be perfomed. Only syntax check.
+    # @return [Boolean] Result
+    # @raise [HrzError] In case of errors
     def self.evaluate_condition(condition_text, dry_run: false)
       return false if condition_text.nil? || condition_text.strip.empty?
       
       set_dry_run_mode(dry_run)
       
       begin
-        # Schritt 1: Alle <HRZ> Tags im Ausdruck durch ihre Werte ersetzen
+        # Step 1: Replace all <HRZ> tags by their values.
         processed_text = condition_text.dup
         
-        # Finde alle <HRZ...> Tags und ersetze sie
+        # Find all <HRZ...> tags and replace them.
         loop do
-          # Suche nach <HRZ...> bis zum schließenden />
+          # Search for nach <HRZ...> bis zum schließenden />
           match = processed_text.match(/<HRZ\s+[^>]*\/>/)
           break unless match
           
@@ -585,66 +579,83 @@ module HrzLib
         
       rescue Parslet::ParseFailed => e
         error_msg = "Invalid condition: #{condition_text}"
-        Rails.logger.error "HRZ Condition Parse Error: #{e.parse_failure_cause.ascii_tree}"
+        HrzLogger.logger.error_msg "HRZ Condition Parse Error: #{e.parse_failure_cause.ascii_tree}"
         raise HrzError.new(error_msg, { condition: condition_text, cause: e })
         
       rescue StandardError => e
         error_msg = "Error evaluating condition: #{e.message}"
-        Rails.logger.error "HRZ Condition Error: #{e.message}"
+        HrzLogger.logger.error_msg "HRZ Condition Error: #{e.message}"
         raise HrzError.new(error_msg, { condition: condition_text, cause: e })
       ensure
         set_dry_run_mode(false)
       end
-    end
+    end  # evaluate_condition
     
-    # Gibt alle während der Verarbeitung aufgetretenen Fehler zurück
-    # @return [Array<String>] Liste der Fehlermeldungen
+
+    
+    # Returns all errors, that occurred during processing, in an array of strings.
+    # @return [Array<String>] List of error messages
     def self.errors
       Thread.current[:hrz_errors] || []
-    end
+    end  # errors
     
-    # Prüft ob Fehler aufgetreten sind
-    # @return [Boolean] true wenn Fehler vorhanden sind
+
+    
+    # Test, if there were errors
+    # @return [Boolean] true, if there were errors
     def self.has_errors?
       !errors.empty?
-    end
+    end  # has_errors?
     
-    # Gibt alle Fehler als Text zurück
-    # @return [String] Fehler als mehrzeiligen Text
+
+
+    # Returns all errors, that occurred during processing, in a multiline text.
+    # @return [String] Errors: multiline text.
     def self.errors_text
       errors.join("\n")
-    end
+    end  # errors_text
     
-    # Meldet einen Fehler (kann von HRZ-Funktionen aufgerufen werden)
-    # @param message [String] Fehlermeldung
-    # @param context [Hash] Zusätzlicher Kontext (optional)
+
+    
+    # Reports a HRZ error. (Will be called by HRZ tag functions)
+    # @param message [String] Error message
+    # @param context [Hash] Context (optional)
     def self.report_error(message, context = {})
       add_error(message)
       Rails.logger.error "HRZ Function Error: #{message} | Context: #{context.inspect}"
-    end
+    end  # report_error
     
-    # Prüft ob im Dry-Run-Modus
+
+
+    # Are we in dry run mode?
     # @return [Boolean]
     def self.dry_run_mode?
       Thread.current[:hrz_dry_run] == true
-    end
+    end  # dry_run_mode?
+    
+
     
     private
     
-    # Setzt den Dry-Run-Modus
+    # Sets dry-run mode
     def self.set_dry_run_mode(enabled)
       Thread.current[:hrz_dry_run] = enabled
-    end
+    end  # set_dry_run_mode
     
-    # Fügt einen Fehler zur Fehlerliste hinzu
+
+
+    # Appends an error to the list
     def self.add_error(message)
       Thread.current[:hrz_errors] ||= []
       Thread.current[:hrz_errors] << message
-    end
+    end   # add_error
     
-    # Löscht die Fehlerliste
+
+
+    # Clears the error list.
     def self.clear_errors
       Thread.current[:hrz_errors] = []
-    end
-  end
-end
+    end  # clear_errors
+
+  end  # class TagStringHelper
+end  # module HrzLib

@@ -13,14 +13,31 @@
 # You should have received a copy of the GNU Affero General Public License                  #
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.                    #
 #-------------------------------------------------------------------------------------eohdr-#
+# Test script for the HRZ tag parser.
+# Usage examples.
 #-------------------------------------------------------------------------------------------#
-# Test-Datei für HRZ Tag Parser
-# Diese Datei zeigt Beispiele für die Verwendung des HRZ Tag Systems
+# For a standalone test with ruby:
+# - Install parslet gem:
+#     gem install parslet
+# - cd into the plugins/hrz_lib directory
+# - Run this test script, that you are viewing currently:
+#   ruby test/unit/hrz_lib/hrz_tag_test.rb
+# - Run this test script with debug info enabled:
+#   HRZ_DEBUG=1 ruby test/unit/hrz_lib/hrz_tag_test.rb
+# - Exit after first failure (2 options available):
+#   ruby test/unit/hrz_lib/hrz_tag_test.rb --exit-on-fail
+#   EXIT_ON_FAIL=1 ruby test/unit/hrz_lib/hrz_tag_test.rb
+# - With debug info, stop after first failure:
+#   HRZ_DEBUG=1 EXIT_ON_FAIL=1 ruby test/unit/hrz_lib/hrz_tag_test.rb
 #-------------------------------------------------------------------------------------------#
 
-require_relative 'tag_string_helper'
+require_relative '../../../lib/hrz_lib/hrz_tag_parser'
 
-# Beispiele aus der Grammatik-Datei testen
+# Globale Variable für Fehler-Zähler
+$test_failures = 0
+$exit_on_first_failure = ENV['EXIT_ON_FAIL'] == '1' || ARGV.include?('--exit-on-fail')
+
+# Examples from the grammar file:
 def run_tests
   puts "=" * 80
   puts "HRZ Tag Parser Tests"
@@ -34,59 +51,31 @@ def run_tests
   puts "BASIC TESTS: get_param und set_param"
   puts "=" * 80
   
-  # Kontext initialisieren
+  # Initialize the context
   HrzLib::HrzTagFunctions.initialize_context({
     price: "1234",
-    customer: "Acme Corp",
+    customer: "James Corp",
     discount: "10"
   })
   
-  # Test 1: Einfacher get_param ohne Defaultwert
-  test_case(
-    "Test 1: get_param ohne Default",
-    'abc<HRZ get_param price />def',
-    'abc1234def'
-  )
+  # Test 1: Simple get_param without default value
+  test_case("Test 1: get_param w/o default",                 'abc<HRZ get_param price>def',                  'abc1234def')
+  test_case("Test 1a: get_param w/o default + blanks",       '  a  bc   <HRZ    get_param    price  >  def', '  a  bc   1234  def')
+  test_case("Test 1b: get_param w/o default, non-existing",  'abc<HRZ get_param xxx>def',                    'abcdef')
+
+  # Test 2: get_param with default value
+  test_case("Test 2: get_param with default, exists",        'abc<HRZ get_param [ price , 0.0 ] >def',       'abc1234def')
+  test_case("Test 2a: get_param with default, non-existing", 'abc<HRZ get_param [xxx,0.0]>def',              'abc0.0def')
   
-  # Test 2: get_param mit Defaultwert
-  test_case(
-    "Test 2: get_param mit Default",
-    'abc<HRZ get_param price, 0.0 />def',
-    'abc1234def'
-  )
-  
-  # Test 3: get_param mit langer Syntax
-  test_case(
-    "Test 3: get_param lange Syntax",
-    'abc<HRZ get_param>price</HRZ get_param>def',
-    'abc1234def'
-  )
-  
-  # Test 4: get_param mit unbekanntem Parameter
-  test_case(
-    "Test 4: get_param unbekannt mit Default",
-    'abc<HRZ get_param unknown, 999 />def',
-    'abc999def'
-  )
-  
-  # Test 5: Mehrere Tags
-  test_case(
-    "Test 5: Mehrere Tags",
-    'Customer: <HRZ get_param customer />, Price: <HRZ get_param price />',
-    'Customer: Acme Corp, Price: 1234'
-  )
-  
-  # Test 6: set_param und dann get_param
-  puts "\n" + "-" * 80
-  puts "Test 6: set_param und get_param kombiniert"
-  HrzLib::HrzTagFunctions.clear_context
-  input = '<HRZ set_param total, 5000 />Total: <HRZ get_param total />'
-  result = HrzLib::TagStringHelper.str_hrz(input)
-  expected = 'Total: 5000'
-  puts "Input:    #{input}"
-  puts "Output:   #{result}"
-  puts "Expected: #{expected}"
-  puts result == expected ? "✓ PASS" : "✗ FAIL"
+  # Test 3: get_param, long syntax
+  test_case("Test 3: get_param, long syntax",                'abc<HRZ get_param +>price</HRZ get_param>def', 'abc1234def')
+
+  # Miscellaneous
+  test_case("Test 4: Two tags", 'Customer: <HRZ get_param customer>, Price: <HRZ get_param price>', 'Customer: James Corp, Price: 1234')
+
+  test_case("Test 5: set_param and get_param combined", 'Old price: <HRZ get_param price>, <HRZ set_param price, 1221>new: <HRZ get_param price>', 'Old price: 1234, new: 1221')
+
+  #HrzLib::HrzTagFunctions.clear_context
   
   # ============================================================================
   # BOOLEAN EXPRESSION TESTS
@@ -139,28 +128,28 @@ def run_tests
   # Test 27: IF-THEN mit true
   test_case(
     "Test 27: IF-THEN mit true",
-    '<HRZ if />true<HRZ then />YES<HRZ end_if />',
+    '<HRZ if>true<HRZ then>YES<HRZ end_if>',
     'YES'
   )
   
   # Test 28: IF-THEN mit false
   test_case(
     "Test 28: IF-THEN mit false",
-    '<HRZ if />false<HRZ then />YES<HRZ end_if />',
+    '<HRZ if>false<HRZ then>YES<HRZ end_if>',
     ''
   )
   
   # Test 29: IF-THEN-ELSE mit true
   test_case(
     "Test 29: IF-THEN-ELSE mit true",
-    '<HRZ if />true<HRZ then />YES<HRZ else />NO<HRZ end_if />',
+    '<HRZ if>true<HRZ then>YES<HRZ else>NO<HRZ end_if>',
     'YES'
   )
   
   # Test 30: IF-THEN-ELSE mit false
   test_case(
     "Test 30: IF-THEN-ELSE mit false",
-    '<HRZ if />false<HRZ then />YES<HRZ else />NO<HRZ end_if />',
+    '<HRZ if >false<HRZ then >YES<HRZ else >NO<HRZ end_if >',
     'NO'
   )
   
@@ -168,14 +157,14 @@ def run_tests
   HrzLib::HrzTagFunctions.initialize_context({ qty: "10" })
   test_case(
     "Test 31: IF mit Vergleich und get_param",
-    'Qty: <HRZ if /><HRZ get_param qty /> > 5<HRZ then />HIGH<HRZ else />LOW<HRZ end_if />',
+    'Qty: <HRZ if><HRZ get_param qty> > 5<HRZ then>HIGH<HRZ else>LOW<HRZ end_if>',
     'Qty: HIGH'
   )
   
   # Test 32: IF mit komplexer Bedingung
   test_case(
     "Test 32: IF mit AND",
-    '<HRZ if />(3 < 5) AND (2 > 1)<HRZ then />Both true<HRZ else />Not both<HRZ end_if />',
+    '<HRZ if>(3 < 5) AND (2 > 1)<HRZ then>Both true<HRZ else>Not both<HRZ end_if>',
     'Both true'
   )
   
@@ -190,7 +179,7 @@ def run_tests
   # Test 33: Division durch 0 mit on_error
   test_case(
     "Test 33: Division durch 0 mit on_error",
-    'Result: <HRZ on_error ERROR +>Value: <HRZ if />10 / 0 > 5<HRZ then />OK<HRZ end_if /></HRZ on_error>',
+    'Result: <HRZ on_error ERROR +>Value: <HRZ if>10 / 0 > 5<HRZ then>OK<HRZ end_if></HRZ on_error>',
     'Result: ERROR'
   )
   
@@ -384,26 +373,66 @@ def run_tests
   HrzLib::HrzTagFunctions.clear_context
 end
 
+
+
+# Output the parse tree
+def outp_parse_tree(b_input)
+  begin
+    parser = HrzLib::HrzTagParser.new
+    parse_tree = parser.parse(b_input)
+    puts "Parse Tree: " + parse_tree.inspect
+  rescue => parse_error
+    puts "\nCouldn't generate parse tree: #{parse_error.message}"
+  end
+end  # outp_parse_tree
+
+
+
+# Output character positons
+def outp_char_positions(b_prefix,  # Prefix text
+                        n_pos)     # Number of character positions to be output.
+   puts b_prefix + (0..(n_pos-1)).map { |i| ((i / 10) % 10) }.join   if n_pos > 10 # tens
+   puts b_prefix + (0..(n_pos-1)).map { |i| ( i       % 10) }.join                 # ones
+end  # outp_char_positions
+
+
+
+# Perform one test
 def test_case(title, input, expected)
   puts "\n" + "-" * 80
   puts title
   begin
     result = HrzLib::TagStringHelper.str_hrz(input)
-    puts "Input:    #{input}"
-    puts "Output:   #{result}"
-    puts "Expected: #{expected}"
     success = result == expected
-    puts success ? "✓ PASS" : "✗ FAIL"
+    puts "Input:    #{input}"
+    outp_char_positions("          ", input.length)   if ! success
+    puts "Output:   #{result}"
+    if success
+      puts "✓ PASS"
+      outp_parse_tree(input)   if ENV['HRZ_DEBUG']
+    else
+      puts "Expected: #{expected}"
+      puts "✗ FAIL"
+      outp_parse_tree(input)
+      $test_failures += 1
+      exit(1) if $exit_on_first_failure
+    end
     if HrzLib::TagStringHelper.has_errors?
       puts "Errors:   #{HrzLib::TagStringHelper.errors_text}"
     end
   rescue HrzLib::HrzError => e
-    puts "Input:    #{input}"
+    puts "Input: #{input}"
+    outp_char_positions("       ", input.length)
     puts "✗ FAIL - Exception: #{e.message}"
-    puts "Errors:   #{HrzLib::TagStringHelper.errors_text}" if HrzLib::TagStringHelper.has_errors?
+    puts "Error: #{HrzLib::TagStringHelper.errors_text}" if HrzLib::TagStringHelper.has_errors?
+    $test_failures += 1
+    exit(1) if $exit_on_first_failure
   end
-end
+end  # test_case
 
+
+
+# Test one condition
 def test_condition(title, condition, expected)
   puts "\n" + "-" * 80
   puts title
@@ -412,14 +441,25 @@ def test_condition(title, condition, expected)
     puts "Condition: #{condition}"
     puts "Result:    #{result}"
     puts "Expected:  #{expected}"
-    puts result == expected ? "✓ PASS" : "✗ FAIL"
+    success = result == expected
+    if success
+      puts "✓ PASS"
+    else
+      puts "✗ FAIL"
+      $test_failures += 1
+      exit(1) if $exit_on_first_failure
+    end
   rescue HrzLib::HrzError => e
     puts "Condition: #{condition}"
     puts "✗ FAIL - Exception: #{e.message}"
+    $test_failures += 1
+    exit(1) if $exit_on_first_failure
   end
-end
+end  # test_condition
 
-# Tests ausführen, wenn Datei direkt aufgerufen wird
+
+
+# Execute the tests, if the file was called directly.
 if __FILE__ == $0
   run_tests
 end
