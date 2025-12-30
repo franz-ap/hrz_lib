@@ -19,11 +19,17 @@ require 'parslet'    # https://kschiess.github.io/parslet/
 require_relative 'hrz_tag_functions'
 
 module HrzLib
+  # Color codes for puts console output
+  B_ANSI_RESET_COLOR           = "\e[0m"
+  B_ANSI_YELLOW_BGCOLOR_STD    = "\e[43m"
+  B_ANSI_YELLOW_BGCOLOR_BRIGHT = "\e[103m"
+  B_ANSI_WHITE_ON_RED_BGCOLOR  = "\e[37;41m"
+
   # Logger wrapper, enabling standalone tests without Rails.
   class HrzLogger
-    def self.debug_msg(msg)
-      return unless ENV['HRZ_DEBUG']
-      puts "[DEBUG] #{msg}"
+    def self.debug_msg(b_msg)
+      return unless ENV['HRZ_DEBUG'] == '1'
+      puts '[DEBUG] ' + B_ANSI_YELLOW_BGCOLOR_STD + b_msg + B_ANSI_RESET_COLOR
     end
 
     def self.transform_beg(b_rule, b_msg)
@@ -34,16 +40,16 @@ module HrzLib
       HrzLogger.debug_msg("  ----->  #{b_msg}")
     end
 
-    def self.info_msg(msg)
-      puts "[INFO] #{msg}"
+    def self.info_msg(b_msg)
+      puts "[INFO] #{b_msg}"
     end
     
-    def self.warning_msg(msg)
-      puts "[WARN] #{msg}"
+    def self.warning_msg(b_msg)
+      puts '[WARN] ' + B_ANSI_YELLOW_BGCOLOR_BRIGHT + b_msg + B_ANSI_RESET_COLOR
     end
     
-    def self.error_msg(msg)
-      puts "[ERROR] #{msg}"
+    def self.error_msg(b_msg)
+      puts '[ERROR] '+ B_ANSI_WHITE_ON_RED_BGCOLOR + b_msg + B_ANSI_RESET_COLOR
     end
     
     # Rails compatible interface
@@ -171,7 +177,7 @@ module HrzLib
     rule(:arith_primary) {
       str('(') >> space? >> arith_expr >> str(')') >> space? |
       number >> space? |
-      single_hrz_tag.as(:tag_value)
+      single_hrz_tag.as(:tag_value) >> space?
     }
     
     rule(:arith_factor) {
@@ -194,8 +200,8 @@ module HrzLib
       str('(') >> space? >> bool_expr >> str(')') >> space? |
       comparison |
       bool_true |
-      bool_false |
-      single_hrz_tag.as(:tag_bool)
+      bool_false # |
+      #single_hrz_tag.as(:tag_bool)
     }
     
     # NOT has highest precedence

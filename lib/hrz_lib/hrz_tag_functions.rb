@@ -16,7 +16,7 @@
 # Purpose: Implementation of HRZ tag functions
 
 module HrzLib
-  # Container for all HRZ tag functions
+  # Container class for all HRZ tag functions
   class HrzTagFunctions
     # Central dispatcher
     # @param b_function [String] Name of hrz_tag function to be called.
@@ -51,19 +51,21 @@ module HrzLib
 
     
     # ============================================================================
-    # Implementierung der einzelnen Funktionen
+    # Implementation of all those HRZ tag functions
     # ============================================================================
     
-    # get_param: Liest einen Parameter aus einem Kontext
-    # Beispiele:
-    #   <HRZ get_param price />           -> params: ["price"]
-    #   <HRZ get_param price, 0.0 />      -> params: ["price", "0.0"]
-    #   <HRZ get_param>price</HRZ get_param> -> params: ["price"]
+    # get_param: Reads a parameter from the conext.
+    # Examples:                                       with price=1234 in the context / empty context:
+    #                                                                           |            |
+    #                                                                           V            V
+    #   <HRZ get_param price>                  -> params: ["price"]        -> 1234   /   <nothing>
+    #   <HRZ get_param price, 0.0>             -> params: ["price", "0.0"] -> 1234   /      0.0
+    #   <HRZ get_param +>price</HRZ get_param> -> params: ["price"]        -> 1234   /   <nothing>
     #
     # @param params [Array<String>] Parameter-Array
-    #   params[0] = Parametername (erforderlich)
-    #   params[1] = Defaultwert (optional)
-    # @return [String] Wert des Parameters oder Defaultwert
+    #   params[0] = Parameter name (required)
+    #   params[1] = Default value, in case the parameter does not exist (optional)
+    # @return [String] Parameter's value oder default value.
     def self.hrz_strfunc_get_param(params)
       param_name = params[0]
       default_value = params[1] || ""
@@ -84,20 +86,22 @@ module HrzLib
       else
         value.to_s
       end
-    end
+    end  # hrz_strfunc_get_param
+
+
     
-    # set_param: Setzt einen Parameter im Kontext
-    # Beispiele:
-    #   <HRZ set_param total, 1234 />
-    #   <HRZ set_param>name, John Doe</HRZ set_param>
+    # set_param: Stores a parameter in the context.
+    # Examples:
+    #   <HRZ set_param total 1234>
+    #   <HRZ set_param>cuname John Doe</HRZ set_param>
     #
     # @param params [Array<String>] Parameter-Array
-    #   params[0] = Parametername (erforderlich)
-    #   params[1] = Wert (erforderlich)
-    # @return [String] Leerer String (set_param gibt nichts zurück)
+    #   params[0]    = Parameter name (required)
+    #   params[1..n] = New value for this parameter, all array elments will be concatenated into a single string, separated by single blanks.
+    # @return [String] Empty string
     def self.hrz_strfunc_set_param(params)
-      param_name = params[0]
-      param_value = params[1] || ""
+      param_name  = params[0]
+      param_value = params[1..-1].join(" ")    # join calls to_s for each array element.
       
       if param_name.nil? || param_name.empty?
         error_msg = "set_param: parameter name is required"
@@ -105,53 +109,84 @@ module HrzLib
         raise HrzError.new(error_msg, { function: 'set_param', params: params })
       end
       
-      # Context setzen
+      # Put the new value into the context
       Thread.current[:hrz_context] ||= {}
       Thread.current[:hrz_context][param_name.to_sym] = param_value
       
       HrzLogger.logger.debug_msg "Parameter '#{param_name}' set to '#{param_value}'"
       
-      # set_param gibt keinen Text zurück
+      # set_param never returns a text, only this empty string:
       ""
-    end
+    end  # hrz_strfunc_set_param
+
+
     
     # ============================================================================
     # Context management utilities
     # ============================================================================
     
-    # Initialisiert den Kontext für eine neue Verarbeitung
-    # @param initial_context [Hash] Initialer Kontext
+    # Initializes the context.
+    # @param initial_context [Hash] Initial context, optional.
     def self.initialize_context(initial_context = {})
       Thread.current[:hrz_context] = initial_context.dup
-    end
+    end  # initialize_context
     
-    # Gibt den aktuellen Kontext zurück
-    # @return [Hash] Aktueller Kontext
+
+
+    # Returns the current context.
+    # @return [Hash] current context.
     def self.current_context
       Thread.current[:hrz_context] || {}
-    end
+    end  # current_context
     
-    # Bereinigt den Kontext nach der Verarbeitung
+
+
+    # Clears the context, e.g. at the end of a session.
     def self.clear_context
       Thread.current[:hrz_context] = nil
-    end
+    end  # clear_context
     
-    # Setzt einen Wert im Kontext
-    # @param key [Symbol, String] Schlüssel
-    # @param value [Object] Wert
-    def self.set_context_value(key, value)
+
+
+    # Sets a value in the context, overwriting the previous value, in case a parameter/key already existed.
+    # Main keys can be seen as namespaces. The same sub key can exist in more than one, with different values.
+    # @param key_main [Symbol, String] Main key (namespace). The only key, if you do not need a 2nd level.
+    # @param key_sub  [Symbol, String] Sub key. Pass nil, if you want only a single level.
+    # @param value    [Object] value
+    def self.set_context_value(key_main, key_sub, value)
       Thread.current[:hrz_context] ||= {}
-      Thread.current[:hrz_context][key.to_sym] = value
-    end
+
+      if key_sub.nil?
+        # Simple key, single level.
+        Thread.current[:hrz_context][key_main.to_sym] = value
+      else
+        # Two levels
+        Thread.current[:hrz_context][key_main.to_sym] ||= {}
+        Thread.current[:hrz_context][key_main.to_sym][key_sub.to_sym] = value
+      end
+    end  # set_context_value
     
-    # Liest einen Wert aus dem Kontext
-    # @param key [Symbol, String] Schlüssel
-    # @param default [Object] Defaultwert wenn nicht vorhanden
-    # @return [Object] Wert oder Default
+
+
+    # Reads a value from the context.
+    # @param key_main [Symbol, String] Main key (namespace). The only key, if you do not need a 2nd level.
+    # @param key_sub  [Symbol, String] Sub key. Pass nil, if you want only a single level. If you do that for a 2-level key,
+    #                                  you will receive a hash of all parameters in that "namespace".
+    # @param default [Object] Default value, optional. Nil, if not passed in. Will be used, if no such key exists.
+    # @return [Object] value from the context oder the default value.
     def self.get_context_value(key, default = nil)
       context = Thread.current[:hrz_context] || {}
-      context[key.to_sym] || default
-    end
+
+      if key_sub.nil?
+        # Simple key, single level.
+        context[key_main.to_sym] || default
+      else
+        # Zweistufiger Key
+        main_hash = context[key_main.to_sym]
+        return default unless main_hash.is_a?(Hash)
+        main_hash[key_sub.to_sym] || default
+      end
+    end  # get_context_value
 
   end  # class HrzTagFunctions
 end  # module HrzLib
