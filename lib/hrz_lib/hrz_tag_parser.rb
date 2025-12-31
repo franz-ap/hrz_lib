@@ -30,7 +30,7 @@ module HrzLib
     def self.debug_msg(b_msg)
       return unless ENV['HRZ_DEBUG'] == '1'
       puts '[DEBUG] ' + B_ANSI_YELLOW_BGCOLOR_STD + b_msg + B_ANSI_RESET_COLOR
-      HrzTagFunctions.context_array_push('hrz_msgs', 'info', b_msg)
+      HrzTagFunctions.context_array_push('hrz_msgs', 'debug', b_msg)
     end
 
     def self.transform_beg(b_rule, b_msg)
@@ -53,6 +53,27 @@ module HrzLib
       puts '[ERROR] '+ B_ANSI_WHITE_ON_RED_BGCOLOR + b_msg + B_ANSI_RESET_COLOR
     end
     
+
+
+    # Retrieve messages, that were collected so far.
+    # @param b_category      [Symbol, String]    Message category to be retrieved: 'debug', 'info', 'warning', 'error'
+    # @param b_previous_msgs [String]            Previous message(s), where you want the retrieved messages appended. Pass nil or '' for none.
+    # @param b_delim         [String]            Delimiter string between messages
+    # @param l_max           [Integer, optional] Maximum length of result string. nil means: no limit.
+    # @return                [String]            Result string
+    def self.retrieve_msgs(b_category, b_previous_msgs, b_delim, l_max=nil)
+      arr = [ b_previous_msgs ]
+      arr += HrzTagFunctions.get_context_value('hrz_msgs', b_category, nil)
+      b_ret = arr.join(b_delim)
+      if l_max.nil?
+        b_ret
+      else
+        b_ret[0..l_max]
+      end
+    end  # retrieve_msgs
+
+
+
     # Rails compatible interface
     def self.logger
       defined?(Rails) ? Rails.logger : self
