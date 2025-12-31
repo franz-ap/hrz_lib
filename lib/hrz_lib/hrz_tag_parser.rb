@@ -67,7 +67,7 @@ module HrzLib
       arr_coll = HrzTagFunctions.get_context_value('hrz_msgs', b_category, nil)
       arr_res += arr_coll          if arr_coll.is_a?(Array)
       puts 'Mitte2 ' + arr_res.inspect
-      b_ret = arr.join(b_delim)
+      b_ret = arr_res.join(b_delim)
       puts 'fertig ' + b_ret.inspect
       if l_max.nil?
         b_ret
