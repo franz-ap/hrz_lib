@@ -27,33 +27,62 @@ module HrzLib
 
   # Logger wrapper, enabling standalone tests without Rails.
   class HrzLogger
+    def initialize
+       @q_debug_enabled = false  # Default: Debug off
+    end
+
+
+    # Enable or disable debug output.
+    # @param q_enabled [Boolean] Debug output enabled from now on (true) or not (false).
+    def self.debug_enable(q_enabled)
+       @q_debug_enabled = q_enabled
+    end  # debug_enable
+
+
+    # Issue a general debug message.
+    # @param b_msg [String] The debug message.
     def self.debug_msg(b_msg)
-      return unless ENV['HRZ_DEBUG'] == '1'
+      return unless @q_debug_enabled
       puts '[DEBUG] ' + B_ANSI_YELLOW_BGCOLOR_STD + b_msg + B_ANSI_RESET_COLOR
       HrzTagFunctions.context_array_push('hrz_msgs', 'debug', b_msg)
-    end
+    end  # debug_msg
 
+
+    # Issue a transform debug message, at the beinning of the transformation.
+    # @param b_rule [String] Name of the rule.
+    # @param b_msg  [String] The debug message.
     def self.transform_beg(b_rule, b_msg)
       HrzLogger.debug_msg("Transform '#{b_rule}': #{b_msg}")
-    end
+    end  # transform_beg
 
+
+    # Issue a transform debug message, at the end of the transformation.
+    # @param b_msg [String] The debug message: result.
     def self.transform_res(b_msg)
       HrzLogger.debug_msg("  ----->  #{b_msg}")
-    end
+    end  # transform_res
 
+
+    # Issue a general info message.
+    # @param b_msg [String] The info message.
     def self.info_msg(b_msg)
       puts "[INFO] #{b_msg}"
-    end
-    
+    end  # info_msg
+
+
+    # Issue a general warning message.
+    # @param b_msg [String] The warning message.
     def self.warning_msg(b_msg)
       puts '[WARN] ' + B_ANSI_YELLOW_BGCOLOR_BRIGHT + b_msg + B_ANSI_RESET_COLOR
-    end
-    
+    end  # warning_msg
+
+
+    # Issue a general error message.
+    # @param b_msg [String] The error message.
     def self.error_msg(b_msg)
       puts '[ERROR] '+ B_ANSI_WHITE_ON_RED_BGCOLOR + b_msg + B_ANSI_RESET_COLOR
-    end
+    end  # error_msg
     
-
 
     # Retrieve messages, that were collected so far.
     # @param b_category      [Symbol, String]    Message category to be retrieved: 'debug', 'info', 'warning', 'error'
@@ -75,7 +104,6 @@ module HrzLib
         b_ret[0..l_max]
       end
     end  # retrieve_msgs
-
 
 
     # Rails compatible interface

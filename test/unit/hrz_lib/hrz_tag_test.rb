@@ -39,6 +39,7 @@ $exit_on_first_failure = ENV['EXIT_ON_FAIL'] == '1' || ARGV.include?('--exit-on-
 
 # Examples from the grammar file:
 def run_tests
+  HrzLib::HrzLogger.debug_enable(ENV['HRZ_DEBUG'] == '1')
   puts "=" * 80
   puts "HRZ Tag Parser Tests"
   puts "=" * 80
