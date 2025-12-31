@@ -179,8 +179,8 @@ def run_tests
   # Test 33: Division durch 0 mit on_error
   test_case(
     "Test 33: Division durch 0 mit on_error",
-    'Result: <HRZ on_error ERROR +>Value: <HRZ if>10 / 0 > 5<HRZ then>OK<HRZ end_if></HRZ on_error>',
-    'Result: ERROR'
+    'Result: <HRZ on_error Problem detected. +>Value: <HRZ if>10 / 0 > 5<HRZ then>OK<HRZ end_if></HRZ on_error>',
+    'Result: Problem detected.'
   )
   
   # Test 34: Division durch 0 OHNE on_error - sollte Fehler werfen

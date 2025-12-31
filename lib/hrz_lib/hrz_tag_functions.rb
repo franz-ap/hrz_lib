@@ -174,7 +174,7 @@ module HrzLib
     #                                  you will receive a hash of all parameters in that "namespace".
     # @param default [Object] Default value, optional. Nil, if not passed in. Will be used, if no such key exists.
     # @return [Object] value from the context oder the default value.
-    def self.get_context_value(key, default = nil)
+    def self.get_context_value(key_main, key_sub, default = nil)
       context = Thread.current[:hrz_context] || {}
 
       if key_sub.nil?
@@ -187,6 +187,22 @@ module HrzLib
         main_hash[key_sub.to_sym] || default
       end
     end  # get_context_value
+
+
+
+    # Appends the given value as a new element to an array in the conext.
+    # @param key_main [Symbol, String] Main key (namespace). The only key, if you do not need a 2nd level.
+    # @param key_sub  [Symbol, String] Sub key. Pass nil, if you want only a single level.
+    # @param value    [Object] value: the new array element.
+    def self.context_array_push(key_main, key_sub, value)
+      arr = get_context_value(key_main, key_sub, nil);
+      if arr.nil?
+        arr = []
+        set_context_value(key_main, key_sub, arr);
+      end
+      arr.push(value)   # This works and does, what we want, because arr is a reference to the array, not a copy.
+    end  # context_array_push
+
 
   end  # class HrzTagFunctions
 end  # module HrzLib

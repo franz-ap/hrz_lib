@@ -30,6 +30,7 @@ module HrzLib
     def self.debug_msg(b_msg)
       return unless ENV['HRZ_DEBUG'] == '1'
       puts '[DEBUG] ' + B_ANSI_YELLOW_BGCOLOR_STD + b_msg + B_ANSI_RESET_COLOR
+      HrzTagFunctions.context_array_push('hrz_msgs', 'info', b_msg)
     end
 
     def self.transform_beg(b_rule, b_msg)
@@ -248,7 +249,7 @@ module HrzLib
             hrz_tag_text.as(:protected_content) >> space? >>
         tag_start_cl >> func_on_error >> space? >> tag_end_closed).as(:on_error_tag)
       )
-      HrzLogger.debug_msg("Parsing single_hrz_tag")
+      #HrzLogger.debug_msg("Parsing single_hrz_tag")
       result
     }
     
