@@ -63,12 +63,12 @@ module HrzLib
     # @return                [String]            Result string
     def self.retrieve_msgs(b_category, b_previous_msgs, b_delim, l_max=nil)
       puts "vorher #{b_previous_msgs}"
-      arr = [ b_previous_msgs ]
+      arr = [ b_previous_msgs || '' ]
       puts 'Mitte ' + arr.inspect
       arr += HrzTagFunctions.get_context_value('hrz_msgs', b_category, nil)
       puts 'Mitte2 ' + arr.inspect
       b_ret = arr.join(b_delim)
-      puts 'fertig ' + b_ret.inspect
+      puts 'fertig ' + b.inspect
       if l_max.nil?
         b_ret
       else
