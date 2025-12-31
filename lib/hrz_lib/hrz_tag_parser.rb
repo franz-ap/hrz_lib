@@ -67,6 +67,7 @@ module HrzLib
     # @param b_msg [String] The info message.
     def self.info_msg(b_msg)
       puts "[INFO] #{b_msg}"
+      HrzTagFunctions.context_array_push('hrz_msgs', 'info', b_msg)
     end  # info_msg
 
 
@@ -74,6 +75,7 @@ module HrzLib
     # @param b_msg [String] The warning message.
     def self.warning_msg(b_msg)
       puts '[WARN] ' + B_ANSI_YELLOW_BGCOLOR_BRIGHT + b_msg + B_ANSI_RESET_COLOR
+      HrzTagFunctions.context_array_push('hrz_msgs', 'warning', b_msg)
     end  # warning_msg
 
 
@@ -81,11 +83,20 @@ module HrzLib
     # @param b_msg [String] The error message.
     def self.error_msg(b_msg)
       puts '[ERROR] '+ B_ANSI_WHITE_ON_RED_BGCOLOR + b_msg + B_ANSI_RESET_COLOR
+      HrzTagFunctions.context_array_push('hrz_msgs', 'error', b_msg)
     end  # error_msg
     
 
+    # Issue a general, severe error message, that will abort the ticket modification.
+    # @param b_msg [String] The error message.
+    def self.error_msg_abort(b_msg)
+      puts '[ERROR] '+ B_ANSI_WHITE_ON_RED_BGCOLOR + b_msg + B_ANSI_RESET_COLOR
+      HrzTagFunctions.context_array_push('hrz_msgs', 'error_abort', b_msg)
+    end  # error_msg_abort
+
+
     # Retrieve messages, that were collected so far.
-    # @param b_category      [Symbol, String]    Message category to be retrieved: 'debug', 'info', 'warning', 'error'
+    # @param b_category      [Symbol, String]    Message category to be retrieved: 'debug', 'info', 'warning', 'error', 'error_abort'
     # @param b_previous_msgs [String]            Previous message(s), where you want the retrieved messages appended. Pass nil or '' for none.
     # @param b_delim         [String]            Delimiter string between messages
     # @param l_max           [Integer, optional] Maximum length of result string. nil means: no limit.
