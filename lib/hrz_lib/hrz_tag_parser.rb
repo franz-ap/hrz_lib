@@ -106,9 +106,7 @@ module HrzLib
       arr_res << b_previous_msgs   unless b_previous_msgs.nil? || b_previous_msgs.empty?
       arr_coll = HrzTagFunctions.get_context_value('hrz_msgs', b_category, nil)
       arr_res += arr_coll          if arr_coll.is_a?(Array)
-      puts 'Mitte2 ' + arr_res.inspect
       b_ret = arr_res.join(b_delim)
-      puts 'fertig ' + b_ret.inspect
       if l_max.nil?
         b_ret
       else
@@ -152,8 +150,14 @@ module HrzLib
     rule(:tag_end_closed) { space? >> str('>') }
     
     # HRZ tag function names
-    rule(:func_get_param) { str('get_param').as(:func) }   # Creates a hash {:func => "get_param"}
-    rule(:func_set_param) { str('set_param').as(:func) }
+    rule(:func_get_param)        { str('get_param').as(:func) }   # Creates a hash {:func => "get_param"}
+    rule(:func_tkt_old)          { str('tkt_old').as(:func) }
+    rule(:func_tkt_new)          { str('tkt_new').as(:func) }
+    rule(:func_set_param)        { str('set_param').as(:func) }
+    rule(:func_tkt_show_info)    { str('show_info').as(:func) }
+    rule(:func_tkt_show_warning) { str('show_warning').as(:func) }
+    rule(:func_tkt_show_error)   { str('show_error').as(:func) }
+
     rule(:func_if) { str('if') }
     rule(:func_then) { str('then') }
     rule(:func_else) { str('else') }
@@ -161,7 +165,7 @@ module HrzLib
     rule(:func_on_error) { str('on_error').as(:func) }
 
     rule(:hrz_function) { 
-      func_get_param | func_set_param | func_on_error
+      func_get_param | func_tkt_old | func_tkt_new | func_set_param | func_on_error
     }
     
     # Any text without a tag_start:
