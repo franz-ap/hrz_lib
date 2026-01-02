@@ -50,7 +50,7 @@ module HrzLib
           raise HrzError.new("Unknown function: #{b_function}", { function: b_function })
       end  # case
     rescue HrzError
-      # HrzError weitergeben
+      # Pass HrzErrors on
       raise
     rescue StandardError => e
       HrzLogger.logger.error_msg "Error in HRZ function #{b_function}: #{e.message}"

@@ -75,28 +75,52 @@ module HrzLib
       hsh_action[:arr_cond].each do |hsh_cond|
         if q_all_cond_true
           HrzLogger.logger.debug_msg "action1: #{hsh_cond[:b_cond_question]}"
-          if TagStringHelper::evaluate_hrz_condition (hsh_cond[:b_cond_hrz])
-            HrzLogger.logger.debug_msg "action1: --> YES"
-          else
-            HrzLogger.logger.debug_msg "action1: --> NO"
-            q_all_cond_true = false   # This one was not true. Stop checking.
+          begin
+            if TagStringHelper::evaluate_hrz_condition (hsh_cond[:b_cond_hrz])
+              HrzLogger.logger.debug_msg "action1: --> YES"
+            else
+              HrzLogger.logger.debug_msg "action1: --> NO"
+              q_all_cond_true = false   # This one was not true. Stop checking.
+            end
+          rescue HrzLib::HrzError => e
+            HrzLogger.logger.debug_msg "action1: Input b_cond_hrz: #{input}"
+            HrzLogger.logger.debug_msg "✗ FAIL - Exception: #{e.message}"
+            HrzLogger.logger.debug_msg "Error: #{HrzLib::TagStringHelper.errors_text}" if HrzLib::TagStringHelper.has_errors?
+            HrzLogger.logger.warning_msg "action1: Could not solve '#{hsh_cond[:b_cond_question]}'. Automatic action not performed. Please contact an admin."
+            q_all_cond_true = false
           end
         end
       end
       return  if (! q_all_cond_true)  # Not all conditions met ... nothing to do here.
 
       # Perform the action steps
-      hsh_action[:arr_steps].each do |hsh_step|
-        HrzLogger.logger.debug_msg "action1 step: #{hsh_step[:b_title]}"
-        # a) Preparation
-        b_result_prep = TagStringHelper::str_hrz(hsh_step[:b_hrz_prep])
-        HrzLogger.logger.debug_msg "action1: Preparation returned '#{b_result_prep}'. Should be empty. Discarding it."  if (! b_result_prep.empty?)
-        # Do nothing else with the results of preparation and cleanup for now. No idea yet.
-        # b) The step
-        # TODO
-        # c) Cleanup
-        b_result_cln = TagStringHelper::str_hrz(hsh_step[:b_hrz_clean])
-        HrzLogger.logger.debug_msg "action1: Cleanup returned '#{b_result_cln}'. Should be empty. Discarding it."  if (! b_result_cln.empty?)
+      begin
+        b_title_step   = ''
+        b_part_problem = ''
+        b_hrz_problem  = ''
+        hsh_action[:arr_steps].each do |hsh_step|
+          HrzLogger.logger.debug_msg "action1 step: #{hsh_step[:b_title]}"
+          b_title_step = hsh_step[:b_title]
+          # a) Preparation
+          b_part_problem = 'preparation of step'
+          b_hrz_problem  = hsh_step[:b_hrz_prep]
+          b_result_prep  = TagStringHelper::str_hrz(hsh_step[:b_hrz_prep])
+          HrzLogger.logger.debug_msg "action1: Preparation returned '#{b_result_prep}'. Should be empty. Discarding it."  if (! b_result_prep.empty?)
+          # Do nothing else with the results of preparation and cleanup for now. No idea yet.
+          # b) The step
+          b_part_problem = 'main step'
+          # TODO
+          # c) Cleanup
+          b_part_problem = 'cleanup of step'
+          b_hrz_problem  = hsh_step[:b_hrz_clean]
+          b_result_cln   = TagStringHelper::str_hrz(hsh_step[:b_hrz_clean])
+          HrzLogger.logger.debug_msg "action1: Cleanup returned '#{b_result_cln}'. Should be empty. Discarding it."  if (! b_result_cln.empty?)
+        end
+      rescue HrzLib::HrzError => e
+        HrzLogger.logger.debug_msg "action1: Input b_cond_hrz: #{input}"
+        HrzLogger.logger.debug_msg "✗ FAIL - Exception: #{e.message}"
+        HrzLogger.logger.debug_msg "Error: #{HrzLib::TagStringHelper.errors_text}" if HrzLib::TagStringHelper.has_errors?
+        HrzLogger.logger.warning_msg "action1: Could not perform #{b_part_problem} '#{hsh_cond[:b_title_step]}'. Automatic action not performed. Please contact an admin."
       end
     end # action1
 
