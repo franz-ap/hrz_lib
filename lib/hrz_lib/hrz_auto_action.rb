@@ -57,6 +57,9 @@ module HrzLib
     def self.action1(b_m_obj_type,  # Type of main object
                      q_new_m_obj,   # Are we currently working on a new main object (ticket, ...)?
                      hsh_action)    # Action hash.
+      B_MSG_USR_BEG           = 'HRZ Lib action1: '
+      B_MSG_USR_WARN_NOT_DONE = 'Automatic action not performed. Please contact an admin.'
+
       q_trigger = false
       case b_m_obj_type
         when 'ticket'
@@ -83,10 +86,10 @@ module HrzLib
               q_all_cond_true = false   # This one was not true. Stop checking.
             end
           rescue HrzLib::HrzError => e
-            HrzLogger.logger.debug_msg "action1: Input b_cond_hrz: #{input}"
+            HrzLogger.logger.debug_msg "action1: Input b_cond_hrz: #{hsh_cond[:b_cond_hrz]}"
             HrzLogger.logger.debug_msg "✗ FAIL - Exception: #{e.message}"
             HrzLogger.logger.debug_msg "Error: #{HrzLib::TagStringHelper.errors_text}" if HrzLib::TagStringHelper.has_errors?
-            HrzLogger.logger.warning_msg "action1: Could not solve '#{hsh_cond[:b_cond_question]}'. Automatic action not performed. Please contact an admin."
+            HrzLogger.logger.warning_msg "#{B_MSG_USR_BEG}Could not solve '#{hsh_cond[:b_cond_question]}'. #{B_MSG_USR_WARN_NOT_DONE}"
             q_all_cond_true = false
           end
         end
@@ -117,10 +120,10 @@ module HrzLib
           HrzLogger.logger.debug_msg "action1: Cleanup returned '#{b_result_cln}'. Should be empty. Discarding it."  if (! b_result_cln.empty?)
         end
       rescue HrzLib::HrzError => e
-        HrzLogger.logger.debug_msg "action1: Input b_cond_hrz: #{input}"
+        HrzLogger.logger.debug_msg "action1: Input b_cond_hrz: #{b_hrz_problem}"
         HrzLogger.logger.debug_msg "✗ FAIL - Exception: #{e.message}"
         HrzLogger.logger.debug_msg "Error: #{HrzLib::TagStringHelper.errors_text}" if HrzLib::TagStringHelper.has_errors?
-        HrzLogger.logger.warning_msg "action1: Could not perform #{b_part_problem} '#{hsh_cond[:b_title_step]}'. Automatic action not performed. Please contact an admin."
+        HrzLogger.logger.warning_msg "#{B_MSG_USR_BEG}Could not perform #{b_part_problem} '#{hsh_cond[:b_title_step]}'. #{B_MSG_USR_WARN_NOT_DONE}"
       end
     end # action1
 
