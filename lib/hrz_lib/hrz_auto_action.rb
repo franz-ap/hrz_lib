@@ -44,7 +44,7 @@ module HrzLib
     def self.ticket_actions(q_new_ticket,  # Are we currently working on a new ticket?
                             arr_actions)   # Array of actions to be performed.
       arr_actions.each do |hsh_action|
-        ticket_action1('ticket', q_new_ticket, (!q_new_ticket), hsh_action)
+        action1('ticket', q_new_ticket, (!q_new_ticket), hsh_action)
       end
     end  # ticket_actions
 
