@@ -117,7 +117,8 @@ module HrzLib
 
     # Rails compatible interface
     def self.logger
-      defined?(Rails) ? Rails.logger : self
+      #defined?(Rails) ? Rails.logger : self
+      self   # For now. Rails.logger has no debug_msg method, would have to switch back to debug/info/...
     end
   end  # class HrzLogger
   
