@@ -83,19 +83,23 @@ module HrzLib
           end
         end
       end
-    end # action1
-    return  if (! q_all_cond_true)  # Not all conditions met ... nothing to do here.
+      return  if (! q_all_cond_true)  # Not all conditions met ... nothing to do here.
 
-    # Perform the action steps
-    hsh_action[:arr_steps].each do |hsh_step|
-       HrzLogger.logger.debug_msg "action1 step: #{hsh_step[:b_title]}"
-       # a) Preparation
-       b_result_prep = TagStringHelper::str_hrz(hsh_step[:b_hrz_prep])
-       # For now: Do nothing with the result. No idea yet.
-       # b) The step
-       # TODO
-       # c) Cleanup
-       b_result_cln = TagStringHelper::str_hrz(hsh_step[:b_hrz_clean])
-    end
+      # Perform the action steps
+      hsh_action[:arr_steps].each do |hsh_step|
+        HrzLogger.logger.debug_msg "action1 step: #{hsh_step[:b_title]}"
+        # a) Preparation
+        b_result_prep = TagStringHelper::str_hrz(hsh_step[:b_hrz_prep])
+        HrzLogger.logger.debug_msg "action1: Preparation returned '#{b_result_prep}'. Should be empty. Discarding it."  if (! b_result_prep.empty?)
+        # Do nothing else with the results of preparation and cleanup for now. No idea yet.
+        # b) The step
+        # TODO
+        # c) Cleanup
+        b_result_cln = TagStringHelper::str_hrz(hsh_step[:b_hrz_clean])
+        HrzLogger.logger.debug_msg "action1: Cleanup returned '#{b_result_cln}'. Should be empty. Discarding it."  if (! b_result_cln.empty?)
+      end
+    end # action1
+
+
   end  # class HrzAutoAction
 end  # module HrzLib
