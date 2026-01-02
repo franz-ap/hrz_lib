@@ -54,27 +54,33 @@ def run_tests
   
   # Initialize the context
   HrzLib::HrzTagFunctions.initialize_context({
-    price: "1234",
+    price:    "1234",
     customer: "James Corp",
-    discount: "10"
+    discount: "10",
+    qty:      "10",
+    tkt_old:  { cf_id_291: '2.5' },
+    tkt_new:  { cf_id_291: '3.3' },
   })
   
   # Test 1: Simple get_param without default value
-  test_case("Test 1: get_param w/o default",                 'abc<HRZ get_param price>def',                  'abc1234def')
-  test_case("Test 1a: get_param w/o default + blanks",       '  a  bc   <HRZ    get_param    price  >  def', '  a  bc   1234  def')
-  test_case("Test 1b: get_param w/o default, non-existing",  'abc<HRZ get_param xxx>def',                    'abcdef')
+  test_case("Test A.1: get_param w/o default",                 'abc<HRZ get_param price>def',                  'abc1234def')
+  test_case("Test A.1a: get_param w/o default + blanks",       '  a  bc   <HRZ    get_param    price  >  def', '  a  bc   1234  def')
+  test_case("Test A.1b: get_param w/o default, non-existing",  'abc<HRZ get_param xxx>def',                    'abcdef')
 
   # Test 2: get_param with default value
-  test_case("Test 2: get_param with default, exists",        'abc<HRZ get_param [ price , 0.0 ] >def',       'abc1234def')
-  test_case("Test 2a: get_param with default, non-existing", 'abc<HRZ get_param [xxx,0.0]>def',              'abc0.0def')
+  test_case("Test A.2: get_param with default, exists",        'abc<HRZ get_param [ price , 0.0 ] >def',       'abc1234def')
+  test_case("Test A.2a: get_param with default, non-existing", 'abc<HRZ get_param [xxx,0.0]>def',              'abc0.0def')
   
   # Test 3: get_param, long syntax
-  test_case("Test 3: get_param, long syntax",                'abc<HRZ get_param +>price</HRZ get_param>def', 'abc1234def')
+  test_case("Test A.3: get_param, long syntax",                'abc<HRZ get_param +>price</HRZ get_param>def', 'abc1234def')
 
   # Miscellaneous
-  test_case("Test 4: Two tags", 'Customer: <HRZ get_param customer>, Price: <HRZ get_param price>', 'Customer: James Corp, Price: 1234')
+  test_case("Test A.4: Two tags", 'Customer: <HRZ get_param customer>, Price: <HRZ get_param price>', 'Customer: James Corp, Price: 1234')
 
-  test_case("Test 5: set_param and get_param combined", 'Old price: <HRZ get_param price>, <HRZ set_param price, 1221>new: <HRZ get_param price>', 'Old price: 1234, new: 1221')
+  test_case("Test A.5: set_param and get_param combined", 'Old price: <HRZ get_param price>, <HRZ set_param price, 1221>new: <HRZ get_param price>', 'Old price: 1234, new: 1221')
+
+  test_case("Test A.6: get_param with more attributes",           '<HRZ get_param tkt_old sub:cf_id_291 "nvl=999" "format=to_f">', '2.5')
+  test_case("Test A.7: tkt_old (get_param) with more attributes", '<HRZ tkt_old cf_id_291 "nvl=999" "format=to_f">', '2.5')
 
   #HrzLib::HrzTagFunctions.clear_context
   
@@ -86,36 +92,45 @@ def run_tests
   puts "BOOLEAN EXPRESSION TESTS"
   puts "=" * 80
   
-  # Test 7: evaluate_hrz_condition mit einfachen Konstanten
-  test_condition("Test 7: Boolean true", "true", true)
-  test_condition("Test 8: Boolean false", "false", false)
-  test_condition("Test 9: Boolean TRUE", "TRUE", true)
-  test_condition("Test 10: Boolean FALSE", "FALSE", false)
+  # Tests: evaluate_hrz_condition with simple constants
+  test_condition("Test B.1: Boolean true", "true", true)
+  test_condition("Test B.2: Boolean false", "false", false)
+  test_condition("Test B.3: Boolean TRUE", "TRUE", true)
+  test_condition("Test B.4: Boolean FALSE", "FALSE", false)
   
-  # Test 11-16: Vergleiche
-  test_condition("Test 11: 5 == 5", "5 == 5", true)
-  test_condition("Test 12: 5 == 3", "5 == 3", false)
-  test_condition("Test 13: 3 < 5", "3 < 5", true)
-  test_condition("Test 14: 5 > 3", "5 > 3", true)
-  test_condition("Test 15: 5 <= 5", "5 <= 5", true)
-  test_condition("Test 16: 3 >= 5", "3 >= 5", false)
+  # Tests: Comparing numbers
+  test_condition("Test B.5: 5 == 5", "5 == 5", true)
+  test_condition("Test B.6: 5 == 3", "5 == 3", false)
+  test_condition("Test B.7: 3 < 5", "3 < 5", true)
+  test_condition("Test B.8: 5 > 3", "5 > 3", true)
+  test_condition("Test B.9: 5 <= 5", "5 <= 5", true)
+  test_condition("Test B.10: 3 >= 5", "3 >= 5", false)
   
-  # Test 17-19: Arithmetik in Vergleichen
-  test_condition("Test 17: 2 * 3 == 6", "2 * 3 == 6", true)
-  test_condition("Test 18: 10 / 2 == 5", "10 / 2 == 5", true)
-  test_condition("Test 19: 2 + 3 > 4", "2 + 3 > 4", true)
+  # Tests: Arithmetic in comparisons
+  test_condition("Test B.11: 2 * 3 == 6", "2 * 3 == 6", true)
+  test_condition("Test B.12: 10 / 2 == 5", "10 / 2 == 5", true)
+  test_condition("Test B.13: 2 + 3 > 4", "2 + 3 > 4", true)
   
-  # Test 20-22: Boolean Operatoren
-  test_condition("Test 20: true AND true", "true AND true", true)
-  test_condition("Test 21: true AND false", "true AND false", false)
-  test_condition("Test 22: true OR false", "true OR false", true)
-  test_condition("Test 23: NOT true", "NOT true", false)
-  test_condition("Test 24: NOT false", "NOT false", true)
+  # Tests: Boolean operators
+  test_condition("Test B.14: true AND true", "true AND true", true)
+  test_condition("Test B.15: true AND false", "true AND false", false)
+  test_condition("Test B.16: true OR false", "true OR false", true)
+  test_condition("Test B.17: NOT true", "NOT true", false)
+  test_condition("Test B.18: NOT false", "NOT false", true)
   
-  # Test 25-26: Komplexe Ausdrücke
-  test_condition("Test 25: (3 < 5) AND (2 > 1)", "(3 < 5) AND (2 > 1)", true)
-  test_condition("Test 26: (3 > 5) OR (2 < 4)", "(3 > 5) OR (2 < 4)", true)
+  # Tests: A little bit more complex expressions
+  test_condition("Test B.19: (3 < 5) AND (2 > 1)", "(3 < 5) AND (2 > 1)", true)
+  test_condition("Test B.20: (3 > 5) OR (2 < 4)", "(3 > 5) OR (2 < 4)", true)
   
+  # Tests: with get_param
+  test_condition("Test B.21: <HRZ get_param qty> > 5",                "<HRZ get_param qty> > 5", true)
+  test_condition("Test B.22: <HRZ get_param qty> > 5 AND 2 * 3 == 6", "<HRZ get_param qty> > 5 AND 2 * 3 == 6", true)
+  test_condition("Test B.23: 2* get_param, AND, comparison",     "<HRZ get_param qty> > 5 AND 2 * 3 == <HRZ get_param qty> - 4", true)
+  test_condition("Test B.23a: 2* get_param, AND, comparison",     "<HRZ get_param qty> > 5 AND 2 * 3 == <HRZ get_param qty> - 2", false)
+  test_condition("Test B.24: 2* get_param, to_f, comparison",    '<HRZ tkt_old cf_id_291 "nvl=999" "format=to_f"> < 3.1 AND <HRZ tkt_new cf_id_291 "nvl=0" "format=to_f"> >= 3.1', true)
+  test_condition("Test B.24a: 2* get_param++, to_f, comparison", '<HRZ tkt_old cf_id_291 vfy="Impulse Phase" nvl=999 format=to_f> < 3.1 AND <HRZ tkt_new cf_id_291 nvl=0 format=to_f> >= 3.1', true)
+
+
   # ============================================================================
   # IF-THEN-ELSE TESTS
   # ============================================================================
@@ -124,50 +139,14 @@ def run_tests
   puts "IF-THEN-ELSE TESTS"
   puts "=" * 80
   
-  HrzLib::HrzTagFunctions.clear_context
+  #HrzLib::HrzTagFunctions.clear_context
   
-  # Test 27: IF-THEN mit true
-  test_case(
-    "Test 27: IF-THEN mit true",
-    '<HRZ if>true<HRZ then>YES<HRZ end_if>',
-    'YES'
-  )
-  
-  # Test 28: IF-THEN mit false
-  test_case(
-    "Test 28: IF-THEN mit false",
-    '<HRZ if>false<HRZ then>YES<HRZ end_if>',
-    ''
-  )
-  
-  # Test 29: IF-THEN-ELSE mit true
-  test_case(
-    "Test 29: IF-THEN-ELSE mit true",
-    '<HRZ if>true<HRZ then>YES<HRZ else>NO<HRZ end_if>',
-    'YES'
-  )
-  
-  # Test 30: IF-THEN-ELSE mit false
-  test_case(
-    "Test 30: IF-THEN-ELSE mit false",
-    '<HRZ if >false<HRZ then >YES<HRZ else >NO<HRZ end_if >',
-    'NO'
-  )
-  
-  # Test 31: IF mit Vergleich
-  HrzLib::HrzTagFunctions.initialize_context({ qty: "10" })
-  test_case(
-    "Test 31: IF mit Vergleich und get_param",
-    'Qty: <HRZ if><HRZ get_param qty> > 5<HRZ then>HIGH<HRZ else>LOW<HRZ end_if>',
-    'Qty: HIGH'
-  )
-  
-  # Test 32: IF mit komplexer Bedingung
-  test_case(
-    "Test 32: IF mit AND",
-    '<HRZ if>(3 < 5) AND (2 > 1)<HRZ then>Both true<HRZ else>Not both<HRZ end_if>',
-    'Both true'
-  )
+  test_case("Test 27: IF-THEN with true",       '<HRZ if>true<HRZ then>YES<HRZ end_if>',    'YES')
+  test_case("Test 28: IF-THEN with false",      '<HRZ if>false<HRZ then>YES<HRZ end_if>',   ''   )
+  test_case("Test 29: IF-THEN-ELSE with true",  '<HRZ if>true<HRZ then>YES<HRZ else>NO<HRZ end_if>',      'YES')
+  test_case("Test 30: IF-THEN-ELSE with false", '<HRZ if >false<HRZ then >YES<HRZ else >NO<HRZ end_if >', 'NO' )
+  test_case("Test 31: IF comparing get_param",  'Qty: <HRZ if><HRZ get_param qty> > 5<HRZ then>HIGH<HRZ else>LOW<HRZ end_if>', 'Qty: HIGH')
+  test_case("Test 32: IF with AND",             '<HRZ if>(3 < 5) AND (2 > 1)<HRZ then>Both true<HRZ else>Not both<HRZ end_if>', 'Both true')
   
   # ============================================================================
   # ERROR HANDLING TESTS

@@ -77,7 +77,7 @@ module HrzLib
       q_all_cond_true = true  # So far ...
       hsh_action[:arr_cond].each do |hsh_cond|
         if q_all_cond_true
-          HrzLogger.logger.debug_msg "action1: #{hsh_cond[:b_cond_question]}"
+          HrzLogger.logger.debug_msg "action1: Condition '#{hsh_cond[:b_cond_question]}'"
           begin
             if TagStringHelper::evaluate_hrz_condition (hsh_cond[:b_cond_hrz])
               HrzLogger.logger.debug_msg "action1: --> YES"
