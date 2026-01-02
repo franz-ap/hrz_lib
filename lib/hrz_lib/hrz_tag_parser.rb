@@ -15,7 +15,7 @@
 #-------------------------------------------------------------------------------------eohdr-#
 # Purpose: Parser and processor for HRZ tags in text strings
 
-require 'parslet'    # https://kschiess.github.io/parslet/
+require          'parslet'            # https://kschiess.github.io/parslet/
 require_relative 'hrz_tag_functions'
 
 module HrzLib
@@ -610,7 +610,7 @@ module HrzLib
     # @param dry_run [Boolean, default false] If true, tag functions will not be perfomed. Only syntax check.
     # @return [Boolean] Result
     # @raise [HrzError] In case of errors
-    def self.evaluate_condition(condition_text, dry_run: false)
+    def self.evaluate_hrz_condition(condition_text, dry_run: false)
       return false if condition_text.nil? || condition_text.strip.empty?
       
       set_dry_run_mode(dry_run)
@@ -664,7 +664,7 @@ module HrzLib
       ensure
         set_dry_run_mode(false)
       end
-    end  # evaluate_condition
+    end  # evaluate_hrz_condition
     
 
     

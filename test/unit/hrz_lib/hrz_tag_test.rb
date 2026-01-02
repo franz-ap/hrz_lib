@@ -86,7 +86,7 @@ def run_tests
   puts "BOOLEAN EXPRESSION TESTS"
   puts "=" * 80
   
-  # Test 7: evaluate_condition mit einfachen Konstanten
+  # Test 7: evaluate_hrz_condition mit einfachen Konstanten
   test_condition("Test 7: Boolean true", "true", true)
   test_condition("Test 8: Boolean false", "false", false)
   test_condition("Test 9: Boolean TRUE", "TRUE", true)
@@ -327,13 +327,13 @@ def run_tests
     'Sum is 10'
   )
   
-  # Test 45: evaluate_condition mit HRZ-Tag
+  # Test 45: evaluate_hrz_condition mit HRZ-Tag
   puts "\n" + "-" * 80
-  puts "Test 45: evaluate_condition mit HRZ-Tag"
+  puts "Test 45: evaluate_hrz_condition mit HRZ-Tag"
   HrzLib::HrzTagFunctions.initialize_context({ price: "100" })
   begin
     condition = '<HRZ get_param price /> >= 50'
-    result = HrzLib::TagStringHelper.evaluate_condition(condition)
+    result = HrzLib::TagStringHelper.evaluate_hrz_condition(condition)
     puts "Condition: #{condition}"
     puts "Result:    #{result}"
     puts "Expected:  true"
@@ -438,7 +438,7 @@ def test_condition(title, condition, expected)
   puts "\n" + "-" * 80
   puts title
   begin
-    result = HrzLib::TagStringHelper.evaluate_condition(condition)
+    result = HrzLib::TagStringHelper.evaluate_hrz_condition(condition)
     puts "Condition: #{condition}"
     puts "Result:    #{result}"
     puts "Expected:  #{expected}"
