@@ -18,6 +18,9 @@
 require_relative 'hrz_tag_parser'
 
 module HrzLib
+  B_MSG_USR_BEG           = 'HRZ Lib action1: '
+  B_MSG_USR_WARN_NOT_DONE = 'Automatic action not performed. Please contact an admin.'
+
   class HrzAutoAction
 
     # Perform automatic actions for a given ticket
@@ -57,9 +60,6 @@ module HrzLib
     def self.action1(b_m_obj_type,  # Type of main object
                      q_new_m_obj,   # Are we currently working on a new main object (ticket, ...)?
                      hsh_action)    # Action hash.
-      B_MSG_USR_BEG           = 'HRZ Lib action1: '
-      B_MSG_USR_WARN_NOT_DONE = 'Automatic action not performed. Please contact an admin.'
-
       q_trigger = false
       case b_m_obj_type
         when 'ticket'
