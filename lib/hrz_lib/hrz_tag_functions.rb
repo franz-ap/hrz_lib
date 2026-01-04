@@ -76,8 +76,10 @@ module HrzLib
     #                                                  alias 1: 'default', alias 2: 'if_empty'
     # @param arr_param_values [Array<String> or Hash] Array of strings with parameter values, possibly
     #                                         prefixed by <par_name> '=' or ':' ... named parameter
-    #                                         If you pass a Hash instead, it will be returned verbatim,
-    #                                         wihtout any processing, just for extra flexibility of the calling method.
+    #                                         If you pass a hash instead of the array, it will be returned verbatim,
+    #                                         without any processing. Just for extra flexibility of the calling method.
+    #                                         Instead of passing a single parameter value as string, you can also
+    #                                         pass a hash: {key:'par_name', val:'par_value'}
     # @param b_caller [String, optional]      Name of the caller. For documentation and for error messages.
     # @param n_pos_auto_assign [Integer]      0 <=  n <= arr_param_names.length. Only the first n
     #                                         anonymous/position values will be assigned to the given
@@ -104,13 +106,14 @@ module HrzLib
                                   arr_param_values,        # Array of strings with parameter values or a hash.
                                   b_caller          = nil, # Name of the calling method.           Optional.
                                   n_pos_auto_assign = nil) # Position parameter auto assign limit. Optional.
+      b_errmsg_beg = "analyze_named_params#{b_caller.nil? || b_caller.empty? ? '' : ' of '}#{b_caller}: "
       if arr_param_values.is_a?(Hash)
         result = arr_param_values  # Return the argument verbatim. No further processing. Ignore other arguments.
       else
         # Validate n_pos_auto_assign
         n_pos_auto_assign = arr_param_names.length   if n_pos_auto_assign.nil?
         if n_pos_auto_assign < 0 || n_pos_auto_assign > arr_param_names.length
-          HrzLogger.error_msg("analyze_named_params#{b_caller.nil? || b_caller.empty? ? '' : ' of '}#{b_caller}: Invalid parameter n_pos_auto_assign = #{n_pos_auto_assign.to_s}, must be 0 <= n <= #{arr_param_names.length}!")
+          HrzLogger.error_msg(b_errmsg_beg + "Invalid parameter n_pos_auto_assign = #{n_pos_auto_assign.to_s}, must be 0 <= n <= #{arr_param_names.length}!")
           return nil
         end
 
@@ -132,23 +135,40 @@ module HrzLib
 
         # Process parameter values
         j_pos_index         = 0
+        j_src_index         = -1
         q_named_encountered = false
 
         arr_param_values.each do |value|
-          # Check if this is a named parameter (name=value or name:value)
-          if value =~ /^([^=:]+)[:=](.*)$/
-            param_name = $1
-            param_value = $2
-
+          j_src_index += 1
+          param_name   = nil
+          if value.is_a?(Hash)
+            if value.key?(:key) && value.key?(:val)
+              param_name  = value[:key]
+              param_value = value[:val]
+            else
+              HrzLogger.error_msg(b_errmsg_beg + "arr_param_values[#{j_src_index}] is invalid: It is a hash, but lacks :key and/or :val ... #{arr_param_values[j_src_index].inspect}")
+            end
+          else
+            if value.is_a?(String)
+              # Check if this is a named parameter (name=value or name:value string)
+              if value =~ /^([^=:]+)[:=](.*)$/
+                param_name  = $1
+                param_value = $2
+              end
+            else
+               HrzLogger.error_msg(b_errmsg_beg + "arr_param_values[#{j_src_index}] is invalid: It is neither a hash nor a string: #{arr_param_values[j_src_index].inspect}")
+            end
+          end
+          if ! param_name.nil?
+            # It is a named parameter (hash or string).
             # Find the primary name for this parameter
             primary = name_map[param_name]
-
             if primary
               result[primary.to_sym] = param_value
               q_named_encountered = true
             else
               # Unknown named parameter goes to 'other'
-              result[:other] << value
+              result[:other] << (param_name + ':' + param_value)
             end
           else
             # Positional parameter
@@ -170,6 +190,7 @@ module HrzLib
         # Clean up 'other' array - set to nil if empty
         result[:other] = nil if result[:other].empty?
       end
+      #HrzLogger.debug_msg('Result ' + b_errmsg_beg + result.inspect)
       result
     end  # analyze_named_params
 
@@ -260,7 +281,7 @@ module HrzLib
     # Retrieve issue/ticket values, old status, i.e. before it was modified by a user.
     # @param arr_args [Array<String> or Hash] Argument array: position parameters and/or named parameters. See analyze_named_params.
     #                                         Hash: Like the result of analyze_named_params. See there for details.
-    def hrz_strfunc_tkt_old(arr_args)
+    def self.hrz_strfunc_tkt_old(arr_args)
       hsh_param  = analyze_named_params(['key_main/main/name', 'nvl/default/if_missing', 'key_sub/sub', 'conversion/conv'], arr_args, 'get_param', 2)
       b_key_main = hsh_param[:key_main]
       hsh_param[:key_sub]  = b_key_main
@@ -271,7 +292,7 @@ module HrzLib
     # Retrieve issue/ticket values, new status, i.e. after possible modifications by a user.
     # @param arr_args [Array<String> or Hash] Argument array: position parameters and/or named parameters. See analyze_named_params.
     #                                         Hash: Like the result of analyze_named_params. See there for details.
-    def hrz_strfunc_tkt_new(arr_args)
+    def self.hrz_strfunc_tkt_new(arr_args)
       hsh_param  = analyze_named_params(['key_main/main/name', 'nvl/default/if_missing', 'key_sub/sub', 'conversion/conv'], arr_args, 'get_param', 2)
       b_key_main = hsh_param[:key_main]
       hsh_param[:key_sub]  = b_key_main

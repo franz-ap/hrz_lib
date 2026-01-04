@@ -61,26 +61,37 @@ def run_tests
     tkt_old:  { cf_id_291: '2.5' },
     tkt_new:  { cf_id_291: '3.3' },
   })
-  
-  # Test 1: Simple get_param without default value
-  test_case("Test A.1: get_param w/o default",                 'abc<HRZ get_param price>def',                  'abc1234def')
-  test_case("Test A.1a: get_param w/o default + blanks",       '  a  bc   <HRZ    get_param    price  >  def', '  a  bc   1234  def')
-  test_case("Test A.1b: get_param w/o default, non-existing",  'abc<HRZ get_param xxx>def',                    'abcdef')
+
+  test_case("Test 0: special dev/debug test", '<HRZ    get_param     tkt_old sub:cf_id_291 "nvlx999" "formatxto_f">', '2.5')
+
+  # Test 1: Simple text and get_param without default value
+  test_case("Test A.1: text",                                  'abc',                                          'abc')
+  test_case("Test A.1a: text",                                 'ab<c>d',                                       'ab<c>d')
+  test_case("Test A.1b: text",                                 'abc>d"ef"g',                                   'abc>d"ef"g')
+  test_case("Test A.1c: get_param w/o default",                '<HRZ get_param "price" >',                     '1234')
+  test_case("Test A.1d: get_param w/o default",                'abc<HRZ get_param "price">def',                'abc1234def')
+  test_case("Test A.1e: get_param w/o default",                'abc<HRZ get_param price>def',                  'abc1234def')
+  test_case("Test A.1f: get_param w/o default + blanks",       '  a  bc   <HRZ    get_param    price  >  def', '  a  bc   1234  def')
+  test_case("Test A.1g: get_param w/o default, non-existing",  'abc<HRZ get_param xxx>def',                    'abcdef')
 
   # Test 2: get_param with default value
-  test_case("Test A.2: get_param with default, exists",        'abc<HRZ get_param [ price , 0.0 ] >def',       'abc1234def')
-  test_case("Test A.2a: get_param with default, non-existing", 'abc<HRZ get_param [xxx,0.0]>def',              'abc0.0def')
-  
+  test_case("Test A.2: get_param with default, exists",        'abc<HRZ get_param price  0.0  >def',           'abc1234def')
+  test_case("Test A.2a: get_param with default, non-existing", 'abc<HRZ get_param xxx 0.0>def',                'abc0.0def')
+  test_case("Test A.2b: get_param with def, non-ex, weird",    'abc<HRZ get_param 3.14 price  0.0   "]">def',  'abcprice 0.0 ]def')
+
   # Test 3: get_param, long syntax
   test_case("Test A.3: get_param, long syntax",                'abc<HRZ get_param +>price</HRZ get_param>def', 'abc1234def')
 
   # Miscellaneous
   test_case("Test A.4: Two tags", 'Customer: <HRZ get_param customer>, Price: <HRZ get_param price>', 'Customer: James Corp, Price: 1234')
 
-  test_case("Test A.5: set_param and get_param combined", 'Old price: <HRZ get_param price>, <HRZ set_param price, 1221>new: <HRZ get_param price>', 'Old price: 1234, new: 1221')
+  test_case("Test A.5: set_param and get_param combined", 'Old price: <HRZ get_param price>, <HRZ set_param price 1221>new: <HRZ get_param price>', 'Old price: 1234, new: 1221')
 
-  test_case("Test A.6: get_param with more attributes",           '<HRZ get_param tkt_old sub:cf_id_291 "nvl=999" "format=to_f">', '2.5')
-  test_case("Test A.7: tkt_old (get_param) with more attributes", '<HRZ tkt_old cf_id_291 "nvl=999" "format=to_f">', '2.5')
+  test_case("Test A.6: get_param with more attributes",           '<HRZ get_param tkt_old sub:cf_id_291 "nvl=999" "conversion:to_f">', '2.5')
+  test_case("Test A.7: tkt_old (get_param) with more attributes", '<HRZ tkt_old cf_id_291 nvl:999 conversion=to_f>', '2.5')
+
+  # Nested <HRZ> tags
+  test_case("Test A.8: nested <HRZ> tags", "<HRZ get_param nonex+>  nvl=<HRZ get_param discount>uvw </HRZ get_param> ghi",  "10 uvw ghi")
 
   #HrzLib::HrzTagFunctions.clear_context
   
@@ -129,6 +140,9 @@ def run_tests
   test_condition("Test B.23a: 2* get_param, AND, comparison",     "<HRZ get_param qty> > 5 AND 2 * 3 == <HRZ get_param qty> - 2", false)
   test_condition("Test B.24: 2* get_param, to_f, comparison",    '<HRZ tkt_old cf_id_291 "nvl=999" "format=to_f"> < 3.1 AND <HRZ tkt_new cf_id_291 "nvl=0" "format=to_f"> >= 3.1', true)
   test_condition("Test B.24a: 2* get_param++, to_f, comparison", '<HRZ tkt_old cf_id_291 vfy="Impulse Phase" nvl=999 format=to_f> < 3.1 AND <HRZ tkt_new cf_id_291 nvl=0 format=to_f> >= 3.1', true)
+
+  # Nested <HRZ> tags
+  test_condition("Test B.21: nested <HRZ> tags", "<HRZ get_param nonex+>  nvl=<HRZ get_param discount>uvw </HRZ get_param> > 7", true)
 
 
   # ============================================================================
