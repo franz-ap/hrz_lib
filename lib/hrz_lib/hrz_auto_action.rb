@@ -164,7 +164,7 @@ module HrzLib
       hsh_grp_info = HrzLib::IssueHelper.get_group_members(principal_id)
       if hsh_grp_info
         if q_assignee_ena && hsh_grp_info[:leader_id]
-          HrzTagFunctions.set_context_value('tkt_prep', 'assigned_to_id',  hsh_grp_info[:leader_id])
+          HrzTagFunctions.set_context_value('tkt_prep', 'assigned_to_id',  hsh_grp_info[:leader_id].to_s)
         end
         HrzTagFunctions.context_array_push( 'tkt_prep', 'arr_watcher_ids', hsh_grp_info[:arr_member_ids], true)
       end
