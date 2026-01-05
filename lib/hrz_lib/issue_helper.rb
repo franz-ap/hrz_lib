@@ -1695,11 +1695,11 @@ module HrzLib
             value = custom_value.value
 
             case field_name
-            when "Leader ID"
-              # Try to convert to integer if it's a string
-              result[:leader_id] = value.to_i if value.present?
-            when "Leader Name"
-              result[:leader_name] = value if value.present?
+              when "Leader ID", "Leader"
+                # Try to convert to integer if it's a string
+                result[:leader_id] = value.to_i if value.present?
+              when "Leader Name"
+                result[:leader_name] = value if value.present?
             end
           end
 

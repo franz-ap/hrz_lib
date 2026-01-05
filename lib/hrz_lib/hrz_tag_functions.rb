@@ -415,16 +415,23 @@ module HrzLib
 
 
     # Appends the given value as a new element to an array in the conext.
-    # @param key_main [Symbol, String] Main key (namespace). The only key, if you do not need a 2nd level.
-    # @param key_sub  [Symbol, String] Sub key. Pass nil, if you want only a single level.
-    # @param value    [Object] value: the new array element.
-    def self.context_array_push(key_main, key_sub, value)
+    # @param key_main  [Symbol, String] Main key (namespace). The only key, if you do not need a 2nd level.
+    # @param key_sub   [Symbol, String] Sub key. Pass nil, if you want only a single level.
+    # @param new_value [Object]         The new array element to be appended to the array.
+    #                                   If you pass an array, both arrays will be concatenated.
+    # @param q_unique  [Boolean]        Make sure, that there are no duplicate values in the array upon return? true=yes, false=no, don't care.
+    def self.context_array_push(key_main, key_sub, new_value, q_unique=false)
       arr = get_context_value(key_main, key_sub, nil);
       if arr.nil?
         arr = []
         set_context_value(key_main, key_sub, arr);
       end
-      arr.push(value)   # This works and does, what we want, because arr is a reference to the array, not a copy.
+      if new_value.is_a?(Array)
+        arr.concat(new_value)
+      else
+         arr.push(new_value)   # This works and does, what we want, because arr is a reference to the array, not a copy.
+      end
+      arr.uniq!  if q_unique
     end  # context_array_push
 
 

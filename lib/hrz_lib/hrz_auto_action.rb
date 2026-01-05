@@ -142,6 +142,36 @@ module HrzLib
       end
     end # action1
 
+    # ------------------------------------------------------------------------------------------------------------------------------
+    # Ticket preparation
+    # ------------------------------------------------------------------------------------------------------------------------------
+
+    # Clear prepared ticket assignee and watchers
+    def self.tkt_prep_clear_assignee_watchers
+       HrzTagFunctions.set_context_value('tkt_prep', 'assigned_to_id',  nil)
+       HrzTagFunctions.set_context_value('tkt_prep', 'arr_watcher_ids', nil)
+    end  # tkt_prep_clear_assignee_watchers
+
+
+
+    # Set assignee and add watchers as a preparation for creating a ticket.
+    # @param principal_id   [Integer] The ID of a Redmine group or user.
+    # @param q_assignee_ena [Boolean] Enable setting/overwriting the assigne? true=yes, false=no
+    # For Groups: The group's leader (if available) will be the assignee (if enabled above)
+    #             All group members will be added as watchers.
+    # For Users:  The user will be the (new) assignee, if enabled above (otherwise nothing will happen).
+    def self.tkt_prep_set_assignee_add_watchers(principal_id, q_assignee_ena=true)
+      hsh_grp_info = HrzLib::IssueHelper.get_group_members(principal_id)
+      if hsh_grp_info
+        if q_assignee_ena && hsh_grp_info[:leader_id]
+          HrzTagFunctions.set_context_value('tkt_prep', 'assigned_to_id',  hsh_grp_info[:leader_id])
+        end
+        HrzTagFunctions.context_array_push( 'tkt_prep', 'arr_watcher_ids', hsh_grp_info[:arr_member_ids], true)
+      end
+      HrzLogger.logger.debug_msg 'Result tkt_prep_set_assignee_add_watchers: assignee=' + HrzTagFunctions.get_context_value('tkt_prep', 'assigned_to_id') + '  watchers: ' + HrzTagFunctions.get_context_value('tkt_prep', 'arr_watcher_ids').inspect
+    end  # tkt_prep_set_assignee_add_watchers
+
+
 
   end  # class HrzAutoAction
 end  # module HrzLib
