@@ -206,6 +206,9 @@ module HrzLib
                                 arr_watcher_ids,
                                 new_options)
                 if ! new_issue_id.nil?
+                  if q_related
+                    HrzLib::IssueHelper.create_relation(issue_main_id, new_issue_id, 'relates')
+                  end
                   HrzLogger.logger.info_msg "Created #{q_related ? 'related ' : ''}#{q_child ? 'child ' : ''}ticket ##{new_issue_id}"
                 end
               end # if template_issue_data

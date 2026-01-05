@@ -292,7 +292,7 @@ module HrzLib
         ).first
 
         if existing
-          HrzLogger.info_msg "HRZ Lib: Relation already exists between issue ##{issue_from_id} and ##{issue_to_id}"
+          #HrzLogger.info_msg "HRZ Lib: Relation already exists between issue ##{issue_from_id} and ##{issue_to_id}"
           return existing.id
         end
 
@@ -309,7 +309,7 @@ module HrzLib
         end
 
         if relation.save
-          HrzLogger.info_msg "HRZ Lib: Successfully created '#{relation_type}' relation from issue ##{issue_from_id} to ##{issue_to_id}"
+          #HrzLogger.info_msg "HRZ Lib: Successfully created '#{relation_type}' relation from issue ##{issue_from_id} to ##{issue_to_id}"
           return relation.id
         else
           HrzLogger.error_msg "HRZ Lib: Failed to create relation: #{relation.errors.full_messages.join(', ')}"
