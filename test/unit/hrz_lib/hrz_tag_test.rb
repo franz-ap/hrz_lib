@@ -412,7 +412,7 @@ def test_case(title, input, expected)
       exit(1) if $exit_on_first_failure
     end
     if HrzLib::TagStringHelper.has_errors?
-      puts "Errors:   #{HrzLib::TagStringHelper.errors_text}"
+      puts "TagStringHelper errors:   #{HrzLib::TagStringHelper.errors_text}"
     end
   rescue HrzLib::HrzError => e
     puts "Input: #{input}"
