@@ -113,23 +113,23 @@ module HrzLib
                 user = User.find(user_id)
                 Watcher.create(watchable: issue, user: user) if user
               rescue ActiveRecord::RecordNotFound
-                HrzLogger.warning_msg "HRZ Lib: User with ID #{user_id} not found, skipping watcher."
+                HrzLogger.warning_msg "HRZ Lib mk_issue: User with ID #{user_id} not found, skipping watcher."
               end
             end
           end
 
-          HrzLogger.info_msg "HRZ Lib: Successfully created issue ##{issue.id} in project '#{project.identifier}'"
+          #HrzLogger.info_msg "HRZ Lib mk_issue: Successfully created issue ##{issue.id} in project '#{project.identifier}'"
           return issue.id
         else
-          HrzLogger.error_msg "HRZ Lib: Failed to create issue: #{issue.errors.full_messages.join(', ')}"
+          HrzLogger.error_msg "HRZ Lib mk_issue: Failed to create issue: #{issue.errors.full_messages.join(', ')}"
           return nil
         end
 
       rescue ActiveRecord::RecordNotFound => e
-        HrzLogger.error_msg "HRZ Lib: Project or resource not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib mk_issue: Project or resource not found: #{e.message}"
         return nil
       rescue => e
-        HrzLogger.error_msg "HRZ Lib: Error creating issue: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib mk_issue: Error creating issue: #{e.message}"
         HrzLogger.error_msg e.backtrace.join("\n")
         return nil
       end

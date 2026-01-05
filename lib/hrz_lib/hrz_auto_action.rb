@@ -151,6 +151,9 @@ module HrzLib
     #     :q_related         [Boolean] Make the new ticket related to the current main ticket (tkt_new)? true=yes, false=no, don't.
     #     :q_child           [Boolean] Make the new ticket a child of the current main ticket (tkt_new)? true=yes, false=no, don't.
     #     :issue_template_id [Integer] The ID of an existing issue to be used as template.
+    #     :project_id        [Integer, String] The ID or identifier of the project.
+    #                                          Optional. Pass it only, if you do not want the new ticket
+    #                                          to be created where the main ticket resides.
     #     :q_only_1x         [Boolean] Do you want to avoid creating the 'same' ticket more than once (same b_issue_abbr and same parent/related)?
     #                                  true=yes false=no, don't care, create a new ticket with every call.
     #     :b_issue_abbr      [String]  A unique abbreviation for this kind of ticket. Required for q_only_1x.
@@ -164,6 +167,8 @@ module HrzLib
             q_child       = hsh_opt[:q_child]
             q_only_1x     = hsh_opt[:q_only_1x]
             b_issue_abbr  = hsh_opt[:b_issue_abbr]
+            project_id    = hsh_opt[:project_id]
+            project_id    = HrzTagFunctions.get_context_value('tkt_new', 'project_id')  if project_id.nil?
             issue_main_id = HrzTagFunctions.get_context_value('tkt_new', 'issue_id')
             if q_only_1x && (b_issue_abbr.nil? || b_issue_abbr.empty?)
               HrzLogger.logger.debug_msg "perform_step_todo: Ignoring q_only_1x for task '#{b_todo}', because b_issue_abbr is empty."
@@ -173,7 +178,7 @@ module HrzLib
             b_suf       = ''
             if q_only_1x
               # See, if the requested ticket already exists. We want only 1 of them.
-              b_suf    = " {aut:#{b_issue_abbr}}"
+              b_suf    = " {#{b_issue_abbr}}"
               found_id = nil
               if q_related
                 found_id = HrzLib::IssueHelper.find_related_with_subject(issue_main_id, b_suf)
@@ -194,14 +199,14 @@ module HrzLib
                 new_options     = template_issue_data[:options]
                 new_options[:parent_issue_id] = issue_main_id   if q_child
                 new_issue_id = HrzLib::IssueHelper.mk_issue(
-                                template_issue_data[:project_id],
+                                project_id,
                                 template_issue_data[:b_subject] + b_suf,
                                 template_issue_data[:b_desc],
                                 j_assignee,
                                 arr_watcher_ids,
                                 new_options)
                 if ! new_issue_id.nil?
-                  HrzLogger.logger.info_msg "Created ticket ##{new_issue_id}"
+                  HrzLogger.logger.info_msg "Created #{q_related ? 'related ' : ''}#{q_child ? 'child ' : ''}ticket ##{new_issue_id}"
                 end
               end # if template_issue_data
             end # if q_creat_tkt
