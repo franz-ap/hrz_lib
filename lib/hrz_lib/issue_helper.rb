@@ -24,13 +24,13 @@ module HrzLib
     # @param b_subject [String] The title/subject of the new issue
     # @param b_desc [String] The description text of the issue
     # @param j_assignee [Integer, nil] The Redmine user ID of the assignee (nil = no assignee)
-    # @param j_arr_watchers [Array<Integer>, nil] Array of Redmine user IDs to be added as watchers (default: [])
+    # @param arr_watcher_ids [Array<Integer>, nil] Array of Redmine user IDs to be added as watchers (default: [])
     # @param options [Hash] Additional options for the issue
     # @option options [Integer] :tracker_id The tracker ID (required if project has multiple trackers)
     # @option options [Integer] :status_id The status ID (default: uses project's default status)
     # @option options [Integer] :priority_id The priority ID (default: uses default priority)
     # @option options [Integer] :category_id The category ID
-    # @option options [Integer] :fixed_version_id The target version ID
+    # @option options [Integer] :target_version_id The target version ID
     # @option options [Date, String] :start_date The start date
     # @option options [Date, String] :due_date The due date
     # @option options [Integer] :estimated_hours Estimated time in hours
@@ -57,13 +57,15 @@ module HrzLib
     #     'We need to implement...',
     #     nil,
     #     [],
-    #     tracker_id: 2,
-    #     priority_id: 4,
-    #     due_date: '2025-12-31',
-    #     custom_fields: {1 => 'High', 2 => 'External'}
+    #     { tracker_id: 2,
+    #       priority_id: 4,
+    #       due_date: '2025-12-31',
+    #       custom_fields: {1 => 'High',
+    #                       2 => 'External'
+    #     }
     #   )
     #
-    def self.mk_issue(project_id, b_subject, b_desc, j_assignee = nil, j_arr_watchers = [], options = {})
+    def self.mk_issue(project_id, b_subject, b_desc, j_assignee = nil, arr_watcher_ids = [], options = {})
       begin
         # Find the project
         project = Project.find(project_id)
@@ -88,7 +90,7 @@ module HrzLib
         issue.status_id = options[:status_id] if options[:status_id]
         issue.priority_id = options[:priority_id] if options[:priority_id]
         issue.category_id = options[:category_id] if options[:category_id]
-        issue.fixed_version_id = options[:fixed_version_id] if options[:fixed_version_id]
+        issue.fixed_version_id = options[:target_version_id] if options[:target_version_id]
         issue.start_date = options[:start_date] if options[:start_date]
         issue.due_date = options[:due_date] if options[:due_date]
         issue.estimated_hours = options[:estimated_hours] if options[:estimated_hours]
@@ -105,30 +107,30 @@ module HrzLib
         # Save the issue
         if issue.save
           # Add watchers if specified
-          if j_arr_watchers && j_arr_watchers.is_a?(Array) && !j_arr_watchers.empty?
-            j_arr_watchers.each do |user_id|
+          if arr_watcher_ids && arr_watcher_ids.is_a?(Array) && !arr_watcher_ids.empty?
+            arr_watcher_ids.each do |user_id|
               begin
                 user = User.find(user_id)
                 Watcher.create(watchable: issue, user: user) if user
               rescue ActiveRecord::RecordNotFound
-                Rails.logger.warn "HRZ Lib: User with ID #{user_id} not found, skipping watcher."
+                HrzLogger.warning_msg "HRZ Lib: User with ID #{user_id} not found, skipping watcher."
               end
             end
           end
 
-          Rails.logger.info "HRZ Lib: Successfully created issue ##{issue.id} in project '#{project.identifier}'"
+          HrzLogger.info_msg "HRZ Lib: Successfully created issue ##{issue.id} in project '#{project.identifier}'"
           return issue.id
         else
-          Rails.logger.error "HRZ Lib: Failed to create issue: #{issue.errors.full_messages.join(', ')}"
+          HrzLogger.error_msg "HRZ Lib: Failed to create issue: #{issue.errors.full_messages.join(', ')}"
           return nil
         end
 
       rescue ActiveRecord::RecordNotFound => e
-        Rails.logger.error "HRZ Lib: Project or resource not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Project or resource not found: #{e.message}"
         return nil
       rescue => e
-        Rails.logger.error "HRZ Lib: Error creating issue: #{e.message}"
-        Rails.logger.error e.backtrace.join("\n")
+        HrzLogger.error_msg "HRZ Lib: Error creating issue: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
         return nil
       end
     end  # mk_issue
@@ -168,7 +170,7 @@ module HrzLib
 
         # Check if file exists
         unless File.exist?(file_path)
-          Rails.logger.error "HRZ Lib: File not found: #{file_path}"
+          HrzLogger.error_msg "HRZ Lib: File not found: #{file_path}"
           return nil
         end
 
@@ -213,21 +215,21 @@ module HrzLib
         if attachment.save
           temp_file.close
           temp_file.unlink
-          Rails.logger.info "HRZ Lib: Successfully attached file '#{filename}' to issue ##{issue_id}"
+          HrzLogger.info_msg "HRZ Lib: Successfully attached file '#{filename}' to issue ##{issue_id}"
           return attachment.id
         else
           temp_file.close
           temp_file.unlink
-          Rails.logger.error "HRZ Lib: Failed to attach file: #{attachment.errors.full_messages.join(', ')}"
+          HrzLogger.error_msg "HRZ Lib: Failed to attach file: #{attachment.errors.full_messages.join(', ')}"
           return nil
         end
 
       rescue ActiveRecord::RecordNotFound => e
-        Rails.logger.error "HRZ Lib: Issue not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Issue not found: #{e.message}"
         return nil
       rescue => e
-        Rails.logger.error "HRZ Lib: Error attaching file: #{e.message}"
-        Rails.logger.error e.backtrace.join("\n")
+        HrzLogger.error_msg "HRZ Lib: Error attaching file: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
         return nil
       end
     end  # attach_file
@@ -274,7 +276,7 @@ module HrzLib
         valid_types = %w[relates duplicates duplicated blocks blocked precedes follows copied_to copied_from]
 
         unless valid_types.include?(relation_type)
-          Rails.logger.error "HRZ Lib: Invalid relation type '#{relation_type}'. Valid types: #{valid_types.join(', ')}"
+          HrzLogger.error_msg "HRZ Lib: Invalid relation type '#{relation_type}'. Valid types: #{valid_types.join(', ')}"
           return nil
         end
 
@@ -290,7 +292,7 @@ module HrzLib
         ).first
 
         if existing
-          Rails.logger.info "HRZ Lib: Relation already exists between issue ##{issue_from_id} and ##{issue_to_id}"
+          HrzLogger.info_msg "HRZ Lib: Relation already exists between issue ##{issue_from_id} and ##{issue_to_id}"
           return existing.id
         end
 
@@ -307,19 +309,19 @@ module HrzLib
         end
 
         if relation.save
-          Rails.logger.info "HRZ Lib: Successfully created '#{relation_type}' relation from issue ##{issue_from_id} to ##{issue_to_id}"
+          HrzLogger.info_msg "HRZ Lib: Successfully created '#{relation_type}' relation from issue ##{issue_from_id} to ##{issue_to_id}"
           return relation.id
         else
-          Rails.logger.error "HRZ Lib: Failed to create relation: #{relation.errors.full_messages.join(', ')}"
+          HrzLogger.error_msg "HRZ Lib: Failed to create relation: #{relation.errors.full_messages.join(', ')}"
           return nil
         end
 
       rescue ActiveRecord::RecordNotFound => e
-        Rails.logger.error "HRZ Lib: Issue not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Issue not found: #{e.message}"
         return nil
       rescue => e
-        Rails.logger.error "HRZ Lib: Error creating relation: #{e.message}"
-        Rails.logger.error e.backtrace.join("\n")
+        HrzLogger.error_msg "HRZ Lib: Error creating relation: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
         return nil
       end
     end  # create_relation
@@ -403,19 +405,19 @@ module HrzLib
 
         # Save the issue
         if issue.save
-          Rails.logger.info "HRZ Lib: Successfully updated issue ##{issue_id}"
+          HrzLogger.info_msg "HRZ Lib: Successfully updated issue ##{issue_id}"
           return true
         else
-          Rails.logger.error "HRZ Lib: Failed to update issue ##{issue_id}: #{issue.errors.full_messages.join(', ')}"
+          HrzLogger.error_msg "HRZ Lib: Failed to update issue ##{issue_id}: #{issue.errors.full_messages.join(', ')}"
           return false
         end
 
       rescue ActiveRecord::RecordNotFound => e
-        Rails.logger.error "HRZ Lib: Issue not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Issue not found: #{e.message}"
         return false
       rescue => e
-        Rails.logger.error "HRZ Lib: Error updating issue: #{e.message}"
-        Rails.logger.error e.backtrace.join("\n")
+        HrzLogger.error_msg "HRZ Lib: Error updating issue: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
         return false
       end
     end  # update_issue
@@ -482,26 +484,152 @@ module HrzLib
         if issue.save
           journal = issue.journals.last
           if journal
-            Rails.logger.info "HRZ Lib: Successfully added comment to issue ##{issue_id}"
+            HrzLogger.info_msg "HRZ Lib: Successfully added comment to issue ##{issue_id}"
             return journal.id
           else
-            Rails.logger.error "HRZ Lib: Comment was saved but journal entry not found"
+            HrzLogger.error_msg "HRZ Lib: Comment was saved but journal entry not found"
             return nil
           end
         else
-          Rails.logger.error "HRZ Lib: Failed to add comment to issue ##{issue_id}: #{issue.errors.full_messages.join(', ')}"
+          HrzLogger.error_msg "HRZ Lib: Failed to add comment to issue ##{issue_id}: #{issue.errors.full_messages.join(', ')}"
           return nil
         end
 
       rescue ActiveRecord::RecordNotFound => e
-        Rails.logger.error "HRZ Lib: Issue not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Issue not found: #{e.message}"
         return nil
       rescue => e
-        Rails.logger.error "HRZ Lib: Error adding comment: #{e.message}"
-        Rails.logger.error e.backtrace.join("\n")
+        HrzLogger.error_msg "HRZ Lib: Error adding comment: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
         return nil
       end
     end  # add_comment
+
+
+
+    # Reads an existing Redmine issue and returns it as a hash compatible with mk_issue
+    # @param issue_id      [Integer]           The ID of the issue to read
+    # @param q_resolve_hrz [Boolean, optional] Resolve <HRZ> tags in strings? true=yes, false=no, return strings verbatim.
+    # @return [Hash, nil] Hash containing issue data compatible with mk_issue parameters, or nil on error
+    #   The returned hash contains:
+    #   - :project_id      [String]         - Project identifier
+    #   - :b_subject       [String]         - Issue subject (processed through TagStringHelper.str_hrz)
+    #   - :b_desc          [String]         - Issue description (processed through TagStringHelper.str_hrz)
+    #   - :j_assignee      [Integer, nil]   - Assigned user ID
+    #   - :arr_watcher_ids [Array<Integer>] - Array of watcher user IDs
+    #   - :options         [Hash]           - Hash with additional options:
+    #     - :tracker_id        [Integer]
+    #     - :status_id         [Integer]
+    #     - :priority_id       [Integer]
+    #     - :category_id       [Integer, nil]
+    #     - :target_version_id [Integer, nil]
+    #     - :start_date        [String, nil]
+    #     - :due_date          [String, nil]
+    #     - :estimated_hours   [Float, nil]
+    #     - :done_ratio        [Integer]
+    #     - :parent_issue_id   [Integer, nil]
+    #     - :custom_fields     [Hash] - Custom field values (all processed through TagStringHelper.str_hrz)
+    #     - :author_id         [Integer]
+    #
+    # @example Read an issue and create a copy
+    #   issue_data = HrzLib::IssueHelper.get_issue(42)
+    #   if issue_data
+    #     new_issue_id = HrzLib::IssueHelper.mk_issue(
+    #       issue_data[:project_id],
+    #       issue_data[:b_subject],
+    #       issue_data[:b_desc],
+    #       issue_data[:j_assignee],
+    #       issue_data[:arr_watcher_ids],
+    #       issue_data[:options]
+    #     )
+    #   end
+    #
+    # @example Read and modify before creating
+    #   issue_data = HrzLib::IssueHelper.get_issue(42)
+    #   if issue_data
+    #     issue_data[:b_subject] = "Copy: #{issue_data[:b_subject]}"
+    #     issue_data[:options][:status_id] = 1  # Reset to new status
+    #     new_issue_id = HrzLib::IssueHelper.mk_issue(
+    #       issue_data[:project_id],
+    #       issue_data[:b_subject],
+    #       issue_data[:b_desc],
+    #       issue_data[:j_assignee],
+    #       [],  # No watchers for copy
+    #       issue_data[:options]
+    #     )
+    #   end
+    #
+    def self.get_issue(issue_id)
+      begin
+        # Find the issue
+        issue = Issue.find(issue_id, q_resolve_hrz=true)
+
+        # Process subject and description through TagStringHelper
+        if q_resolve_hrz
+           subject     = TagStringHelper.str_hrz(issue.subject     || '')
+           description = TagStringHelper.str_hrz(issue.description || '')
+        else
+           subject     = issue.subject     || ''
+           description = issue.description || ''
+        end
+
+        # Get watcher user IDs
+        watcher_ids = issue.watcher_users.pluck(:id)
+
+        # Build custom fields hash with processed values
+        custom_fields = {}
+        issue.custom_field_values.each do |custom_value|
+          field_id = custom_value.custom_field.id
+          value = custom_value.value
+
+          # Process text values through TagStringHelper
+          if q_resolve_hrz && value.is_a?(String)
+            custom_fields[field_id] = TagStringHelper.str_hrz(value)
+          else
+            custom_fields[field_id] = value
+          end
+        end
+
+        # Build options hash
+        options = {
+          tracker_id: issue.tracker_id,
+          status_id: issue.status_id,
+          priority_id: issue.priority_id,
+          category_id: issue.category_id,
+          target_version_id: issue.fixed_version_id,
+          start_date: issue.start_date&.to_s,
+          due_date: issue.due_date&.to_s,
+          estimated_hours: issue.estimated_hours,
+          done_ratio: issue.done_ratio,
+          parent_issue_id: issue.parent_issue_id,
+          author_id: issue.author_id
+        }
+
+        # Add custom fields to options if any exist
+        options[:custom_fields] = custom_fields unless custom_fields.empty?
+
+        # Build result hash compatible with mk_issue
+        result = {
+          project_id: issue.project.identifier,
+          b_subject: subject,
+          b_desc: description,
+          j_assignee: issue.assigned_to_id,
+          arr_watcher_ids: watcher_ids,
+          options: options
+        }
+
+        HrzLogger.info_msg "HRZ Lib: Successfully read issue ##{issue_id}"
+        return result
+
+      rescue ActiveRecord::RecordNotFound => e
+        HrzLogger.error_msg "HRZ Lib: Issue ##{issue_id} not found: #{e.message}"
+        return nil
+      rescue => e
+        HrzLogger.error_msg "HRZ Lib: Error reading issue ##{issue_id}: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
+        return nil
+      end
+    end  # get_issue
 
 
 
@@ -526,7 +654,7 @@ module HrzLib
 
         # Check if user is already watching
         if Watcher.where(watchable: issue, user: user).exists?
-          Rails.logger.info "HRZ Lib: User ##{user_id} is already watching issue ##{issue_id}"
+          HrzLogger.info_msg "HRZ Lib: User ##{user_id} is already watching issue ##{issue_id}"
           return true
         end
 
@@ -534,19 +662,19 @@ module HrzLib
         watcher = Watcher.new(watchable: issue, user: user)
 
         if watcher.save
-          Rails.logger.info "HRZ Lib: Successfully added user ##{user_id} as watcher to issue ##{issue_id}"
+          HrzLogger.info_msg "HRZ Lib: Successfully added user ##{user_id} as watcher to issue ##{issue_id}"
           return true
         else
-          Rails.logger.error "HRZ Lib: Failed to add watcher: #{watcher.errors.full_messages.join(', ')}"
+          HrzLogger.error_msg "HRZ Lib: Failed to add watcher: #{watcher.errors.full_messages.join(', ')}"
           return false
         end
 
       rescue ActiveRecord::RecordNotFound => e
-        Rails.logger.error "HRZ Lib: Issue or user not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Issue or user not found: #{e.message}"
         return false
       rescue => e
-        Rails.logger.error "HRZ Lib: Error adding watcher: #{e.message}"
-        Rails.logger.error e.backtrace.join("\n")
+        HrzLogger.error_msg "HRZ Lib: Error adding watcher: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
         return false
       end
     end  # add_watcher
@@ -578,7 +706,7 @@ module HrzLib
         end
       end
 
-      Rails.logger.info "HRZ Lib: Added #{success_count} watchers to issue ##{issue_id}, #{failed_ids.length} failed"
+      HrzLogger.info_msg "HRZ Lib: Added #{success_count} watchers to issue ##{issue_id}, #{failed_ids.length} failed"
 
       {success: success_count, failed: failed_ids}
     end  # add_watchers
@@ -604,24 +732,24 @@ module HrzLib
         watcher = Watcher.where(watchable: issue, user: user).first
 
         if watcher.nil?
-          Rails.logger.info "HRZ Lib: User ##{user_id} is not watching issue ##{issue_id}"
+          HrzLogger.info_msg "HRZ Lib: User ##{user_id} is not watching issue ##{issue_id}"
           return true
         end
 
         if watcher.destroy
-          Rails.logger.info "HRZ Lib: Successfully removed user ##{user_id} as watcher from issue ##{issue_id}"
+          HrzLogger.info_msg "HRZ Lib: Successfully removed user ##{user_id} as watcher from issue ##{issue_id}"
           return true
         else
-          Rails.logger.error "HRZ Lib: Failed to remove watcher"
+          HrzLogger.error_msg "HRZ Lib: Failed to remove watcher"
           return false
         end
 
       rescue ActiveRecord::RecordNotFound => e
-        Rails.logger.error "HRZ Lib: Issue or user not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Issue or user not found: #{e.message}"
         return false
       rescue => e
-        Rails.logger.error "HRZ Lib: Error removing watcher: #{e.message}"
-        Rails.logger.error e.backtrace.join("\n")
+        HrzLogger.error_msg "HRZ Lib: Error removing watcher: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
         return false
       end
     end  # remove_watcher
@@ -653,7 +781,7 @@ module HrzLib
         end
       end
 
-      Rails.logger.info "HRZ Lib: Removed #{success_count} watchers from issue ##{issue_id}, #{failed_ids.length} failed"
+      HrzLogger.info_msg "HRZ Lib: Removed #{success_count} watchers from issue ##{issue_id}, #{failed_ids.length} failed"
 
       {success: success_count, failed: failed_ids}
     end  # remove_watchers
@@ -683,15 +811,15 @@ module HrzLib
           }
         end
 
-        Rails.logger.info "HRZ Lib: Retrieved #{watchers.length} watchers for issue ##{issue_id}"
+        HrzLogger.info_msg "HRZ Lib: Retrieved #{watchers.length} watchers for issue ##{issue_id}"
         return watchers
 
       rescue ActiveRecord::RecordNotFound => e
-        Rails.logger.error "HRZ Lib: Issue not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Issue not found: #{e.message}"
         return nil
       rescue => e
-        Rails.logger.error "HRZ Lib: Error getting watchers: #{e.message}"
-        Rails.logger.error e.backtrace.join("\n")
+        HrzLogger.error_msg "HRZ Lib: Error getting watchers: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
         return nil
       end
     end  # get_watchers
@@ -715,14 +843,14 @@ module HrzLib
 
         watching = Watcher.where(watchable: issue, user: user).exists?
 
-        Rails.logger.info "HRZ Lib: User ##{user_id} is #{watching ? '' : 'not '}watching issue ##{issue_id}"
+        HrzLogger.info_msg "HRZ Lib: User ##{user_id} is #{watching ? '' : 'not '}watching issue ##{issue_id}"
         return watching
 
       rescue ActiveRecord::RecordNotFound => e
-        Rails.logger.error "HRZ Lib: Issue or user not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Issue or user not found: #{e.message}"
         return nil
       rescue => e
-        Rails.logger.error "HRZ Lib: Error checking watcher status: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Error checking watcher status: #{e.message}"
         return nil
       end
     end  # is_watching?
@@ -755,19 +883,19 @@ module HrzLib
         end
 
         if success
-          Rails.logger.info "HRZ Lib: Successfully set watchers for issue ##{issue_id}"
+          HrzLogger.info_msg "HRZ Lib: Successfully set watchers for issue ##{issue_id}"
         else
-          Rails.logger.warn "HRZ Lib: Set watchers partially successful for issue ##{issue_id}"
+          HrzLogger.warning_msg "HRZ Lib: Set watchers partially successful for issue ##{issue_id}"
         end
 
         return success
 
       rescue ActiveRecord::RecordNotFound => e
-        Rails.logger.error "HRZ Lib: Issue not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Issue not found: #{e.message}"
         return false
       rescue => e
-        Rails.logger.error "HRZ Lib: Error setting watchers: #{e.message}"
-        Rails.logger.error e.backtrace.join("\n")
+        HrzLogger.error_msg "HRZ Lib: Error setting watchers: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
         return false
       end
     end  # set_watchers
@@ -822,11 +950,11 @@ module HrzLib
           begin
             related_issue = Issue.find(relation.issue_to_id)
             if related_issue.subject.downcase.include?(search_text)
-              Rails.logger.info "HRZ Lib: Found text '#{b_txt_find}' in related issue ##{related_issue.id} (relation from ##{issue.id})"
+              HrzLogger.info_msg "HRZ Lib: Found text '#{b_txt_find}' in related issue ##{related_issue.id} (relation from ##{issue.id})"
               return related_issue.id
             end
           rescue ActiveRecord::RecordNotFound
-            Rails.logger.warn "HRZ Lib: Related issue ##{relation.issue_to_id} not found"
+            HrzLogger.warning_msg "HRZ Lib: Related issue ##{relation.issue_to_id} not found"
             next
           end
         end
@@ -836,25 +964,25 @@ module HrzLib
           begin
             related_issue = Issue.find(relation.issue_from_id)
             if related_issue.subject.downcase.include?(search_text)
-              Rails.logger.info "HRZ Lib: Found text '#{b_txt_find}' in related issue ##{related_issue.id} (relation to ##{issue.id})"
+              HrzLogger.info_msg "HRZ Lib: Found text '#{b_txt_find}' in related issue ##{related_issue.id} (relation to ##{issue.id})"
               return related_issue.id
             end
           rescue ActiveRecord::RecordNotFound
-            Rails.logger.warn "HRZ Lib: Related issue ##{relation.issue_from_id} not found"
+            HrzLogger.warning_msg "HRZ Lib: Related issue ##{relation.issue_from_id} not found"
             next
           end
         end
 
         # No match found
-        Rails.logger.info "HRZ Lib: No related issues with text '#{b_txt_find}' found for issue ##{issue.id}"
+        HrzLogger.info_msg "HRZ Lib: No related issues with text '#{b_txt_find}' found for issue ##{issue.id}"
         return nil
 
       rescue ActiveRecord::RecordNotFound => e
-        Rails.logger.error "HRZ Lib: Issue ##{j_issue_main_id} not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Issue ##{j_issue_main_id} not found: #{e.message}"
         return nil
       rescue => e
-        Rails.logger.error "HRZ Lib: Error searching related issues: #{e.message}"
-        Rails.logger.error e.backtrace.join("\n")
+        HrzLogger.error_msg "HRZ Lib: Error searching related issues: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
         return nil
       end
     end  # find_related_with_subject
@@ -893,11 +1021,11 @@ module HrzLib
         return found_id.present?
 
       rescue ActiveRecord::RecordNotFound => e
-        Rails.logger.error "HRZ Lib: Issue ##{j_issue_main_id} not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Issue ##{j_issue_main_id} not found: #{e.message}"
         return nil
       rescue => e
-        Rails.logger.error "HRZ Lib: Error in has_related_with_subject?: #{e.message}"
-        Rails.logger.error e.backtrace.join("\n")
+        HrzLogger.error_msg "HRZ Lib: Error in has_related_with_subject?: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
         return nil
       end
     end  # has_related_with_subject?
@@ -936,28 +1064,28 @@ module HrzLib
 
         # Return nil if no sub-tasks exist
         if subtasks.empty?
-          Rails.logger.info "HRZ Lib: No sub-tasks found for issue ##{issue.id}"
+          HrzLogger.info_msg "HRZ Lib: No sub-tasks found for issue ##{issue.id}"
           return nil
         end
 
         # Search through all sub-tasks
         subtasks.each do |subtask|
           if subtask.subject.downcase.include?(search_text)
-            Rails.logger.info "HRZ Lib: Found text '#{b_txt_find}' in sub-task ##{subtask.id} of issue ##{issue.id}"
+            HrzLogger.info_msg "HRZ Lib: Found text '#{b_txt_find}' in sub-task ##{subtask.id} of issue ##{issue.id}"
             return subtask.id
           end
         end
 
         # No match found
-        Rails.logger.info "HRZ Lib: No sub-tasks with text '#{b_txt_find}' found for issue ##{issue.id} (checked #{subtasks.count} sub-tasks)"
+        HrzLogger.info_msg "HRZ Lib: No sub-tasks with text '#{b_txt_find}' found for issue ##{issue.id} (checked #{subtasks.count} sub-tasks)"
         return nil
 
       rescue ActiveRecord::RecordNotFound => e
-        Rails.logger.error "HRZ Lib: Issue ##{j_issue_main_id} not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Issue ##{j_issue_main_id} not found: #{e.message}"
         return nil
       rescue => e
-        Rails.logger.error "HRZ Lib: Error searching sub-tasks: #{e.message}"
-        Rails.logger.error e.backtrace.join("\n")
+        HrzLogger.error_msg "HRZ Lib: Error searching sub-tasks: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
         return nil
       end
     end  # find_subtask_with_subject
@@ -995,11 +1123,11 @@ module HrzLib
         return found_id.present?
 
       rescue ActiveRecord::RecordNotFound => e
-        Rails.logger.error "HRZ Lib: Issue ##{j_issue_main_id} not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Issue ##{j_issue_main_id} not found: #{e.message}"
         return nil
       rescue => e
-        Rails.logger.error "HRZ Lib: Error in has_subtask_with_subject?: #{e.message}"
-        Rails.logger.error e.backtrace.join("\n")
+        HrzLogger.error_msg "HRZ Lib: Error in has_subtask_with_subject?: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
         return nil
       end
     end  # has_subtask_with_subject?
@@ -1066,7 +1194,7 @@ module HrzLib
           if default_activity
             time_entry.activity_id = default_activity.id
           else
-            Rails.logger.error "HRZ Lib: No active time entry activity found"
+            HrzLogger.error_msg "HRZ Lib: No active time entry activity found"
             return nil
           end
         end
@@ -1079,19 +1207,19 @@ module HrzLib
         end
 
         if time_entry.save
-          Rails.logger.info "HRZ Lib: Successfully created time entry for issue ##{issue_id}: #{hours}h"
+          HrzLogger.info_msg "HRZ Lib: Successfully created time entry for issue ##{issue_id}: #{hours}h"
           return time_entry.id
         else
-          Rails.logger.error "HRZ Lib: Failed to create time entry: #{time_entry.errors.full_messages.join(', ')}"
+          HrzLogger.error_msg "HRZ Lib: Failed to create time entry: #{time_entry.errors.full_messages.join(', ')}"
           return nil
         end
 
       rescue ActiveRecord::RecordNotFound => e
-        Rails.logger.error "HRZ Lib: Issue or user not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Issue or user not found: #{e.message}"
         return nil
       rescue => e
-        Rails.logger.error "HRZ Lib: Error creating time entry: #{e.message}"
-        Rails.logger.error e.backtrace.join("\n")
+        HrzLogger.error_msg "HRZ Lib: Error creating time entry: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
         return nil
       end
     end  # create_time_entry
@@ -1137,19 +1265,19 @@ module HrzLib
         end
 
         if time_entry.save
-          Rails.logger.info "HRZ Lib: Successfully updated time entry ##{time_entry_id}"
+          HrzLogger.info_msg "HRZ Lib: Successfully updated time entry ##{time_entry_id}"
           return true
         else
-          Rails.logger.error "HRZ Lib: Failed to update time entry: #{time_entry.errors.full_messages.join(', ')}"
+          HrzLogger.error_msg "HRZ Lib: Failed to update time entry: #{time_entry.errors.full_messages.join(', ')}"
           return false
         end
 
       rescue ActiveRecord::RecordNotFound => e
-        Rails.logger.error "HRZ Lib: Time entry not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Time entry not found: #{e.message}"
         return false
       rescue => e
-        Rails.logger.error "HRZ Lib: Error updating time entry: #{e.message}"
-        Rails.logger.error e.backtrace.join("\n")
+        HrzLogger.error_msg "HRZ Lib: Error updating time entry: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
         return false
       end
     end  # update_time_entry
@@ -1170,19 +1298,19 @@ module HrzLib
         time_entry = TimeEntry.find(time_entry_id)
 
         if time_entry.destroy
-          Rails.logger.info "HRZ Lib: Successfully deleted time entry ##{time_entry_id}"
+          HrzLogger.info_msg "HRZ Lib: Successfully deleted time entry ##{time_entry_id}"
           return true
         else
-          Rails.logger.error "HRZ Lib: Failed to delete time entry"
+          HrzLogger.error_msg "HRZ Lib: Failed to delete time entry"
           return false
         end
 
       rescue ActiveRecord::RecordNotFound => e
-        Rails.logger.error "HRZ Lib: Time entry not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Time entry not found: #{e.message}"
         return false
       rescue => e
-        Rails.logger.error "HRZ Lib: Error deleting time entry: #{e.message}"
-        Rails.logger.error e.backtrace.join("\n")
+        HrzLogger.error_msg "HRZ Lib: Error deleting time entry: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
         return false
       end
     end  # delete_time_entry
@@ -1237,15 +1365,15 @@ module HrzLib
           }
         end
 
-        Rails.logger.info "HRZ Lib: Retrieved #{result.length} time entries for issue ##{issue_id}"
+        HrzLogger.info_msg "HRZ Lib: Retrieved #{result.length} time entries for issue ##{issue_id}"
         return result
 
       rescue ActiveRecord::RecordNotFound => e
-        Rails.logger.error "HRZ Lib: Issue not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Issue not found: #{e.message}"
         return nil
       rescue => e
-        Rails.logger.error "HRZ Lib: Error getting time entries: #{e.message}"
-        Rails.logger.error e.backtrace.join("\n")
+        HrzLogger.error_msg "HRZ Lib: Error getting time entries: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
         return nil
       end
     end  # get_time_entries
@@ -1283,14 +1411,14 @@ module HrzLib
 
         total = entries.sum(:hours)
 
-        Rails.logger.info "HRZ Lib: Total hours for issue ##{issue_id}: #{total}"
+        HrzLogger.info_msg "HRZ Lib: Total hours for issue ##{issue_id}: #{total}"
         return total
 
       rescue ActiveRecord::RecordNotFound => e
-        Rails.logger.error "HRZ Lib: Issue not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Issue not found: #{e.message}"
         return nil
       rescue => e
-        Rails.logger.error "HRZ Lib: Error calculating total hours: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Error calculating total hours: #{e.message}"
         return nil
       end
     end  # get_total_hours
@@ -1317,11 +1445,11 @@ module HrzLib
           }
         end
 
-        Rails.logger.info "HRZ Lib: Retrieved #{activities.length} time entry activities"
+        HrzLogger.info_msg "HRZ Lib: Retrieved #{activities.length} time entry activities"
         return activities
 
       rescue => e
-        Rails.logger.error "HRZ Lib: Error getting time entry activities: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Error getting time entry activities: #{e.message}"
         return nil
       end
     end  # get_time_entry_activities
@@ -1398,18 +1526,18 @@ module HrzLib
           entries: detailed_entries
         }
 
-        Rails.logger.info "HRZ Lib: User ##{user_id} logged #{total_hours}h on #{date} (#{entries.count} entries)"
+        HrzLogger.info_msg "HRZ Lib: User ##{user_id} logged #{total_hours}h on #{date} (#{entries.count} entries)"
         return result
 
       rescue ActiveRecord::RecordNotFound => e
-        Rails.logger.error "HRZ Lib: User or project not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: User or project not found: #{e.message}"
         return nil
       rescue ArgumentError => e
-        Rails.logger.error "HRZ Lib: Invalid date format: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Invalid date format: #{e.message}"
         return nil
       rescue => e
-        Rails.logger.error "HRZ Lib: Error calculating user daily hours: #{e.message}"
-        Rails.logger.error e.backtrace.join("\n")
+        HrzLogger.error_msg "HRZ Lib: Error calculating user daily hours: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
         return nil
       end
     end  # get_user_daily_hours
@@ -1496,22 +1624,112 @@ module HrzLib
           result[:by_date] = by_date
         end
 
-        Rails.logger.info "HRZ Lib: User ##{user_id} logged #{total_hours}h from #{from_date} to #{to_date}"
+        HrzLogger.info_msg "HRZ Lib: User ##{user_id} logged #{total_hours}h from #{from_date} to #{to_date}"
         return result
 
       rescue ActiveRecord::RecordNotFound => e
-        Rails.logger.error "HRZ Lib: User or project not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: User or project not found: #{e.message}"
         return nil
       rescue ArgumentError => e
-        Rails.logger.error "HRZ Lib: Invalid date format: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib: Invalid date format: #{e.message}"
         return nil
       rescue => e
-        Rails.logger.error "HRZ Lib: Error calculating user hours range: #{e.message}"
-        Rails.logger.error e.backtrace.join("\n")
+        HrzLogger.error_msg "HRZ Lib: Error calculating user hours range: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
         return nil
       end
     end  # get_user_hours_range
 
+
+
+    # ------------------------------------------------------------------------------------------------------------------------------
+    # Redmine group information
+    # ------------------------------------------------------------------------------------------------------------------------------
+
+    # Gets members of a Redmine group or information about a user
+    #
+    # @param principal_id [Integer] The ID of a group or user
+    # @return [Hash, nil] Hash containing member information, or nil on error
+    #   For groups:
+    #   - :arr_member_ids [Array<Integer>] - Array of user IDs who are members of the group.
+    #   - :leader_id      [Integer, nil]   - Value from custom field "Leader ID", if it exists.
+    #   - :leader_name    [String, nil]    - Value from custom field "Leader Name", if it exists.
+    #   For users:
+    #   - :arr_member_ids [Array]   - Empty array
+    #   - :leader_id      [Integer] - The user's ID
+    #   - :leader_name    [String]  - The user's display name (firstname lastname)
+    #
+    # @example Get group members
+    #   result = HrzLib::IssueHelper.get_group_members(15)
+    #   # => {members: [3, 5, 7, 12], leader_id: 5, leader_name: "John Doe"}
+    #
+    # @example Get user info
+    #   result = HrzLib::IssueHelper.get_group_members(42)
+    #   # => {members: [], leader_id: 42, leader_name: "Jane Smith"}
+    #
+    # @example Check if it's a group with members
+    #   result = HrzLib::IssueHelper.get_group_members(15)
+    #   if result && result[:members].any?
+    #     puts "Group has #{result[:members].count} members"
+    #     puts "Leader: #{result[:leader_name]}" if result[:leader_name]
+    #   end
+    #
+    def self.get_group_members(principal_id)
+      begin
+        # Try to find as Principal first (can be User or Group)
+        principal = Principal.find(principal_id)
+
+        result = {
+          arr_member_ids: [],
+          leader_id: nil,
+          leader_name: nil
+        }
+
+        if principal.is_a?(Group)
+          # It's a group - get all user members
+          result[:arr_member_ids] = principal.users.pluck(:id)
+
+          # Try to find custom fields "Leader ID" and "Leader Name"
+          principal.custom_field_values.each do |custom_value|
+            field_name = custom_value.custom_field.name
+            value = custom_value.value
+
+            case field_name
+            when "Leader ID"
+              # Try to convert to integer if it's a string
+              result[:leader_id] = value.to_i if value.present?
+            when "Leader Name"
+              result[:leader_name] = value if value.present?
+            end
+          end
+
+          HrzLogger.debug_msg "HRZ Lib: Group ##{principal_id} has #{result[:arr_member_ids].count} members."
+
+        elsif principal.is_a?(User)
+          # It's a user - return empty members array and user info as leader
+          result[:arr_member_ids] = []
+          result[:leader_id] = principal.id
+          result[:leader_name] = "#{principal.firstname} #{principal.lastname}".strip
+
+          HrzLogger.debug_msg "HRZ Lib: Principal ##{principal_id} is a user: #{result[:leader_name]}"
+
+        else
+          # Unknown principal type
+          HrzLogger.warning_msg "HRZ Lib: Principal ##{principal_id} is neither Group nor User"
+          return nil
+        end
+
+        return result
+
+      rescue ActiveRecord::RecordNotFound => e
+        HrzLogger.error_msg "HRZ Lib: Principal ##{principal_id} not found: #{e.message}"
+        return nil
+      rescue => e
+        HrzLogger.error_msg "HRZ Lib: Error getting group members for ##{principal_id}: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
+        return nil
+      end
+    end  # get_group_members
 
   end  # module IssueHelper
 end  # module HrzLib
