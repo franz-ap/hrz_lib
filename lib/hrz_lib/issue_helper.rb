@@ -17,6 +17,19 @@
 
 module HrzLib
   module IssueHelper
+    def initialize
+       @q_verbose = false  # Default: off
+    end
+
+
+
+    # Enable or disable verbose output: Info about success, not only when something went wrong.
+    # @param q_enabled [Boolean] Debug output enabled from now on (true) or not (false).
+    def self.verbose_output(q_enabled)
+       @q_verbose = q_enabled
+    end  # verbose_output
+
+
 
     # Creates a new Redmine issue with the specified parameters
     #
@@ -951,11 +964,11 @@ module HrzLib
           begin
             related_issue = Issue.find(relation.issue_to_id)
             if related_issue.subject.downcase.include?(search_text)
-              #HrzLogger.info_msg "HRZ Lib: Found text '#{b_txt_find}' in related issue ##{related_issue.id} (relation from ##{issue.id})"
+              HrzLogger.info_msg "HRZ Lib find_related_with_subject: Found text '#{b_txt_find}' in related issue ##{related_issue.id} (relation from ##{issue.id})"   if @q_verbose
               return related_issue.id
             end
           rescue ActiveRecord::RecordNotFound
-            #HrzLogger.warning_msg "HRZ Lib: Related issue ##{relation.issue_to_id} not found"
+            HrzLogger.warning_msg "HRZ Lib find_related_with_subject: Related issue ##{relation.issue_to_id} not found"
             next
           end
         end
@@ -965,17 +978,17 @@ module HrzLib
           begin
             related_issue = Issue.find(relation.issue_from_id)
             if related_issue.subject.downcase.include?(search_text)
-              #HrzLogger.info_msg "HRZ Lib: Found text '#{b_txt_find}' in related issue ##{related_issue.id} (relation to ##{issue.id})"
+              HrzLogger.info_msg "HRZ Lib find_related_with_subject: Found text '#{b_txt_find}' in related issue ##{related_issue.id} (relation to ##{issue.id})"  if @q_verbose
               return related_issue.id
             end
           rescue ActiveRecord::RecordNotFound
-            #HrzLogger.warning_msg "HRZ Lib: Related issue ##{relation.issue_from_id} not found"
+            HrzLogger.warning_msg "HRZ Lib find_related_with_subject: Related issue ##{relation.issue_from_id} not found"
             next
           end
         end
 
         # No match found
-        #HrzLogger.info_msg "HRZ Lib: No related issues with text '#{b_txt_find}' found for issue ##{issue.id}"
+        HrzLogger.info_msg "HRZ Lib find_related_with_subject: No related issues with text '#{b_txt_find}' found for issue ##{issue.id}"   if @q_verbose
         return nil
 
       rescue ActiveRecord::RecordNotFound => e
