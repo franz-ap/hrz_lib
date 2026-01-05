@@ -173,7 +173,10 @@ module HrzLib
     rule(:func_on_error) { str('on_error').as(:func) >> space? }
 
     rule(:hrz_function) { 
-      (func_get_param | func_tkt_old | func_tkt_new | func_set_param | func_on_error) >> space?
+      (func_get_param | func_tkt_old | func_tkt_new | func_set_param |
+       func_tkt_show_info | func_tkt_show_warning | func_tkt_show_error |
+       func_on_error
+      ) >> space?
     }
     
     # Any text without a tag_start:
@@ -545,7 +548,7 @@ module HrzLib
         else
           parse_tree = parser.parse(input_text, reporter: Parslet::ErrorReporter::Deepest.new)
         end
-        HrzLogger.logger.error_msg "HRZ Tag str_hrz: No parse result for input '#{input_text}'!"   if parse_tree.nil?
+        HrzLogger.logger.debug_msg "HRZ Tag str_hrz: No parse result for input '#{input_text}'!"   if parse_tree.nil?
         # Transform
         result = transform.apply(parse_tree)
         
