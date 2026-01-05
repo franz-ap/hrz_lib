@@ -112,6 +112,7 @@ module HrzLib
           # Do nothing else with the results of preparation and cleanup for now. No idea yet.
           # b) The step
           b_part_problem = 'main step'
+          perform_step_todo(hsh_step[:b_todo], hsh_step[:hsh_todo_opt])
           # TODO
           # c) Cleanup
           b_part_problem = 'cleanup of step'
@@ -141,6 +142,75 @@ module HrzLib
         #raise HrzError.new(b_msg, { cause: e })
       end
     end # action1
+
+
+    # Perfom the main part of the step, i.e. what needs to be done aside from preparation and cleanup.
+    # @param b_todo   [String] Short name for the task to be performed: 'mk_issue_from_templ'  (The only one for now)
+    # @param hsh_opt  [Hash]   Additional information about the above task.
+    #   For task 'mk_issue_from_templ':
+    #     :q_related         [Boolean] Make the new ticket related to the current main ticket (tkt_new)? true=yes, false=no, don't.
+    #     :q_child           [Boolean] Make the new ticket a child of the current main ticket (tkt_new)? true=yes, false=no, don't.
+    #     :issue_template_id [Integer] The ID of an existing issue to be used as template.
+    #     :q_only_1x         [Boolean] Do you want to avoid creating the 'same' ticket more than once (same b_issue_abbr and same parent/related)?
+    #                                  true=yes false=no, don't care, create a new ticket with every call.
+    #     :b_issue_abbr      [String]  A unique abbreviation for this kind of ticket. Required for q_only_1x.
+    def self.perform_step_todo(b_todo, hsh_opt)
+      return  if b_todo.nil? || b_todo.empty?
+
+      case b_todo
+        when 'mk_issue_from_templ'
+          if hsh_opt[:issue_template_id]
+            q_related     = hsh_opt[:q_related]
+            q_child       = hsh_opt[:q_child]
+            q_only_1x     = hsh_opt[:q_only_1x]
+            b_issue_abbr  = hsh_opt[:b_issue_abbr]
+            issue_main_id = HrzTagFunctions.get_context_value('tkt_new', 'issue_id')
+            if q_only_1x && (b_issue_abbr.nil? || b_issue_abbr.empty?)
+              HrzLogger.logger.debug_msg "perform_step_todo: Ignoring q_only_1x for task '#{b_todo}', because b_issue_abbr is empty."
+              q_only_1x = false
+            end
+            q_creat_tkt = true
+            b_suf       = ''
+            if q_only_1x
+              # See, if the requested ticket already exists. We want only 1 of them.
+              b_suf    = " {aut:#{b_issue_abbr}}"
+              found_id = nil
+              if q_related
+                found_id = HrzLib::IssueHelper.find_related_with_subject(issue_main_id, b_suf)
+              end # if q_related
+              if q_child && (! found_id)
+                found_id = HrzLib::IssueHelper.find_subtask_with_subject(42, 'testing')
+              end # if q_child
+              if found_id
+                 HrzLogger.logger.info_msg "Ticket '#{b_issue_abbr}' exists already: ##{found_id}"
+                 q_creat_tkt = false
+              end
+            end # if q_only_1x
+            if q_creat_tkt
+              template_issue_data = HrzLib::IssueHelper.get_issue(hsh_opt[:issue_template_id])
+              if template_issue_data
+                j_assignee      = HrzTagFunctions.get_context_value('tkt_prep', 'assigned_to_id')
+                arr_watcher_ids = HrzTagFunctions.get_context_value('tkt_prep', 'arr_watcher_ids')
+                new_options     = template_issue_data[:options]
+                new_options[:parent_issue_id] = issue_main_id   if q_child
+                new_issue_id = HrzLib::IssueHelper.mk_issue(
+                                template_issue_data[:project_id],
+                                template_issue_data[:b_subject] + b_suf,
+                                template_issue_data[:b_desc],
+                                j_assignee,
+                                arr_watcher_ids,
+                                new_options)
+                if ! new_issue_id.nil?
+                  HrzLogger.logger.info_msg "Created ticket ##{new_issue_id}"
+                end
+              end # if template_issue_data
+            end # if q_creat_tkt
+          end # if hsh_opt[:issue_template_id]
+        else
+           HrzLogger.logger.debug_msg "perform_step_todo: task '#{b_todo}' is not implemented yet. Skipping it."
+      end # case
+    end  # perform_step_todo
+
 
     # ------------------------------------------------------------------------------------------------------------------------------
     # Ticket preparation

@@ -560,6 +560,7 @@ module HrzLib
     #   end
     #
     def self.get_issue(issue_id)
+      return nil  if issue_id.nil?
       begin
         # Find the issue
         issue = Issue.find(issue_id, q_resolve_hrz=true)
