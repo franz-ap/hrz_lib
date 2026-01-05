@@ -545,6 +545,7 @@ module HrzLib
         else
           parse_tree = parser.parse(input_text, reporter: Parslet::ErrorReporter::Deepest.new)
         end
+        HrzLogger.logger.error_msg "HRZ Tag str_hrz: No parse result for input '#{input_text}'!"   if parse_tree.nil?
         # Transform
         result = transform.apply(parse_tree)
         
