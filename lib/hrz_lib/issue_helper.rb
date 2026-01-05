@@ -559,11 +559,11 @@ module HrzLib
     #     )
     #   end
     #
-    def self.get_issue(issue_id)
+    def self.get_issue(issue_id, q_resolve_hrz=true)
       return nil  if issue_id.nil?
       begin
         # Find the issue
-        issue = Issue.find(issue_id, q_resolve_hrz=true)
+        issue = Issue.find(issue_id)
 
         # Process subject and description through TagStringHelper
         if q_resolve_hrz
@@ -619,14 +619,14 @@ module HrzLib
           options: options
         }
 
-        HrzLogger.info_msg "HRZ Lib: Successfully read issue ##{issue_id}"
+        #HrzLogger.info_msg "HRZ Lib get_issue: Successfully read issue ##{issue_id}"
         return result
 
       rescue ActiveRecord::RecordNotFound => e
-        HrzLogger.error_msg "HRZ Lib: Issue ##{issue_id} not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib get_issue: Issue ##{issue_id} not found: #{e.message}"
         return nil
       rescue => e
-        HrzLogger.error_msg "HRZ Lib: Error reading issue ##{issue_id}: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib get_issue: Error reading issue ##{issue_id}: #{e.message}"
         HrzLogger.error_msg e.backtrace.join("\n")
         return nil
       end
@@ -951,11 +951,11 @@ module HrzLib
           begin
             related_issue = Issue.find(relation.issue_to_id)
             if related_issue.subject.downcase.include?(search_text)
-              HrzLogger.info_msg "HRZ Lib: Found text '#{b_txt_find}' in related issue ##{related_issue.id} (relation from ##{issue.id})"
+              #HrzLogger.info_msg "HRZ Lib: Found text '#{b_txt_find}' in related issue ##{related_issue.id} (relation from ##{issue.id})"
               return related_issue.id
             end
           rescue ActiveRecord::RecordNotFound
-            HrzLogger.warning_msg "HRZ Lib: Related issue ##{relation.issue_to_id} not found"
+            #HrzLogger.warning_msg "HRZ Lib: Related issue ##{relation.issue_to_id} not found"
             next
           end
         end
@@ -965,24 +965,24 @@ module HrzLib
           begin
             related_issue = Issue.find(relation.issue_from_id)
             if related_issue.subject.downcase.include?(search_text)
-              HrzLogger.info_msg "HRZ Lib: Found text '#{b_txt_find}' in related issue ##{related_issue.id} (relation to ##{issue.id})"
+              #HrzLogger.info_msg "HRZ Lib: Found text '#{b_txt_find}' in related issue ##{related_issue.id} (relation to ##{issue.id})"
               return related_issue.id
             end
           rescue ActiveRecord::RecordNotFound
-            HrzLogger.warning_msg "HRZ Lib: Related issue ##{relation.issue_from_id} not found"
+            #HrzLogger.warning_msg "HRZ Lib: Related issue ##{relation.issue_from_id} not found"
             next
           end
         end
 
         # No match found
-        HrzLogger.info_msg "HRZ Lib: No related issues with text '#{b_txt_find}' found for issue ##{issue.id}"
+        #HrzLogger.info_msg "HRZ Lib: No related issues with text '#{b_txt_find}' found for issue ##{issue.id}"
         return nil
 
       rescue ActiveRecord::RecordNotFound => e
-        HrzLogger.error_msg "HRZ Lib: Issue ##{j_issue_main_id} not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib find_related_with_subject: Issue ##{j_issue_main_id} not found: #{e.message}"
         return nil
       rescue => e
-        HrzLogger.error_msg "HRZ Lib: Error searching related issues: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib find_related_with_subject: Error searching related issues: #{e.message}"
         HrzLogger.error_msg e.backtrace.join("\n")
         return nil
       end
@@ -1022,10 +1022,10 @@ module HrzLib
         return found_id.present?
 
       rescue ActiveRecord::RecordNotFound => e
-        HrzLogger.error_msg "HRZ Lib: Issue ##{j_issue_main_id} not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib has_related_with_subject?: Issue ##{j_issue_main_id} not found: #{e.message}"
         return nil
       rescue => e
-        HrzLogger.error_msg "HRZ Lib: Error in has_related_with_subject?: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib has_related_with_subject?: Error in has_related_with_subject?: #{e.message}"
         HrzLogger.error_msg e.backtrace.join("\n")
         return nil
       end
@@ -1065,27 +1065,27 @@ module HrzLib
 
         # Return nil if no sub-tasks exist
         if subtasks.empty?
-          HrzLogger.info_msg "HRZ Lib: No sub-tasks found for issue ##{issue.id}"
+          #HrzLogger.info_msg "HRZ Lib: No sub-tasks found for issue ##{issue.id}"
           return nil
         end
 
         # Search through all sub-tasks
         subtasks.each do |subtask|
           if subtask.subject.downcase.include?(search_text)
-            HrzLogger.info_msg "HRZ Lib: Found text '#{b_txt_find}' in sub-task ##{subtask.id} of issue ##{issue.id}"
+            #HrzLogger.info_msg "HRZ Lib: Found text '#{b_txt_find}' in sub-task ##{subtask.id} of issue ##{issue.id}"
             return subtask.id
           end
         end
 
         # No match found
-        HrzLogger.info_msg "HRZ Lib: No sub-tasks with text '#{b_txt_find}' found for issue ##{issue.id} (checked #{subtasks.count} sub-tasks)"
+        #HrzLogger.info_msg "HRZ Lib: No sub-tasks with text '#{b_txt_find}' found for issue ##{issue.id} (checked #{subtasks.count} sub-tasks)"
         return nil
 
       rescue ActiveRecord::RecordNotFound => e
-        HrzLogger.error_msg "HRZ Lib: Issue ##{j_issue_main_id} not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib find_subtask_with_subject: Issue ##{j_issue_main_id} not found: #{e.message}"
         return nil
       rescue => e
-        HrzLogger.error_msg "HRZ Lib: Error searching sub-tasks: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib find_subtask_with_subject: Error searching sub-tasks: #{e.message}"
         HrzLogger.error_msg e.backtrace.join("\n")
         return nil
       end
@@ -1124,10 +1124,10 @@ module HrzLib
         return found_id.present?
 
       rescue ActiveRecord::RecordNotFound => e
-        HrzLogger.error_msg "HRZ Lib: Issue ##{j_issue_main_id} not found: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib has_subtask_with_subject?: Issue ##{j_issue_main_id} not found: #{e.message}"
         return nil
       rescue => e
-        HrzLogger.error_msg "HRZ Lib: Error in has_subtask_with_subject?: #{e.message}"
+        HrzLogger.error_msg "HRZ Lib has_subtask_with_subject?: Error in has_subtask_with_subject?: #{e.message}"
         HrzLogger.error_msg e.backtrace.join("\n")
         return nil
       end
@@ -1704,7 +1704,7 @@ module HrzLib
             end
           end
 
-          HrzLogger.debug_msg "HRZ Lib: Group ##{principal_id} has #{result[:arr_member_ids].count} members."
+          #HrzLogger.debug_msg "HRZ Lib: Group ##{principal_id} has #{result[:arr_member_ids].count} members."
 
         elsif principal.is_a?(User)
           # It's a user - return empty members array and user info as leader
@@ -1712,11 +1712,11 @@ module HrzLib
           result[:leader_id] = principal.id
           result[:leader_name] = "#{principal.firstname} #{principal.lastname}".strip
 
-          HrzLogger.debug_msg "HRZ Lib: Principal ##{principal_id} is a user: #{result[:leader_name]}"
+          #HrzLogger.debug_msg "HRZ Lib: Principal ##{principal_id} is a user: #{result[:leader_name]}"
 
         else
           # Unknown principal type
-          HrzLogger.warning_msg "HRZ Lib: Principal ##{principal_id} is neither Group nor User"
+          HrzLogger.debug_msg "HRZ Lib: Principal ##{principal_id} is neither Group nor User"
           return nil
         end
 
