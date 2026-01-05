@@ -124,20 +124,20 @@ module HrzLib
         # Parse errors
         b_msg = "Parse error in action1, #{b_part_problem}, for input '#{b_hrz_problem}' at position #{e.parse_failure_cause.pos}: #{e.parse_failure_cause.to_s}"
         HrzLogger.logger.debug_msg "HRZ Tag str_hrz: #{b_msg} Parse tree: #{e.parse_failure_cause.ascii_tree}"
-        HrzLogger.logger.warning_msg "#{B_MSG_USR_BEG}Could not perform #{b_part_problem} '#{hsh_cond[:b_title_step]}'. #{B_MSG_USR_WARN_NOT_DONE}"
+        HrzLogger.logger.warning_msg "#{B_MSG_USR_BEG}Could not perform #{b_part_problem} '#{b_title_step}'. #{B_MSG_USR_WARN_NOT_DONE}"
         #raise HrzError.new(b_msg, { cause: e })
 
       rescue HrzLib::HrzError => e
         HrzLogger.logger.debug_msg "action1 #{b_part_problem}: HrzError for input b_cond_hrz: #{b_hrz_problem}"
         HrzLogger.logger.debug_msg "✗ FAIL - Exception: #{e.message}"
         HrzLogger.logger.debug_msg "Error: #{HrzLib::TagStringHelper.errors_text}" if HrzLib::TagStringHelper.has_errors?
-        HrzLogger.logger.warning_msg "#{B_MSG_USR_BEG}Could not perform #{b_part_problem} '#{hsh_cond[:b_title_step]}'. #{B_MSG_USR_WARN_NOT_DONE}"
+        HrzLogger.logger.warning_msg "#{B_MSG_USR_BEG}Could not perform #{b_part_problem} '#{b_title_step}'. #{B_MSG_USR_WARN_NOT_DONE}"
 
       rescue StandardError => e
         # Other error
         b_msg = "Std.error in action1, str_hrz: #{b_part_problem}, for input '#{b_hrz_problem}' processing HRZ tags: #{e.message}"
         HrzLogger.logger.debug_msg "HRZ Tag action1: #{b_msg}\n#{e.backtrace.join("\n")}"
-        HrzLogger.logger.warning_msg "#{B_MSG_USR_BEG}Could not perform #{b_part_problem} '#{hsh_cond[:b_title_step]}'. #{B_MSG_USR_WARN_NOT_DONE}"
+        HrzLogger.logger.warning_msg "#{B_MSG_USR_BEG}Could not perform #{b_part_problem} '#{b_title_step}'. #{B_MSG_USR_WARN_NOT_DONE}"
         #raise HrzError.new(b_msg, { cause: e })
       end
     end # action1

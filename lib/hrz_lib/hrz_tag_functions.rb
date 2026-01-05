@@ -41,10 +41,13 @@ module HrzLib
           hrz_strfunc_set_param(params)
         when 'show_info'
           HrzLogger.logger.info_msg (params.join(' '))
+          ""
         when 'show_warning'
           HrzLogger.logger.warning_msg (params.join(' '))
+          ""
         when 'show_error'
           HrzLogger.logger.error_msg (params.join(' '))
+          ""
         else
           HrzLogger.logger.warning_msg "Unknown HRZ function: #{b_function}"
           raise HrzError.new("Unknown function: #{b_function}", { function: b_function })
