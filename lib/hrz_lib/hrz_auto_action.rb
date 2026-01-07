@@ -163,10 +163,10 @@ module HrzLib
     #     :b_issue_abbr      [String]  A unique abbreviation for this kind of ticket. Required for q_only_1x.
     def self.perform_step_todo(b_todo, hsh_opt)
       # Remember the original recursion level.
-      j_lvl_recu_orig = HrzLib::HrzTagFunctions.get_context_value('j_lvl_recu', nil, nil)
+      j_lvl_recu_orig = get_recursion_level()
       return  if b_todo.nil? || b_todo.empty?
       # We will possibly start a new recursion in here, e.g. by creating an additionl ticket while we are still working on the other, main ticket.
-      HrzLib::HrzTagFunctions.set_context_value('j_lvl_recu', nil, (j_lvl_recu_orig + 1))
+      push_recursion()
 
       case b_todo
         when 'mk_issue_from_templ'
@@ -226,8 +226,8 @@ module HrzLib
            HrzLogger.logger.debug_msg "perform_step_todo: task '#{b_todo}' is not implemented yet. Skipping it."
       end # case
     ensure
-      # Restore the original recursion level
-      HrzLib::HrzTagFunctions.set_context_value('j_lvl_recu', nil, j_lvl_recu_orig)
+      # Restore the original recursion level. We migt as well pop_recursion(), but since we know the original level, this adds extra safety.
+      set_recursion_level(j_lvl_recu_orig)
     end  # perform_step_todo
 
 
@@ -260,6 +260,56 @@ module HrzLib
       HrzLogger.logger.debug_msg 'Result tkt_prep_set_assignee_add_watchers: assignee=' + HrzTagFunctions.get_context_value('tkt_prep', 'assigned_to_id') + '  watchers: ' + HrzTagFunctions.get_context_value('tkt_prep', 'arr_watcher_ids').inspect
     end  # tkt_prep_set_assignee_add_watchers
 
+
+
+    # ------------------------------------------------------------------------------------------------------------------------------
+    # Recursion handling
+    # ------------------------------------------------------------------------------------------------------------------------------
+
+    # Get the current recursion level.
+    # @return [Integer] ... The current recursion level. 0 means: base level.
+    def get_recursion_level
+      j_lvl_recu = get_context_value('j_lvl_recu', nil, nil)
+      if j_lvl_recu.nil?
+        # No recursion level set yet. Do it now.
+        set_recursion_level(0)
+        HrzLib::HrzTagFunctions.set_context_value('j_lvl_recu', nil, 0)
+        j_lvl_recu = get_context_value('j_lvl_recu', nil, nil)
+      end
+      HrzLogger.logger.debug_msg "HrzTagFunctions: Current recursion level: #{j_lvl_recu.to_s}"
+      j_lvl_recu
+    end   # get_recursion_level
+
+
+
+    # Set the current recursion level.
+    # Usually you would rather use push_recursion and pop_recursion, unless you have a good reason to set it directly.
+    # @param j_lvl_recu   [Integer] The new recursion level to be set. 0 means: base level.
+    def set_recursion_level(j_lvl_recu)
+      set_context_value('j_lvl_recu', nil, j_lvl_recu)
+    end  # set_context_value
+
+
+
+    # "Push" a new recursion onto the "stack"
+    def push_recursion
+      j_lvl_recu = get_recursion_level()
+      HrzLogger.logger.debug_msg "HrzAutoAction.push_recursion: #{j_lvl_recu.to_s} --> #{(j_lvl_recu+1).to_s}"
+      set_recursion_level(j_lvl_recu + 1)
+    end  # push_recursion
+
+
+
+    # "Pop" a recursion from the "stack"
+    def pop_recursion
+      j_lvl_recu = get_recursion_level()
+      if j_lvl_recu > 0
+        HrzLogger.logger.debug_msg "HrzAutoAction.pop_recursion: #{j_lvl_recu.to_s} --> #{(j_lvl_recu-1).to_s}"
+        set_recursion_level(j_lvl_recu - 1)
+      else
+        HrzLogger.logger.debug_msg "HrzAutoAction.pop_recursion for current level #{j_lvl_recu.to_s}! Nothing is on the 'stack'!"
+      end
+    end  # pop_recursion
 
 
   end  # class HrzAutoAction
