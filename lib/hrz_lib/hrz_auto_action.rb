@@ -268,7 +268,7 @@ module HrzLib
 
     # Get the current recursion level.
     # @return [Integer] ... The current recursion level. 0 means: base level.
-    def get_recursion_level
+    def self.get_recursion_level
       j_lvl_recu = get_context_value('j_lvl_recu', nil, nil)
       if j_lvl_recu.nil?
         # No recursion level set yet. Do it now.
@@ -285,14 +285,14 @@ module HrzLib
     # Set the current recursion level.
     # Usually you would rather use push_recursion and pop_recursion, unless you have a good reason to set it directly.
     # @param j_lvl_recu   [Integer] The new recursion level to be set. 0 means: base level.
-    def set_recursion_level(j_lvl_recu)
+    def self.set_recursion_level(j_lvl_recu)
       set_context_value('j_lvl_recu', nil, j_lvl_recu)
     end  # set_context_value
 
 
 
     # "Push" a new recursion onto the "stack"
-    def push_recursion
+    def self.push_recursion
       j_lvl_recu = get_recursion_level()
       HrzLogger.logger.debug_msg "HrzAutoAction.push_recursion: #{j_lvl_recu.to_s} --> #{(j_lvl_recu+1).to_s}"
       set_recursion_level(j_lvl_recu + 1)
@@ -301,7 +301,7 @@ module HrzLib
 
 
     # "Pop" a recursion from the "stack"
-    def pop_recursion
+    def self.pop_recursion
       j_lvl_recu = get_recursion_level()
       if j_lvl_recu > 0
         HrzLogger.logger.debug_msg "HrzAutoAction.pop_recursion: #{j_lvl_recu.to_s} --> #{(j_lvl_recu-1).to_s}"
