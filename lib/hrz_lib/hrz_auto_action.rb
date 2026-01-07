@@ -112,9 +112,10 @@ module HrzLib
           # Do nothing else with the results of preparation and cleanup for now. No idea yet.
           # b) The main step
           b_part_problem = 'main step'
+          b_hrz_problem  = ''
           b_todo         = hsh_step[:b_todo]
           if ! (b_todo.nil?  ||  b_todo.empty?)
-             b_hrz_problem  = b_todo || ' opt: ' || hsh_step[:hsh_todo_opt].inspect
+             b_hrz_problem  = b_todo + ' opt: ' + hsh_step[:hsh_todo_opt].inspect
              perform_step_todo(hsh_step[:b_todo], hsh_step[:hsh_todo_opt])
           end # main step
           # c) Cleanup
