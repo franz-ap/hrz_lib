@@ -15,6 +15,10 @@
 #-------------------------------------------------------------------------------------eohdr-#
 # Purpose: Implementation of HRZ tag functions
 
+
+#require_relative './hrz_auto_action'    # Here only needed for tests.
+
+
 module HrzLib
   # Container class for all HRZ tag functions
   class HrzTagFunctions
@@ -54,6 +58,14 @@ module HrzLib
         when 'show_error'
           HrzLogger.logger.error_msg (params.join(' '))
           ""
+        when 'prep_clear_all'
+          HrzAutoAction.tkt_prep_clear_assignee_watchers()
+        when 'prep_add_asgn_watch'
+          hsh_param   = analyze_named_params(['set_assignee/assignee/asgn'], params, 'get_param', 0)
+          bq_assignee = hsh_param[:set_assignee] || 'true'
+          q_assignee  = (bq_assignee.downcase == 'true')
+          HrzLogger.debug_msg "tkt_prep_set_assignee_add_watchers: set_assignee=#{bq_assignee}, but should be true or false. Taking it as false."  if (! q_assignee) && (bq_assignee.downcase != 'false')
+          HrzAutoAction.tkt_prep_clear_assignee_watchers()
         else
           HrzLogger.logger.warning_msg "Unknown HRZ function: #{b_function}"
           raise HrzError.new("Unknown function: #{b_function}", { function: b_function })

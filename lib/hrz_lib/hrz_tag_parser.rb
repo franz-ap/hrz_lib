@@ -158,13 +158,15 @@ module HrzLib
     rule(:tag_end_closed) { str('>')               }   # Retain whitespace outside of <HRZ tags.
     
     # HRZ tag function names
-    rule(:func_get_param)        { str('get_param').as(:func) }   # Creates a hash {:func => "get_param"}
-    rule(:func_tkt_old)          { str('tkt_old').as(:func) }
-    rule(:func_tkt_new)          { str('tkt_new').as(:func) }
-    rule(:func_set_param)        { str('set_param').as(:func) }
-    rule(:func_tkt_show_info)    { str('show_info').as(:func) }
-    rule(:func_tkt_show_warning) { str('show_warning').as(:func) }
-    rule(:func_tkt_show_error)   { str('show_error').as(:func) }
+    rule(:func_get_param)            { str('get_param').as(:func) }   # Creates a hash {:func => "get_param"}
+    rule(:func_tkt_old)              { str('tkt_old').as(:func) }
+    rule(:func_tkt_new)              { str('tkt_new').as(:func) }
+    rule(:func_set_param)            { str('set_param').as(:func) }
+    rule(:func_show_info)            { str('show_info').as(:func) }
+    rule(:func_show_warning)         { str('show_warning').as(:func) }
+    rule(:func_show_error)           { str('show_error').as(:func) }
+    rule(:func_prep_clear_all)       { str('prep_clear_all').as(:func) }
+    rule(:func_prep_add_asgn_watch)  { str('prep_add_asgn_watch').as(:func) }
 
     rule(:func_if)     { str('if')     >> space? }
     rule(:func_then)   { str('then')   >> space? }
@@ -174,7 +176,8 @@ module HrzLib
 
     rule(:hrz_function) { 
       (func_get_param | func_tkt_old | func_tkt_new | func_set_param |
-       func_tkt_show_info | func_tkt_show_warning | func_tkt_show_error |
+       func_show_info | func_show_warning | func_show_error |
+       func_prep_clear_all | func_prep_add_asgn_watch |
        func_on_error
       ) >> space?
     }

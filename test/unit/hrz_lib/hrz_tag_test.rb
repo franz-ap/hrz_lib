@@ -62,7 +62,7 @@ def run_tests
     tkt_new:  { cf_id_291: '3.3' },
   })
 
-  test_case("Test 0: special dev/debug test", '<HRZ    get_param     tkt_old sub:cf_id_291 "nvlx999" "formatxto_f">', '2.5')
+  #test_case("Test 0: special dev/debug test", '<HRZ prep_clear_all><HRZ prep_add_asgn_watch 7163 set_assignee:falxse>', 'x')
 
   # Test 1: Simple text and get_param without default value
   test_case("Test A.1: text",                                  'abc',                                          'abc')

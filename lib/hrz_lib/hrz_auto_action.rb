@@ -236,6 +236,7 @@ module HrzLib
     # ------------------------------------------------------------------------------------------------------------------------------
 
     # Clear prepared ticket assignee and watchers
+    # <HRZ> tag example: <HRZ prep_clear_all>
     def self.tkt_prep_clear_assignee_watchers
        HrzTagFunctions.set_context_value('tkt_prep', 'assigned_to_id',  nil)
        HrzTagFunctions.set_context_value('tkt_prep', 'arr_watcher_ids', nil)
@@ -249,6 +250,11 @@ module HrzLib
     # For Groups: The group's leader (if available) will be the assignee (if enabled above)
     #             All group members will be added as watchers.
     # For Users:  The user will be the (new) assignee, if enabled above (otherwise nothing will happen).
+    # <HRZ> tag examples:
+    #    <HRZ prep_add_asgn_watch 7163 set_assignee:false> ... Will not change the assignee, but add user/group 7163 as watchers.
+    #    <HRZ prep_add_asgn_watch 7163 set_assignee:true> .... Will set the assignee and add watchers. 'true' is the default.
+    #    <HRZ prep_add_asgn_watch 7163> ......................    -----"-----
+    #       Synonyms for "set_assignee": "assignee", "asgn"  (in case you want to type less)
     def self.tkt_prep_set_assignee_add_watchers(principal_id, q_assignee_ena=true)
       hsh_grp_info = HrzLib::IssueHelper.get_group_members(principal_id)
       if hsh_grp_info
