@@ -18,6 +18,12 @@
 module HrzLib
   # Container class for all HRZ tag functions
   class HrzTagFunctions
+    def initialize
+      @q_context_initialized = false  # Not yet initialized. Will be done, when necessary.
+    end  # initialize
+
+
+
     # Central dispatcher
     # @param b_function [String] Name of hrz_tag function to be called.
     # @param params [Array<String>] Array of string parameters
@@ -353,6 +359,7 @@ module HrzLib
     # @param initial_context [Hash] Initial context, optional.
     def self.initialize_context(initial_context = {})
       Thread.current[:hrz_context] = initial_context.dup
+      @q_context_initialized       = true
     end  # initialize_context
     
 
@@ -360,6 +367,7 @@ module HrzLib
     # Returns the current context.
     # @return [Hash] current context.
     def self.current_context
+      initialize_context()  unless @q_context_initialized
       Thread.current[:hrz_context] || {}
     end  # current_context
     
@@ -368,6 +376,7 @@ module HrzLib
     # Clears the context, e.g. at the end of a session.
     def self.clear_context
       Thread.current[:hrz_context] = nil
+      @q_context_initialized       = false
     end  # clear_context
     
 
@@ -378,6 +387,7 @@ module HrzLib
     # @param key_sub  [Symbol, String] Sub key. Pass nil, if you want only a single level.
     # @param value    [Object] value
     def self.set_context_value(key_main, key_sub, value)
+      initialize_context()  unless @q_context_initialized
       Thread.current[:hrz_context] ||= {}
 
       if key_sub.nil?
@@ -399,6 +409,7 @@ module HrzLib
     # @param default [Object] Default value, optional. Nil, if not passed in. Will be used, if no such key exists.
     # @return [Object] value from the context oder the default value.
     def self.get_context_value(key_main, key_sub, default = nil)
+      initialize_context()  unless @q_context_initialized
       context = Thread.current[:hrz_context] || {}
 
       if key_sub.nil?
