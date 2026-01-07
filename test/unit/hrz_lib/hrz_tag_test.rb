@@ -141,8 +141,17 @@ def run_tests
   test_condition("Test B.24: 2* get_param, to_f, comparison",    '<HRZ tkt_old cf_id_291 "nvl=999" "format=to_f"> < 3.1 AND <HRZ tkt_new cf_id_291 "nvl=0" "format=to_f"> >= 3.1', true)
   test_condition("Test B.24a: 2* get_param++, to_f, comparison", '<HRZ tkt_old cf_id_291 vfy="Impulse Phase" nvl=999 format=to_f> < 3.1 AND <HRZ tkt_new cf_id_291 nvl=0 format=to_f> >= 3.1', true)
 
+  # Tests: string comparison
+  test_case(     'Test B.30: string constant comparison, with tag',       '<HRZ if>"ABC" == "ABC"<HRZ then>good<HRZ else>wrong<HRZ end_if>', 'good')
+  test_condition('Test B.30a: string constant comparison, condition',     '"ABC" == "ABC"', true)
+  test_condition('Test B.31:  string constant comparison, condition',     '"ABC" == "XY"',  false)
+  test_condition('Test B.32: string comparison, condition const==param',  '"ABC" == <HRZ get_param customer>',  false)
+  test_case(     'Test B.32a: string comparison, with tag, const==param', '<HRZ if>"ABC" == <HRZ get_param customer><HRZ then>wrong<HRZ else>good<HRZ end_if>',  'good')
+  test_condition('Test B.33: string comparison, condition const==param',  '"James Corp" == <HRZ get_param customer>',  true)
+  test_case(     'Test B.33a: string comparison, with tag, const==param', '<HRZ if><HRZ get_param customer>=="James Corp"<HRZ then>good<HRZ else>wrong<HRZ end_if>',  'good')
+
   # Nested <HRZ> tags
-  test_condition("Test B.21: nested <HRZ> tags", "<HRZ get_param nonex+>  nvl=<HRZ get_param discount>uvw </HRZ get_param> > 7", true)
+  test_condition("Test B.40: nested <HRZ> tags", "<HRZ get_param nonex+>  nvl=<HRZ get_param discount>uvw </HRZ get_param> > 7", true)
 
 
   # ============================================================================

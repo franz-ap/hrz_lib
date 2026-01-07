@@ -271,9 +271,15 @@ module HrzLib
       arith_factor
     }
     
+    rule(:string_expr) {
+      quoted_string.as(:string_expr)  >> space? |
+      single_hrz_tag.as(:string_expr) >> space?
+    }
+
     # Comparison expressions
     rule(:comparison) {
-      (arith_expr.as(:left) >> (op_eq | op_le | op_ge | op_lt | op_gt) >> arith_expr.as(:right)).as(:comparison)
+      (string_expr.as(:left) >>  op_eq                                  >> string_expr.as(:right)).as(:string_comparison) |
+      (arith_expr.as(:left)  >> (op_eq | op_le | op_ge | op_lt | op_gt) >> arith_expr.as(:right)).as(:comparison)
     }
     
     # Boolean primary expressions
@@ -359,16 +365,21 @@ module HrzLib
     end
 
 
+    # String expression
+    rule(string_expr: { quoted: simple(:txt) } )  { txt.to_s }
+    rule(string_expr:           simple(:txt)   )  { txt.to_s }
+
+
     # Parameter: Returns either a hash { key: string, val: string} or a string.
     #rule(param: simple(:p)) { p }
     rule(param_nm_key: { identifier: simple(:b_key) }, param_nm_val: { quoted:         simple(:b_val) })   { { key: b_key.to_s, val: b_val.to_s } }
     rule(param_nm_key: { identifier: simple(:b_key) }, param_nm_val: { num_const:      simple(:x_val) })   { { key: b_key.to_s, val: x_val.to_s } }
     rule(param_nm_key: { identifier: simple(:b_key) }, param_nm_val: { identifier:     simple(:b_val) })   { { key: b_key.to_s, val: b_val.to_s } }
-    rule(param_nm_key: { identifier: simple(:b_key) }, param_nm_val:                   simple(:b_val)  )   { { key: b_key.to_s, val: b_val.to_s } } # single_hrz_tag
+    rule(param_nm_key: { identifier: simple(:b_key) }, param_nm_val:                   simple(:b_val)  )   { { key: b_key.to_s, val: b_val.to_s } } # single_hrz_tag in hrz_outs_param_list
     rule(param_unnam:  {                                               quoted:         simple(:b_val) })   {                         b_val.to_s   }
     rule(param_unnam:  {                                               num_const:      simple(:x_val) })   {                         x_val.to_s   }
     rule(param_unnam:  {                                               identifier:     simple(:b_val) })   {                         b_val.to_s   }
-    rule(param_unnam:                                                                  simple(:b_val)  )   {                         b_val.to_s   } # single_hrz_tag
+    rule(param_unnam:                                                                  simple(:b_val)  )   {                         b_val.to_s   } # single_hrz_tag in hrz_outs_param_list
 
     # Boolean constants
     rule(bool_const: simple(:val)) do
@@ -398,20 +409,48 @@ module HrzLib
     end # rule binary_arith
 
     
-    # Comparison operations
+    # Arithmetic comparison operations
     rule(comparison: { left: simple(:l), op: simple(:o), right: simple(:r) }) do
-      left_val = l.is_a?(Numeric) ? l : l.to_s.to_f
+      HrzLogger.transform_beg 'comparison', "left = #{l.inspect} #{l.is_a?(Numeric) ? '<-is_num' : ''}  op=#{o.inspect}  right = #{r.inspect} #{r.is_a?(Numeric) ? '<-is_num' : ''}"
+      left_val  = l.is_a?(Numeric) ? l : l.to_s.to_f
       right_val = r.is_a?(Numeric) ? r : r.to_s.to_f
       
       case o.to_s
-      when '==' then left_val == right_val
-      when '<'  then left_val <  right_val
-      when '<=' then left_val <= right_val
-      when '>'  then left_val >  right_val
-      when '>=' then left_val >= right_val
-      end
+        when '==' then ret = (left_val == right_val)
+        when '<'  then ret = (left_val <  right_val)
+        when '<=' then ret = (left_val <= right_val)
+        when '>'  then ret = (left_val >  right_val)
+        when '>=' then ret = (left_val >= right_val)
+        else
+          ret = "?#{o.to_s}?"
+          HrzLogger.debug_msg("Unimplemented arithmetic comparison '#{o.to_s}'.")
+      end # case
+      HrzLogger.transform_res ret.inspect
+      ret
     end
-    
+
+
+    # String comparison operations
+    rule(string_comparison: { left: simple(:l), op: simple(:o), right: simple(:r) }) do
+      HrzLogger.transform_beg 'string_comparison', "left = #{l.inspect} #{l.is_a?(String) ? '<-is_str' : ''}  op=#{o.inspect}  right = #{r.inspect} #{r.is_a?(String) ? '<-is_str' : ''}"
+      left_val  = l.is_a?(String) ? l : l.to_s.to_s
+      right_val = r.is_a?(String) ? r : r.to_s.to_s
+
+      case o.to_s
+        when '==' then ret = (left_val == right_val)
+        #when '<'  then ret = (left_val <  right_val)
+        #when '<=' then ret = (left_val <= right_val)
+        #when '>'  then ret = (left_val >  right_val)
+        #when '>=' then ret = (left_val >= right_val)
+        else
+          ret = "?#{o.to_s}?"
+          HrzLogger.debug_msg("Unimplemented string comparison '#{o.to_s}'.")
+      end # case
+      HrzLogger.transform_res ret.inspect
+      ret
+    end
+
+
     # Boolean binary operation
     rule(binary_bool: { left: simple(:l), op: simple(:o), right: simple(:r) }) do
       left_val = l.is_a?(TrueClass) || l.is_a?(FalseClass) ? l : (l.to_s.upcase == 'TRUE')
@@ -430,8 +469,8 @@ module HrzLib
     end
     
     # Tag value in expression
-    rule(tag_value: simple(:t)) { t.to_s.to_f }
-    rule(tag_bool: simple(:t)) { t.to_s.upcase == 'TRUE' }
+    rule(tag_value: simple(:t))  { t.to_s.to_f }
+    rule(tag_bool:  simple(:t))  { t.to_s.upcase == 'TRUE' }
     
 
     # IF-THEN-ELSE tag

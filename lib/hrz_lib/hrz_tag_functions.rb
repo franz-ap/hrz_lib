@@ -238,8 +238,10 @@ module HrzLib
     #                                            'to_i_oct' .. Same as to_i, but for basis  8, i.e. octal       numbers
     #                                            'to_i_bin' .. Same as to_i, but for basis 16, i.e. binary      numbers
     #                                            'to_f' ...... Same as to_i, but for floating point numbers
-    #                                            'upper', 'upcase' ..... Turns all lowercase letters in the result into their uppercase counterparts.
-    #                                            'lower', 'downcase' ... Turns all uppercase letters in the result into their lowercase counterparts.
+    #                                            'upper', 'upcase' ...... Turns all lowercase letters in the result into their uppercase counterparts.
+    #                                            'lower', 'downcase' .... Turns all uppercase letters in the result into their lowercase counterparts.
+    #                                            'quoted', 'dbl_quoted' . Encloses the result in "
+    #                                            'sng_quoted' ........... Encloses the result in '
     # @return [String] Parameter's value oder default value.
     def self.hrz_strfunc_get_param(arr_args)
       hsh_param  = analyze_named_params(['key_main/main/name', 'nvl/default/if_missing', 'key_sub/sub', 'conversion/conv'], arr_args, 'get_param', 2)
@@ -272,6 +274,10 @@ module HrzLib
           value = value.upcase
         when 'lower', 'downcase'
           value = value.downcase
+        when 'quoted', 'dbl_quoted'
+          value = '"' + value + '"'
+        when 'sng_quoted'
+          value = "'" + value + "'"
         else
           b_keys = [ b_key_main, (b_key_sub unless b_key_sub.nil? || b_key_sub.empty?) ].compact.join(".")
           b_msg  = "Unknown/unimplemented conversion '#{b_conv}' in HRZ get_param(#{b_keys})."
