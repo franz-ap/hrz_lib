@@ -158,7 +158,11 @@ module HrzLib
     #                                  true=yes false=no, don't care, create a new ticket with every call.
     #     :b_issue_abbr      [String]  A unique abbreviation for this kind of ticket. Required for q_only_1x.
     def self.perform_step_todo(b_todo, hsh_opt)
+      # Remember the original recursion level.
+      j_lvl_recu_orig = HrzLib::HrzTagFunctions.get_context_value('j_lvl_recu', nil, nil)
       return  if b_todo.nil? || b_todo.empty?
+      # We will possibly start a new recursion in here, e.g. by creating an additionl ticket while we are still working on the other, main ticket.
+      HrzLib::HrzTagFunctions.set_context_value('j_lvl_recu', nil, (j_lvl_recu_orig + 1))
 
       case b_todo
         when 'mk_issue_from_templ'
@@ -217,6 +221,9 @@ module HrzLib
         else
            HrzLogger.logger.debug_msg "perform_step_todo: task '#{b_todo}' is not implemented yet. Skipping it."
       end # case
+    ensure
+      # Restore the original recursion level
+      HrzLib::HrzTagFunctions.set_context_value('j_lvl_recu', nil, j_lvl_recu_orig)
     end  # perform_step_todo
 
 
