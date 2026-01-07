@@ -110,10 +110,13 @@ module HrzLib
           b_result_prep  = TagStringHelper::str_hrz(hsh_step[:b_hrz_prep])
           HrzLogger.logger.debug_msg "action1: Preparation returned '#{b_result_prep}'. Should be empty. Discarding it."  if (! b_result_prep.empty?)
           # Do nothing else with the results of preparation and cleanup for now. No idea yet.
-          # b) The step
+          # b) The main step
           b_part_problem = 'main step'
-          perform_step_todo(hsh_step[:b_todo], hsh_step[:hsh_todo_opt])
-          # TODO
+          b_todo         = hsh_step[:b_todo]
+          if ! (b_todo.nil?  ||  b_todo.empty?)
+             b_hrz_problem  = b_todo || ' opt: ' || hsh_step[:hsh_todo_opt].inspect
+             perform_step_todo(hsh_step[:b_todo], hsh_step[:hsh_todo_opt])
+          end # main step
           # c) Cleanup
           b_part_problem = 'cleanup of step'
           b_hrz_problem  = hsh_step[:b_hrz_clean]
