@@ -226,9 +226,10 @@ module HrzLib
            HrzLogger.logger.debug_msg "perform_step_todo: task '#{b_todo}' is not implemented yet. Skipping it."
       end # case
     ensure
-      # Restore the original recursion level. We migt as well pop_recursion(), but since we know the original level, this adds extra safety.
+      # Restore the original recursion level. We might as well pop_recursion(), but since we know the original level, this adds extra safety.
       set_recursion_level(j_lvl_recu_orig)
     end  # perform_step_todo
+
 
 
     # ------------------------------------------------------------------------------------------------------------------------------
