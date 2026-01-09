@@ -23,7 +23,7 @@ module HrzLib
   class HrzHttp
 
     # Perform HTTP request.
-    # Returns a hash:
+    # Returns a [Hash]:
     #   :q_ok [Boolean] ... true:  Success. The result body is in :body
     #                       false: Error, problems. :body is empty or at least unusable. Error messages were already issued.
     #   :body [String] .... The body of the http response.
@@ -75,7 +75,7 @@ module HrzLib
         HrzLogger.error_msg (b_name_svc.empty? ? 'Requested service' : 'Service ') +  b_name_svc + " for Tkt_summary_AI CustWorkflow is currently unavailable: '#{exc.message}'"
         hsh_result[:q_ok] = false
       end
-      HrzLogger.debug_msg "HrzHttp.http_request" + (b_name_svc.empty? ? '' : ' for service ') +  b_name_svc + " finished: ok=#{hsh_result[:q_ok].to_s}. It took #{Time.now - t_start} s"
+      HrzLogger.debug_msg "HrzHttp.http_request" + (b_name_svc.empty? ? '' : ' for service ') +  b_name_svc + " finished: ok=#{hsh_result[:q_ok].to_s}. It took #{Time.now - t_start} s  body: " + hsh_result[:body].inspect
       hsh_result
     end  # http_request
 

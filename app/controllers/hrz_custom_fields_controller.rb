@@ -37,7 +37,7 @@ class HrzCustomFieldsController < ApplicationController
         host_name: Setting.host_name || request.host,
         protocol: Setting.protocol || 'https',
         redmine_version: Redmine::VERSION.to_s,
-        plugin_version: Redmine::Plugin.find(:hrz_lib).version,
+        plugin_version_hrz_lib: Redmine::Plugin.find(:hrz_lib).version,
         custom_fields_count: CustomField.count,
         issue_custom_fields_count: IssueCustomField.count,
         project_custom_fields_count: ProjectCustomField.count,
