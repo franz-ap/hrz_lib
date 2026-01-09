@@ -375,7 +375,50 @@ HrzLib::IssueHelper.update_issue(
 )
 ```
 
+### Working with Key/Value Custom Fields
+
+Key/value custom fields store data in key=value format, one pair per line.
+
+```ruby
+# Create a key/value field
+field_id = HrzLib::CustomFieldHelper.create_custom_field(
+  'API Configuration',
+  'key_value',
+  'issue',
+  description: 'API endpoint configurations',
+  default_value: "endpoint=https://api.example.com\napi_version=v2\ntimeout=30"
+)
+
+# Use in issue creation
+issue_id = HrzLib::IssueHelper.mk_issue(
+  'my-project',
+  'Configure API',
+  'Setup API integration',
+  nil,
+  [],
+  custom_fields: {
+    field_id => "endpoint=https://prod.api.com\napi_key=secret123\ntimeout=60"
+  }
+)
+
+# Parse key/value data (helper method)
+def parse_keyvalue(data)
+  return {} if data.blank?
+
+  data.split("\n").each_with_object({}) do |line, hash|
+    key, value = line.split('=', 2)
+    hash[key.strip] = value.strip if key && value
+  end
+end
+
+# Usage
+custom_value = issue.custom_field_value(field_id)
+config = parse_keyvalue(custom_value)
+puts config['endpoint']  # => "https://prod.api.com"
+puts config['timeout']   # => "60"
+```
 ---
+
 
 ## Complete Example: Task Management Plugin
 
@@ -404,7 +447,7 @@ plugins/task_manager/
 require 'redmine'
 
 Redmine::Plugin.register :task_manager do
-  name 'Task Manager Plugin'
+  name 'Task Manager Example Plugin'
   author 'Your Name'
   description 'Advanced task management using HRZ Lib'
   version '1.0.0'

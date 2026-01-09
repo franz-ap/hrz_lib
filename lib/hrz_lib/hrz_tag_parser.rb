@@ -168,10 +168,10 @@ module HrzLib
     rule(:func_prep_clear_all)       { str('prep_clear_all').as(:func) }
     rule(:func_prep_add_asgn_watch)  { str('prep_add_asgn_watch').as(:func) }
 
-    rule(:func_if)     { str('if')     >> space? }
-    rule(:func_then)   { str('then')   >> space? }
-    rule(:func_else)   { str('else')   >> space? }
-    rule(:func_end_if) { str('end_if') >> space? }
+    rule(:func_if)     { str('if')                      >> space? }
+    rule(:func_then)   { str('then')                    >> space? }
+    rule(:func_else)   { str('else')                    >> space? }
+    rule(:func_end_if) { (str('endif') | str('end_if')) >> space? }
     rule(:func_on_error) { str('on_error').as(:func) >> space? }
 
     rule(:hrz_function) { 

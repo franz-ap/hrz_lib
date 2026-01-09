@@ -257,6 +257,24 @@ class HrzCustomFieldsControllerTest < ActionController::TestCase
     assert_includes field.tracker_ids, tracker.id
   end
 
+  test "should create key/value custom field via API" do
+    post :create, params: {
+      custom_field: {
+        name: 'Test API Key/Value',
+        field_format: 'key_value',
+        customized_type: 'issue',
+        description: 'Test key-value field',
+        default_value: "env=production\nregion=eu-west-1"
+      }
+    }, format: 'json'
+
+    assert_response :created
+    json = JSON.parse(@response.body)
+    field = CustomField.find(json['custom_field']['id'])
+    assert_equal 'key_value', field.field_format
+    assert_equal "env=production\nregion=eu-west-1", field.default_value
+  end
+
   test "should return error for missing parameters" do
     post :create, params: {
       custom_field: {

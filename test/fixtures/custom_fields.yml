@@ -124,3 +124,12 @@ hrz_test_user_cf:
   is_required: false
   is_for_all: true
   position: 11
+
+hrz_test_keyvalue_field:
+  id: 1011
+  type: IssueCustomField
+  name: HRZ Test Key/Value Field
+  field_format: key_value
+  is_required: false
+  is_for_all: true
+  position: 12

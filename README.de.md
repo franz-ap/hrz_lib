@@ -535,6 +535,9 @@ Erstellt ein neues Custom Field.
   - `'version'` - Versions-Auswahl
   - `'link'` - URL/Link
   - `'attachment'` - Dateianhang
+  - `'key_value'` - Eigenschaft/Wert-Paare ("Key-value", Format: key=value, jeweils in einer eigenen Zeile)
+
+
 - `customized_type` - Anwendungsbereich:
   - `'issue'` - Ticket/Issue
   - `'project'` - Projekt
@@ -627,7 +630,18 @@ field_id = HrzLib::CustomFieldHelper.create_custom_field(
   tracker_ids: [1],
   possible_values: ['UI', 'Backend', 'Datenbank', 'API']
 )
+
+# Eigenschaft/Wert-Paare Key/Value Feld
+field_id = HrzLib::CustomFieldHelper.create_custom_field(
+  'Umgebungsvariablen',
+  'key_value',
+  'project',
+  description: 'Umgebungsvariablen-Konfiguration',
+  default_value: "API_KEY=your_key_here\nDATABASE_URL=postgres://localhost\nLOG_LEVEL=debug"
+)
+
 ```
+
 
 ### Berechnete Custom Fields (Computed Fields)
 
@@ -1125,6 +1139,35 @@ curl -X POST \
     "is_required": false
   }
 }
+```
+
+**Beispiel: Eigenschaft/Wert-Paare Key/Value**
+```json
+{
+  "custom_field": {
+    "name": "Configuration Settings",
+    "field_format": "key_value",
+    "customized_type": "issue",
+    "description": "Configuration key-value pairs",
+    "default_value": "API_KEY=\nDATABASE_URL=\nLOG_LEVEL=info"
+  }
+}
+```
+
+**cURL:**
+```bash
+curl -X POST \
+  -H "X-Redmine-API-Key: your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "custom_field": {
+      "name": "Configuration Settings",
+      "field_format": "key_value",
+      "customized_type": "issue",
+      "default_value": "API_KEY=\nDATABASE_URL=\nLOG_LEVEL=info"
+    }
+  }' \
+  https://your-redmine.com/hrz_custom_fields.json
 ```
 
 ---

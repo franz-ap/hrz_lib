@@ -99,10 +99,25 @@ module HrzLib
     #     formula: 'if cfs[5].to_i > 100; cfs[5] * 0.9; else; cfs[5]; end'
     #   )
     #
+    # @example Create a key/value custom field
+    #   field_id = HrzLib::CustomFieldHelper.create_custom_field(
+    #     'Configuration Settings',
+    #     'key_value',
+    #     'issue',
+    #     description: 'Key-value pairs for configuration'
+    #   )
+    #
+    # @example Create key/value field with default values
+    #   field_id = HrzLib::CustomFieldHelper.create_custom_field(
+    #     'Environment Variables',
+    #     'key_value',
+    #     'project',
+    #     default_value: "API_KEY=\nDATABASE_URL=\nLOG_LEVEL=info"
+    #   )
     def self.create_custom_field(name, field_format, customized_type, options = {})
       begin
         # Validate field_format
-        valid_formats = %w[string text int float date bool list user version link attachment]
+        valid_formats = %w[string text int float date bool list user version link attachment key_value]
         unless valid_formats.include?(field_format)
           Rails.logger.error "HRZ Lib: Invalid field format '#{field_format}'. Valid formats: #{valid_formats.join(', ')}"
           return nil

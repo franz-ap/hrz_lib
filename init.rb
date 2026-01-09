@@ -18,12 +18,12 @@
 require 'redmine'
 
 Redmine::Plugin.register :hrz_lib do
-  name 'HRZ Lib'
-  author 'Franz Apeltauer, Claude'
+  name        'HRZ Lib'
+  author      'Franz Apeltauer, Claude'
   description 'Redmine utility/library plugin. Provides common functions to other plugins and a REST API for CustomField creation/modification.'
-  version '0.4.47'
-  url '' #'https://github.com/franz-ap/hrz_lib'
-  author_url ''
+  version     '0.4.48'
+  url         'https://github.com/franz-ap/hrz_lib'
+  author_url  ''
   requires_redmine version_or_higher: '6.1.0'
 end
 

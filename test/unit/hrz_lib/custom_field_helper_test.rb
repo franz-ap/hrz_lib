@@ -175,6 +175,32 @@ class CustomFieldHelperTest < ActiveSupport::TestCase
     assert_equal 'link', field.field_format
   end
 
+  test "should create key/value custom field" do
+    field_id = HrzLib::CustomFieldHelper.create_custom_field(
+      'Test Key/Value Field',
+      'key_value',
+      'issue'
+    )
+
+    assert_not_nil field_id
+    field = CustomField.find(field_id)
+    assert_equal 'key_value', field.field_format
+  end
+
+  test "should create key/value custom field with default value" do
+    field_id = HrzLib::CustomFieldHelper.create_custom_field(
+      'Test Key/Value With Defaults',
+      'key_value',
+      'issue',
+      default_value: "key1=value1\nkey2=value2\nkey3=value3"
+    )
+
+    assert_not_nil field_id
+    field = CustomField.find(field_id)
+    assert_equal 'key_value', field.field_format
+    assert_equal "key1=value1\nkey2=value2\nkey3=value3", field.default_value
+  end
+
   test "should create required custom field" do
     field_id = HrzLib::CustomFieldHelper.create_custom_field(
       'Test Required Field',

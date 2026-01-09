@@ -19,6 +19,12 @@
 # * Defines some test utilities (create_test_project, create_test_user, etc.)
 # * Used by all other tests
 #
+# Pre-requisites:
+#   Grant the application user rights in the test database.
+#   You may have to do something like this:
+#       GRANT ALL PRIVILEGES ON `redm_test`.* TO `redmine_appl`@`172.%`;
+#       FLUSH PRIVILEGES;
+#
 # How to run the tests:
 # * All tests for this plugin
 #   bundle exec rake redmine:plugins:test NAME=hrz_lib
