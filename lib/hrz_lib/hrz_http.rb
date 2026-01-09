@@ -15,6 +15,9 @@
 #-------------------------------------------------------------------------------------eohdr-#
 # Purpose: Perform http/https requests, etc..
 
+require 'net/http'
+require 'json'
+require 'uri'
 
 module HrzLib
   class HrzHttp
@@ -29,7 +32,7 @@ module HrzLib
                      arr_aux_hdr  = [],    # Array of auxiliary HTTP header lines: {key: 'aux_key1', val: 'aux_value1'}
                      b_post_data  = '',    # Data to be sent in the request body of a POST.             Optional.
                      b_name_svc   = '')    # Human readable name of service to be called. For messages. Optional.
-      HrzLogger.logger.debug_msg "HrzHttp.http_request: #{b_method.to_s} #{b_url.to_s}" + (b_name_svc.empty? ? '' : ' / Service ') + b_name_svc
+      HrzLogger.debug_msg "HrzHttp.http_request: #{b_method.to_s} #{b_url.to_s}" + (b_name_svc.empty? ? '' : ' / Service ') + b_name_svc
       t_start = Time.now
       hsh_result = { q_ok: true, body: '' }
       return   if b_url.nil? || b_url.empty?
@@ -50,7 +53,7 @@ module HrzLib
                request.body = b_post_data  if ! b_post_data.nil?
           else
                request = nil
-               HrzLogger.logger.error_msg "Unimplemented REST method #{b_method} in HrzHttp.http_request" + (b_name_svc.empty? ? '' : ' / service ') + b_name_svc + '. Please inform an admin.'
+               HrzLogger.error_msg "Unimplemented REST method #{b_method} in HrzHttp.http_request" + (b_name_svc.empty? ? '' : ' / service ') + b_name_svc + '. Please inform an admin.'
                hsh_result[:q_ok] = false
         end
         if ! request.nil?
@@ -64,15 +67,15 @@ module HrzLib
           if response.code == '200'
              hsh_result[:body] = response.body
           else
-            HrzLogger.logger.error_msg "Request" + (b_name_svc.empty? ? '' : ' for service ') +  b_name_svc + " failed with HTTP code: #{response.code}  URL: #{b_url} Result: #{response.body}"
+            HrzLogger.error_msg "Request" + (b_name_svc.empty? ? '' : ' for service ') +  b_name_svc + " failed with HTTP code: #{response.code}  URL: #{b_url} Result: #{response.body}"
             hsh_result[:q_ok] = false
           end
         end
       rescue => exc
-        HrzLogger.logger.error_msg (b_name_svc.empty? ? 'Requested service' : 'Service ') +  b_name_svc + " for Tkt_summary_AI CustWorkflow is currently unavailable: '#{exc.message}'"
+        HrzLogger.error_msg (b_name_svc.empty? ? 'Requested service' : 'Service ') +  b_name_svc + " for Tkt_summary_AI CustWorkflow is currently unavailable: '#{exc.message}'"
         hsh_result[:q_ok] = false
       end
-      HrzLogger.logger.debug_msg "HrzHttp.http_request" + (b_name_svc.empty? ? '' : ' for service ') +  b_name_svc + " finished: ok=#{hsh_result[:q_ok].to_s}. It took #{Time.now - t_start} s"
+      HrzLogger.debug_msg "HrzHttp.http_request" + (b_name_svc.empty? ? '' : ' for service ') +  b_name_svc + " finished: ok=#{hsh_result[:q_ok].to_s}. It took #{Time.now - t_start} s"
       hsh_result
     end  # http_request
 
