@@ -27,11 +27,11 @@ module HrzLib
     #   :q_ok [Boolean] ... true:  Success. The result body is in :body
     #                       false: Error, problems. :body is empty or at least unusable. Error messages were already issued.
     #   :body [String] .... The body of the http response.
-    def http_request(b_url,                # URL to be called. nil or empty is ok, will return ok and an empty body.
-                     b_method     = 'GET', # Method to be used: 'GET', 'PUT', 'POST', ...
-                     arr_aux_hdr  = [],    # Array of auxiliary HTTP header lines: {key: 'aux_key1', val: 'aux_value1'}
-                     b_post_data  = '',    # Data to be sent in the request body of a POST.             Optional.
-                     b_name_svc   = '')    # Human readable name of service to be called. For messages. Optional.
+    def self.http_request(b_url,                # URL to be called. nil or empty is ok, will return ok and an empty body.
+                          b_method     = 'GET', # Method to be used: 'GET', 'PUT', 'POST', ...
+                          arr_aux_hdr  = [],    # Array of auxiliary HTTP header lines: {key: 'aux_key1', val: 'aux_value1'}
+                          b_post_data  = '',    # Data to be sent in the request body of a POST.             Optional.
+                          b_name_svc   = '')    # Human readable name of service to be called. For messages. Optional.
       HrzLogger.debug_msg "HrzHttp.http_request: #{b_method.to_s} #{b_url.to_s}" + (b_name_svc.empty? ? '' : ' / Service ') + b_name_svc
       t_start = Time.now
       hsh_result = { q_ok: true, body: '' }
