@@ -326,21 +326,6 @@ module HrzLib
       begin
         custom_field = CustomField.find(custom_field_id)
         
-        # Get possible values for list fields
-        possible_values = []
-        if custom_field.field_format == 'list' || custom_field.field_format == 'enumeration'
-          if custom_field.respond_to?(:enumerations)
-            # Redmine 4.x and later
-            possible_values = custom_field.enumerations.map(&:name)
-          elsif custom_field.respond_to?(:custom_options)
-            # Alternative method
-            possible_values = custom_field.custom_options.map(&:value)
-          elsif custom_field.respond_to?(:possible_values) && custom_field.possible_values.is_a?(Array)
-            # Fallback for older versions or direct array
-            possible_values = custom_field.possible_values
-          end
-        end
-
         result = {
           id: custom_field.id,
           name: custom_field.name,
@@ -353,13 +338,29 @@ module HrzLib
           searchable: custom_field.searchable,
           multiple: custom_field.multiple,
           default_value: custom_field.default_value,
-          possible_values: possible_values,
+          possible_values: custom_field.possible_values,
           regexp: custom_field.regexp,
           min_length: custom_field.min_length,
           max_length: custom_field.max_length,
           formula: custom_field.respond_to?(:formula) ? custom_field.formula : nil
         }
         
+        # Get possible values for key/value fields
+        possible_values = []
+        if custom_field.field_format == 'enumeration'
+          if custom_field.respond_to?(:enumerations)
+            # Redmine 4.x and later
+            possible_values = custom_field.enumerations.map(&:name)
+          elsif custom_field.respond_to?(:custom_options)
+            # Alternative method
+            possible_values = custom_field.custom_options.map(&:value)
+          elsif custom_field.respond_to?(:possible_values) && custom_field.possible_values.is_a?(Array)
+            # Fallback for older versions or direct array
+            possible_values = custom_field.possible_values
+          end
+          result[:possible_values] = possible_values
+        end
+
         #Rails.logger.info "HRZ Lib: Retrieved custom field ##{custom_field_id}"
         return result
         
