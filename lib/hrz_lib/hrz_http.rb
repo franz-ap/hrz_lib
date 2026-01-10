@@ -97,7 +97,10 @@ module HrzLib
               request[ aux_hdr1[:key] ] = aux_hdr1[:val]
             end
           elsif aux_hdr.is_a?(Hash)
-            request.merge!(aux_hdr)
+            #request.merge!(aux_hdr)
+            aux_hdr.each do |k, v|
+              request[ k.to_key ] = v
+            end
           else
             HrzLogger.debug_msg "HrzHttp.http_request: Unsupported object type  #{aux_hdr.class.name} of aux_hdr. Ignoring it."
           end
@@ -109,13 +112,13 @@ module HrzLib
             hsh_result[:body] = response.body
           else
             HrzLogger.error_msg "Request" + (b_name_svc.empty? ? '' : ' for service ') +  b_name_svc + " failed with HTTP code: #{response.code} - #{response.message}.  URL: #{b_url} Result: #{response.body}"
-            # Response herader:
+            # Response header:
             response.each_header { |key, value| HrzLogger.debug_msg "  #{key}: #{value}" }
             hsh_result[:q_ok] = false
           end
         end
       rescue => exc
-        HrzLogger.error_msg (b_name_svc.empty? ? 'Requested service' : 'Service ') +  b_name_svc + " for Tkt_summary_AI CustWorkflow is currently unavailable: '#{exc.message}'"
+        HrzLogger.error_msg (b_name_svc.empty? ? 'Requested remote service' : 'Remote Service ') +  b_name_svc + " is currently unavailable. http_request: '#{exc.message}'"
         hsh_result[:q_ok] = false
       end
       HrzLogger.debug_msg "HrzHttp.http_request" + (b_name_svc.empty? ? '' : ' for service ') +  b_name_svc + " finished: ok=#{hsh_result[:q_ok].to_s}. It took #{Time.now - t_start} s  body: " + hsh_result[:body].inspect
