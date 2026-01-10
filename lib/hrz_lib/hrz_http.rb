@@ -99,7 +99,7 @@ module HrzLib
           elsif aux_hdr.is_a?(Hash)
             #request.merge!(aux_hdr)
             aux_hdr.each do |k, v|
-              request[ k.to_key ] = v
+              request[ k ] = v
             end
           else
             HrzLogger.debug_msg "HrzHttp.http_request: Unsupported object type  #{aux_hdr.class.name} of aux_hdr. Ignoring it."
