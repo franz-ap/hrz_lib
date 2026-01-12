@@ -321,7 +321,7 @@ module HrzLib
     # @example Get field details
     #   field = HrzLib::CustomFieldHelper.get_custom_field(5)
     #   puts field[:name]
-    #
+    #   puts field[:trackers].map(&:name)
     def self.get_custom_field(custom_field_id)
       begin
         custom_field = CustomField.find(custom_field_id)
@@ -344,7 +344,18 @@ module HrzLib
           max_length: custom_field.max_length,
           formula: custom_field.respond_to?(:formula) ? custom_field.formula : nil
         }
-        
+
+        # Get tracker information for IssueCustomFields:
+        if custom_field.is_a?(IssueCustomField)
+          result[:trackers] = custom_field.trackers.map do |tracker|
+            {
+              id:   tracker.id,
+              name: tracker.name
+            }
+          end
+          result[:tracker_ids] = custom_field.tracker_ids
+        end
+
         # Get possible values for key/value fields
         possible_values = []
         if custom_field.field_format == 'enumeration'
