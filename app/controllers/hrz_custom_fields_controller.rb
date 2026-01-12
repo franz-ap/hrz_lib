@@ -89,6 +89,7 @@ class HrzCustomFieldsController < ApplicationController
     @custom_field = HrzLib::CustomFieldHelper.get_custom_field(@custom_field_id)
     
     if @custom_field
+      HrzLib::HrzLogger.debug_msg "CF-#{@custom_field_id}: " + @custom_field.inspect
       respond_to do |format|
         format.json { render json: {custom_field: @custom_field} }
         format.xml { render xml: {custom_field: @custom_field} }
