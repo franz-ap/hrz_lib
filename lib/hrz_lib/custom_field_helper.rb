@@ -346,6 +346,8 @@ module HrzLib
         }
 
         # Get tracker information for IssueCustomFields:
+        #   trackers ...... Array with Tracker ID and name.
+        #   tracker_ids ... Array of Tracker IDs only, for simple access.
         if custom_field.is_a?(IssueCustomField)
           result[:trackers] = custom_field.trackers.map do |tracker|
             {
