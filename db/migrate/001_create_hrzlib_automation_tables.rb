@@ -16,14 +16,13 @@
 class CreateHrzlibAutomationTables < ActiveRecord::Migration[6.1]
   def change
     # Condition for automatic actions
-    create_table :hrzlib_aut_conditions do |t|
+    create_table :hrzlib_aut_conditions, primary_key: :j_condition_id do |t|
       t.string :b_cond_question, limit: 100
       t.string :b_cond_hrz, limit: 4000
       t.integer :created_by
       t.integer :updated_by
       t.timestamps
     end
-    rename_column :hrzlib_aut_conditions, :id, :j_condition_id
 
     # List of available Todos
     create_table :hrzlib_aut_todos, id: false do |t|
@@ -37,7 +36,7 @@ class CreateHrzlibAutomationTables < ActiveRecord::Migration[6.1]
     add_index :hrzlib_aut_todos, [:j_sort, :b_name]
 
     # Step in an automatic action
-    create_table :hrzlib_aut_steps do |t|
+    create_table :hrzlib_aut_steps, primary_key: :j_step_id do |t|
       t.string :b_title, limit: 100
       t.string :b_comment, limit: 4000
       t.string :b_hrz_prep, limit: 4000
@@ -53,7 +52,6 @@ class CreateHrzlibAutomationTables < ActiveRecord::Migration[6.1]
       t.integer :updated_by
       t.timestamps
     end
-    rename_column :hrzlib_aut_steps, :id, :j_step_id
     add_foreign_key :hrzlib_aut_steps, :hrzlib_aut_todos, column: :b_todo, primary_key: :b_key
 
     # Automatic action

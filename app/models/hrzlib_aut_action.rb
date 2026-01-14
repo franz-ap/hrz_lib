@@ -18,33 +18,35 @@
 
 class HrzlibAutAction < ActiveRecord::Base
   self.primary_key = 'b_title'
-  
+
   belongs_to :condition1, class_name: 'HrzlibAutCondition', foreign_key: 'j_cond1_id', primary_key: 'j_condition_id', optional: true
   belongs_to :condition2, class_name: 'HrzlibAutCondition', foreign_key: 'j_cond2_id', primary_key: 'j_condition_id', optional: true
   belongs_to :condition3, class_name: 'HrzlibAutCondition', foreign_key: 'j_cond3_id', primary_key: 'j_condition_id', optional: true
   belongs_to :condition4, class_name: 'HrzlibAutCondition', foreign_key: 'j_cond4_id', primary_key: 'j_condition_id', optional: true
   belongs_to :condition5, class_name: 'HrzlibAutCondition', foreign_key: 'j_cond5_id', primary_key: 'j_condition_id', optional: true
-  
+
   belongs_to :step1, class_name: 'HrzlibAutStep', foreign_key: 'j_step1_id', primary_key: 'j_step_id', optional: true
   belongs_to :step2, class_name: 'HrzlibAutStep', foreign_key: 'j_step2_id', primary_key: 'j_step_id', optional: true
   belongs_to :step3, class_name: 'HrzlibAutStep', foreign_key: 'j_step3_id', primary_key: 'j_step_id', optional: true
   belongs_to :step4, class_name: 'HrzlibAutStep', foreign_key: 'j_step4_id', primary_key: 'j_step_id', optional: true
   belongs_to :step5, class_name: 'HrzlibAutStep', foreign_key: 'j_step5_id', primary_key: 'j_step_id', optional: true
-  
+
   belongs_to :creator, class_name: 'User', foreign_key: 'created_by', optional: true
   belongs_to :updater, class_name: 'User', foreign_key: 'updated_by', optional: true
-  
+
   validates :b_title, presence: true, uniqueness: true, length: { maximum: 100 }
   validates :b_comment, length: { maximum: 4000 }
-  
-  before_save :set_user_context
-  
+
+  before_create :set_created_by
+  before_save :set_updated_by
+
   private
-  
-  def set_user_context
-    if new_record?
-      self.created_by = User.current.id if User.current
-    end
+
+  def set_created_by
+    self.created_by = User.current.id if User.current
+  end
+
+  def set_updated_by
     self.updated_by = User.current.id if User.current
   end
 end  # class HrzlibAutAction

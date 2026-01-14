@@ -18,21 +18,23 @@
 
 class HrzlibAutCondition < ActiveRecord::Base
   self.primary_key = 'j_condition_id'
-  
+
   belongs_to :creator, class_name: 'User', foreign_key: 'created_by', optional: true
   belongs_to :updater, class_name: 'User', foreign_key: 'updated_by', optional: true
-  
+
   validates :b_cond_question, presence: true, length: { maximum: 100 }
   validates :b_cond_hrz, length: { maximum: 4000 }
-  
-  before_save :set_user_context
-  
+
+  before_create :set_created_by
+  before_save :set_updated_by
+
   private
-  
-  def set_user_context
-    if new_record?
-      self.created_by = User.current.id if User.current
-    end
+
+  def set_created_by
+    self.created_by = User.current.id if User.current
+  end
+
+  def set_updated_by
     self.updated_by = User.current.id if User.current
   end
 end  # class HrzlibAutCondition

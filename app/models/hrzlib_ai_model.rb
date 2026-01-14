@@ -18,40 +18,44 @@
 
 class HrzlibAiModel < ActiveRecord::Base
   self.primary_key = 'j_key'
-  
+
   belongs_to :creator, class_name: 'User', foreign_key: 'created_by', optional: true
   belongs_to :updater, class_name: 'User', foreign_key: 'updated_by', optional: true
-  
+
   validates :j_key, presence: true, uniqueness: true
   validates :b_name, presence: true, length: { maximum: 100 }
   validates :b_url, length: { maximum: 1000 }
   validates :b_api_key, length: { maximum: 100 }
   validates :b_json_post, length: { maximum: 4000 }
   validates :b_json_res_path, length: { maximum: 100 }
-  
-  before_save :set_user_context
-  before_save :auto_fill_b_key
-  
+
+  before_create :set_created_by
+  before_save :set_updated_by
+  # REMOVED auto_fill_b_key from before_save to avoid issues during migration
+
   private
-  
-  def set_user_context
-    if new_record?
-      self.created_by = User.current.id if User.current
-    end
+
+  def set_created_by
+    self.created_by = User.current.id if User.current
+  end
+
+  def set_updated_by
     self.updated_by = User.current.id if User.current
   end
-  
+
+  # This method can be called manually when needed
   def auto_fill_b_key
-    if j_key_changed? && j_key.present?
-      begin
-        field = HrzLib::CustomFieldHelper.get_custom_field(5)
-        if field && field[:possible_val_keys] && field[:possible_values]
-          idx = field[:possible_val_keys].index(j_key)
-          self.b_key = field[:possible_values][idx] if idx
-        end
-      rescue => e
-        Rails.logger.error "Error auto-filling b_key: #{e.message}"
+    return unless j_key.present?
+
+    begin
+      field = HrzLib::CustomFieldHelper.get_custom_field(5)
+      if field && field[:possible_val_keys] && field[:possible_values]
+        idx = field[:possible_val_keys].index(j_key)
+        self.b_key = field[:possible_values][idx] if idx
       end
+    rescue => e
+      Rails.logger.error "Error auto-filling b_key: #{e.message}"
     end
   end
+end
 end  # class HrzlibAiModel

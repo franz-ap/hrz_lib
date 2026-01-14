@@ -18,24 +18,26 @@
 
 class HrzlibAutTodo < ActiveRecord::Base
   self.primary_key = 'b_key'
-  
+
   has_many :steps, class_name: 'HrzlibAutStep', foreign_key: 'b_todo'
   belongs_to :creator, class_name: 'User', foreign_key: 'created_by', optional: true
   belongs_to :updater, class_name: 'User', foreign_key: 'updated_by', optional: true
-  
+
   validates :b_key, presence: true, uniqueness: true, length: { maximum: 25 }
   validates :b_name, presence: true, length: { maximum: 100 }
-  
-  default_scope { order(:j_sort, :b_name) }
-  
-  before_save :set_user_context
-  
+
+  scope :sorted, -> { order(:j_sort, :b_name) }
+
+  before_create :set_created_by
+  before_save :set_updated_by
+
   private
-  
-  def set_user_context
-    if new_record?
-      self.created_by = User.current.id if User.current
-    end
+
+  def set_created_by
+    self.created_by = User.current.id if User.current
+  end
+
+  def set_updated_by
     self.updated_by = User.current.id if User.current
   end
 end  # class HrzlibAutTodo
