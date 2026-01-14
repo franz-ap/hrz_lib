@@ -314,35 +314,62 @@ module HrzLib
     
     # Gets details of a custom field
     #
-    # @param custom_field_id [Integer] The ID of the custom field
-    #
+    # @param custom_field_id [Integer] The ID of the custom field.
     # @return [Hash, nil] Hash with custom field details, or nil on error
     #
     # @example Get field details
     #   field = HrzLib::CustomFieldHelper.get_custom_field(5)
     #   puts field[:name]
     #   puts field[:trackers].map(&:name)
+    #
+    # If you know the name, but not the ID of a custom field, you can use
+    # these methods to find it:
+    # a) For custom fields in issues: IssueCustomField.find_by(name: 'My field')
+    #      cf = IssueCustomField.find_by(name: 'My field')
+    #      cf_id = cf&.id
+    #      field = HrzLib::CustomFieldHelper.get_custom_field(cf_id)
+    #      puts field[:possible_values]
+    #    All in one line:
+    #      field = HrzLib::CustomFieldHelper.get_custom_field(IssueCustomField.find_by(name: 'My field')&.id)
+    #    Note: Many, but not all properties of custom fields are available
+    #          in the above cf. So, may not need the 2nd call.
+    # b) For custom fields in projects: ProjectCustomField.find_by(name: 'My field')
+    # c) Similar for other custom fields:
+    #    DocumentCategoryCustomField, DocumentCustomField, GroupCustomField,
+    #    IssuePriorityCustomField, TimeEntryActivityCustomField, TimeEntryCustomField,
+    #    UserCustomField, VersionCustomField
+    #    Details can be found at
+    #      https://www.rubydoc.info/github/redmine/redmine/CustomField
+    # d) If you do not know the type or if you want to search for any kind of
+    #    custom field: CustomField.find_by(name: 'My field')
+    #    Please be aware, that custom field names may not be unique across types.
+    #    So, better use a)-c) if possible.
     def self.get_custom_field(custom_field_id)
       begin
         custom_field = CustomField.find(custom_field_id)
-        
         result = {
-          id: custom_field.id,
-          name: custom_field.name,
-          description: custom_field.description,
-          field_format: custom_field.field_format,
+          id:              custom_field.id,
+          type:            custom_field.type,
           customized_type: custom_field.class.name.gsub('CustomField', '').downcase,
-          is_required: custom_field.is_required,
-          is_for_all: custom_field.is_for_all,
-          visible: custom_field.visible,
-          searchable: custom_field.searchable,
-          multiple: custom_field.multiple,
-          default_value: custom_field.default_value,
+          name:            custom_field.name,
+          description:     custom_field.description,
+          field_format:    custom_field.field_format,
+          is_required:     custom_field.is_required,
+          is_for_all:      custom_field.is_for_all,
+          is_filter:       custom_field.is_filter,
+          position:        custom_field.position,
+          searchable:      custom_field.searchable,
+          editable:        custom_field.editable,
+          visible:         custom_field.visible,
+          is_for_new:      custom_field.is_for_new,
+          hint:            custom_field.hint,
+          multiple:        custom_field.multiple,
+          default_value:   custom_field.default_value,
           possible_values: custom_field.possible_values,
-          regexp: custom_field.regexp,
-          min_length: custom_field.min_length,
-          max_length: custom_field.max_length,
-          formula: custom_field.respond_to?(:formula) ? custom_field.formula : nil
+          regexp:          custom_field.regexp,
+          min_length:      custom_field.min_length,
+          max_length:      custom_field.max_length,
+          formula:         custom_field.respond_to?(:formula) ? custom_field.formula : nil
         }
 
         # Get tracker information for IssueCustomFields:
@@ -359,19 +386,26 @@ module HrzLib
         end
 
         # Get possible values for key/value fields
-        possible_values = []
         if custom_field.field_format == 'enumeration'
           if custom_field.respond_to?(:enumerations)
             # Redmine 4.x and later
-            possible_values = custom_field.enumerations.map(&:name)
+            possible_values     = custom_field.enumerations.map(&:name)
+            possible_val_keys   = custom_field.enumerations.map(&:id)
+            possible_val_active = custom_field.enumerations.map(&:active)
           elsif custom_field.respond_to?(:custom_options)
             # Alternative method
-            possible_values = custom_field.custom_options.map(&:value)
+            possible_values     = custom_field.custom_options.map(&:value)
+            possible_val_keys   = custom_field.custom_options.map(&:key)
+            possible_val_active = []
           elsif custom_field.respond_to?(:possible_values) && custom_field.possible_values.is_a?(Array)
             # Fallback for older versions or direct array
-            possible_values = custom_field.possible_values
+            possible_values     = custom_field.possible_values
+            possible_val_keys   = []
+            possible_val_active = []
           end
-          result[:possible_values] = possible_values
+          result[:possible_values]     = possible_values
+          result[:possible_val_keys]   = possible_val_keys
+          result[:possible_val_active] = possible_val_active
         end
 
         #Rails.logger.info "HRZ Lib: Retrieved custom field ##{custom_field_id}"
