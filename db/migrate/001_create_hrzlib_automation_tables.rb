@@ -56,7 +56,7 @@ class CreateHrzlibAutomationTables < ActiveRecord::Migration[6.1]
 
     # Automatic action
     create_table :hrzlib_aut_actions do |t|
-      t.string :b_title, limit: 100, primary_key: true
+      t.string :b_title, limit: 100
       t.string :b_comment, limit: 4000
       t.integer :jq_on_new_ticket, limit: 1
       t.integer :jq_on_ticket_update, limit: 1
