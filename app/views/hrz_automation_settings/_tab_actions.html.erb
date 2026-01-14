@@ -1,0 +1,81 @@
+<%# ------------------------------------------------------------------------------------------- %>
+<%#  Redmine utility/library plugin. Provides common functions to other plugins + REST API.     %>
+<%#  Copyright (C) 2026 Franz Apeltauer                                                         %>
+<%#                                                                                             %>
+<%#  This program is free software: you can redistribute it and/or modify it under the terms    %>
+<%#  of the GNU Affero General Public License as published by the Free Software Foundation,     %>
+<%#  either version 3 of the License, or (at your option) any later version.                    %>
+<%#                                                                                             %>
+<%#  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;  %>
+<%#  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  %>
+<%#  See the GNU Affero General Public License for more details.                                %>
+<%#                                                                                             %>
+<%#  You should have received a copy of the GNU Affero General Public License                   %>
+<%#  along with this program.  If not, see <https://www.gnu.org/licenses/>.                     %>
+<%# -------------------------------------------------------------------------------------eohdr- %>
+<h3><%= l(:label_actions) %></h3>
+
+<% if @actions.any? %>
+<table class="list">
+  <thead>
+    <tr>
+      <th><%= l(:field_action_title) %></th>
+      <th><%= l(:field_on_new) %></th>
+      <th><%= l(:field_on_update) %></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @actions.each do |action| %>
+    <tr>
+      <td><%= action.b_title %></td>
+      <td><%= checked_image(action.jq_on_new_ticket == 1) %></td>
+      <td><%= checked_image(action.jq_on_ticket_update == 1) %></td>
+      <td class="buttons">
+        <%= link_to l(:button_edit), 'javascript:void(0)', 
+            onclick: "showEditForm('action', '#{j action.b_title}')", 
+            class: 'icon icon-edit' %>
+        <%= link_to l(:button_delete), 
+            { action: 'destroy_action', id: action.b_title }, 
+            method: :delete, 
+            data: { confirm: l(:text_are_you_sure) }, 
+            class: 'icon icon-del' %>
+      </td>
+    </tr>
+    <tr id="edit_action_<%= action.b_title.gsub(/[^a-zA-Z0-9]/, '_') %>" style="display:none;">
+      <td colspan="4">
+        <%= render partial: 'action_form', locals: { 
+          action: action, 
+          conditions: @conditions, 
+          steps: @steps, 
+          url: { action: 'update_action', id: action.b_title }, 
+          method: :patch 
+        } %>
+      </td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+<% else %>
+<p class="nodata"><%= l(:label_no_data) %></p>
+<% end %>
+
+<h3><%= l(:label_new_action) %></h3>
+<%= render partial: 'action_form', locals: { 
+  action: @action, 
+  conditions: @conditions, 
+  steps: @steps, 
+  url: { action: 'create_action' }, 
+  method: :post 
+} %>
+
+<script>
+function showEditForm(type, id) {
+  var cleanId = id.replace(/[^a-zA-Z0-9]/g, '_');
+  document.getElementById('edit_' + type + '_' + cleanId).style.display = '';
+}
+function hideEditForm(type, id) {
+  var cleanId = id.replace(/[^a-zA-Z0-9]/g, '_');
+  document.getElementById('edit_' + type + '_' + cleanId).style.display = 'none';
+}
+</script>

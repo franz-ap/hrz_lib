@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------------------#
 # Redmine utility/library plugin. Provides common functions to other plugins + REST API.    #
-# Copyright (C) 2025 Franz Apeltauer                                                        #
+# Copyright (C) 2026 Franz Apeltauer                                                        #
 #                                                                                           #
 # This program is free software: you can redistribute it and/or modify it under the terms   #
 # of the GNU Affero General Public License as published by the Free Software Foundation,    #
@@ -13,33 +13,33 @@
 # You should have received a copy of the GNU Affero General Public License                  #
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.                    #
 #-------------------------------------------------------------------------------------eohdr-#
-# Purpose: Plugin registration file for the Redmine utility/library plugin.
+# Purpose: Model for automation steps
 
-require 'redmine'
 
-Redmine::Plugin.register :hrz_lib do
-  name        'HRZ Lib'
-  author      'Franz Apeltauer, Claude'
-  description 'Redmine utility/library plugin. Provides common functions to other plugins and a REST API for CustomField creation/modification.'
-  version     '0.6.3'
-  url         'https://github.com/franz-ap/hrz_lib'
-  author_url  ''
-  requires_redmine version_or_higher: '6.1.0'
-
-  # Add settings page
-  settings default: {}, partial: 'settings/hrz_lib_settings'
-
-  # Add menu item for automation settings
-  menu :admin_menu, :hrz_automation,
-       { controller: 'hrz_automation_settings', action: 'index' },
-       caption: :label_hrz_automation,
-       html: { class: 'icon icon-workflows' }
-end
-
-# Load library modules
-require_relative 'lib/hrz_lib/issue_helper'
-require_relative 'lib/hrz_lib/custom_field_helper'
-require_relative 'lib/hrz_lib/hrz_tag_parser'
-require_relative 'lib/hrz_lib/hrz_tag_functions'
-require_relative 'lib/hrz_lib/hrz_auto_action'
-require_relative 'lib/hrz_lib/hrz_http'
+class HrzlibAutStep < ActiveRecord::Base
+  self.primary_key = 'j_step_id'
+  
+  belongs_to :todo, class_name: 'HrzlibAutTodo', foreign_key: 'b_todo', primary_key: 'b_key', optional: true
+  belongs_to :issue_template, class_name: 'Issue', foreign_key: 'j_issue_template_id', optional: true
+  belongs_to :creator, class_name: 'User', foreign_key: 'created_by', optional: true
+  belongs_to :updater, class_name: 'User', foreign_key: 'updated_by', optional: true
+  
+  validates :b_title, presence: true, length: { maximum: 100 }
+  validates :b_comment, length: { maximum: 4000 }
+  validates :b_hrz_prep, length: { maximum: 4000 }
+  validates :b_todo, length: { maximum: 25 }
+  validates :b_project_id, length: { maximum: 50 }
+  validates :b_key_abbr, length: { maximum: 50 }
+  validates :b_hrz_clean, length: { maximum: 4000 }
+  
+  before_save :set_user_context
+  
+  private
+  
+  def set_user_context
+    if new_record?
+      self.created_by = User.current.id if User.current
+    end
+    self.updated_by = User.current.id if User.current
+  end
+end  # class HrzlibAutStep

@@ -1,0 +1,77 @@
+<%# ------------------------------------------------------------------------------------------- %>
+<%#  Redmine utility/library plugin. Provides common functions to other plugins + REST API.     %>
+<%#  Copyright (C) 2026 Franz Apeltauer                                                         %>
+<%#                                                                                             %>
+<%#  This program is free software: you can redistribute it and/or modify it under the terms    %>
+<%#  of the GNU Affero General Public License as published by the Free Software Foundation,     %>
+<%#  either version 3 of the License, or (at your option) any later version.                    %>
+<%#                                                                                             %>
+<%#  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;  %>
+<%#  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  %>
+<%#  See the GNU Affero General Public License for more details.                                %>
+<%#                                                                                             %>
+<%#  You should have received a copy of the GNU Affero General Public License                   %>
+<%#  along with this program.  If not, see <https://www.gnu.org/licenses/>.                     %>
+<%# -------------------------------------------------------------------------------------eohdr- %>
+<h3><%= l(:label_ai_models) %></h3>
+
+<% if @ai_models.any? %>
+<table class="list">
+  <thead>
+    <tr>
+      <th><%= l(:field_model_id) %></th>
+      <th><%= l(:field_model_name) %></th>
+      <th><%= l(:field_url) %></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @ai_models.each do |model| %>
+    <tr>
+      <td><%= model.j_key %> (<%= model.b_key %>)</td>
+      <td><%= model.b_name %></td>
+      <td><%= truncate(model.b_url, length: 50) %></td>
+      <td class="buttons">
+        <%= link_to l(:button_edit), 'javascript:void(0)', 
+            onclick: "showEditForm('aimodel', #{model.j_key})", 
+            class: 'icon icon-edit' %>
+        <%= link_to l(:button_delete), 
+            { action: 'destroy_ai_model', id: model.j_key }, 
+            method: :delete, 
+            data: { confirm: l(:text_are_you_sure) }, 
+            class: 'icon icon-del' %>
+      </td>
+    </tr>
+    <tr id="edit_aimodel_<%= model.j_key %>" style="display:none;">
+      <td colspan="4">
+        <%= render partial: 'ai_model_form', locals: { 
+          ai_model: model, 
+          available_models: @available_models, 
+          url: { action: 'update_ai_model', id: model.j_key }, 
+          method: :patch 
+        } %>
+      </td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+<% else %>
+<p class="nodata"><%= l(:label_no_data) %></p>
+<% end %>
+
+<h3><%= l(:label_new_ai_model) %></h3>
+<%= render partial: 'ai_model_form', locals: { 
+  ai_model: @ai_model, 
+  available_models: @available_models, 
+  url: { action: 'create_ai_model' }, 
+  method: :post 
+} %>
+
+<script>
+function showEditForm(type, id) {
+  document.getElementById('edit_' + type + '_' + id).style.display = '';
+}
+function hideEditForm(type, id) {
+  document.getElementById('edit_' + type + '_' + id).style.display = 'none';
+}
+</script>

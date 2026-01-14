@@ -1,0 +1,77 @@
+<%# ------------------------------------------------------------------------------------------- %>
+<%#  Redmine utility/library plugin. Provides common functions to other plugins + REST API.     %>
+<%#  Copyright (C) 2026 Franz Apeltauer                                                         %>
+<%#                                                                                             %>
+<%#  This program is free software: you can redistribute it and/or modify it under the terms    %>
+<%#  of the GNU Affero General Public License as published by the Free Software Foundation,     %>
+<%#  either version 3 of the License, or (at your option) any later version.                    %>
+<%#                                                                                             %>
+<%#  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;  %>
+<%#  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  %>
+<%#  See the GNU Affero General Public License for more details.                                %>
+<%#                                                                                             %>
+<%#  You should have received a copy of the GNU Affero General Public License                   %>
+<%#  along with this program.  If not, see <https://www.gnu.org/licenses/>.                     %>
+<%# -------------------------------------------------------------------------------------eohdr- %>
+<%= form_for step, url: url, method: method, html: { class: 'tabular' } do |f| %>
+  <div class="box">
+    <p>
+      <%= f.label :b_title, l(:field_step_title) %>
+      <%= f.text_field :b_title, size: 80, required: true %>
+    </p>
+    <p>
+      <%= f.label :b_comment, l(:field_comment) %>
+      <%= f.text_area :b_comment, rows: 3, cols: 80 %>
+      <em class="info"><%= l(:help_comment_admin) %></em>
+    </p>
+    <p>
+      <%= f.label :b_hrz_prep, l(:field_preparation) %>
+      <%= f.text_area :b_hrz_prep, rows: 3, cols: 80 %>
+      <em class="info"><%= l(:help_preparation) %></em>
+    </p>
+    <p>
+      <%= f.label :b_todo, l(:field_todo) %>
+      <%= f.select :b_todo, 
+          options_for_select(todos.map { |t| [t.b_name, t.b_key] }, step.b_todo), 
+          { include_blank: true } %>
+    </p>
+    <p>
+      <%= f.label :jq_related, l(:field_related_ticket) %>
+      <%= f.check_box :jq_related %>
+    </p>
+    <p>
+      <%= f.label :jq_subticket, l(:field_subticket) %>
+      <%= f.check_box :jq_subticket %>
+    </p>
+    <p>
+      <%= f.label :j_issue_template_id, l(:field_issue_template) %>
+      <%= f.number_field :j_issue_template_id %>
+    </p>
+    <p>
+      <%= f.label :b_project_id, l(:field_project_id) %>
+      <%= f.text_field :b_project_id, size: 30 %>
+      <em class="info"><%= l(:help_project_id) %></em>
+    </p>
+    <p>
+      <%= f.label :jq_only_1x, l(:field_only_once) %>
+      <%= f.check_box :jq_only_1x %>
+      <em class="info"><%= l(:help_only_once) %></em>
+    </p>
+    <p>
+      <%= f.label :b_key_abbr, l(:field_key_abbr) %>
+      <%= f.text_field :b_key_abbr, size: 30 %>
+      <em class="info"><%= l(:help_key_abbr) %></em>
+    </p>
+    <p>
+      <%= f.label :b_hrz_clean, l(:field_cleanup) %>
+      <%= f.text_area :b_hrz_clean, rows: 3, cols: 80 %>
+      <em class="info"><%= l(:help_cleanup) %></em>
+    </p>
+    <p>
+      <%= f.submit method == :post ? l(:button_create) : l(:button_save) %>
+      <% if method == :patch %>
+        <%= link_to l(:button_cancel), 'javascript:void(0)', onclick: "hideEditForm('step', #{step.j_step_id})" %>
+      <% end %>
+    </p>
+  </div>
+<% end %>

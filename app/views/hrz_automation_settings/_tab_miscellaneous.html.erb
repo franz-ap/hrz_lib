@@ -1,0 +1,105 @@
+<%# ------------------------------------------------------------------------------------------- %>
+<%#  Redmine utility/library plugin. Provides common functions to other plugins + REST API.     %>
+<%#  Copyright (C) 2026 Franz Apeltauer                                                         %>
+<%#                                                                                             %>
+<%#  This program is free software: you can redistribute it and/or modify it under the terms    %>
+<%#  of the GNU Affero General Public License as published by the Free Software Foundation,     %>
+<%#  either version 3 of the License, or (at your option) any later version.                    %>
+<%#                                                                                             %>
+<%#  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;  %>
+<%#  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  %>
+<%#  See the GNU Affero General Public License for more details.                                %>
+<%#                                                                                             %>
+<%#  You should have received a copy of the GNU Affero General Public License                   %>
+<%#  along with this program.  If not, see <https://www.gnu.org/licenses/>.                     %>
+<%# -------------------------------------------------------------------------------------eohdr- %>
+<h3><%= l(:label_todo_list) %></h3>
+
+<% if @todos.any? %>
+<table class="list">
+  <thead>
+    <tr>
+      <th><%= l(:field_todo_key) %></th>
+      <th><%= l(:field_todo_name) %></th>
+      <th><%= l(:field_sort_order) %></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @todos.each do |todo| %>
+    <tr>
+      <td><%= todo.b_key %></td>
+      <td><%= todo.b_name %></td>
+      <td><%= todo.j_sort %></td>
+      <td class="buttons">
+        <%= link_to l(:button_edit), 'javascript:void(0)', 
+            onclick: "showEditForm('todo', '#{j todo.b_key}')", 
+            class: 'icon icon-edit' %>
+        <%= link_to l(:button_delete), 
+            { action: 'destroy_todo', id: todo.b_key }, 
+            method: :delete, 
+            data: { confirm: l(:text_are_you_sure) }, 
+            class: 'icon icon-del' %>
+      </td>
+    </tr>
+    <tr id="edit_todo_<%= todo.b_key.gsub(/[^a-zA-Z0-9]/, '_') %>" style="display:none;">
+      <td colspan="4">
+        <%= form_for todo, url: { action: 'update_todo', id: todo.b_key }, method: :patch, html: { class: 'tabular' } do |f| %>
+          <div class="box">
+            <p>
+              <%= f.label :b_key, l(:field_todo_key) %>
+              <%= f.text_field :b_key, size: 25, required: true, readonly: true %>
+            </p>
+            <p>
+              <%= f.label :b_name, l(:field_todo_name) %>
+              <%= f.text_field :b_name, size: 80, required: true %>
+            </p>
+            <p>
+              <%= f.label :j_sort, l(:field_sort_order) %>
+              <%= f.number_field :j_sort %>
+            </p>
+            <p>
+              <%= f.submit l(:button_save) %>
+              <%= link_to l(:button_cancel), 'javascript:void(0)', onclick: "hideEditForm('todo', '#{j todo.b_key}')" %>
+            </p>
+          </div>
+        <% end %>
+      </td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+<% else %>
+<p class="nodata"><%= l(:label_no_data) %></p>
+<% end %>
+
+<h3><%= l(:label_new_todo) %></h3>
+<%= form_for @todo, url: { action: 'create_todo' }, html: { class: 'tabular' } do |f| %>
+  <div class="box">
+    <p>
+      <%= f.label :b_key, l(:field_todo_key) %>
+      <%= f.text_field :b_key, size: 25, required: true %>
+    </p>
+    <p>
+      <%= f.label :b_name, l(:field_todo_name) %>
+      <%= f.text_field :b_name, size: 80, required: true %>
+    </p>
+    <p>
+      <%= f.label :j_sort, l(:field_sort_order) %>
+      <%= f.number_field :j_sort %>
+      <em class="info"><%= l(:help_sort_order) %></em>
+    </p>
+    <%= f.submit l(:button_create) %>
+  </div>
+<% end %>
+
+<script>
+function showEditForm(type, id) {
+  var cleanId = id.replace(/[^a-zA-Z0-9]/g, '_');
+  document.getElementById('edit_' + type + '_' + cleanId).style.display = '';
+}
+function hideEditForm(type, id) {
+  var cleanId = id.replace(/[^a-zA-Z0-9]/g, '_');
+  document.getElementById('edit_' + type + '_' + cleanId).style.display = 'none';
+}
+</script>

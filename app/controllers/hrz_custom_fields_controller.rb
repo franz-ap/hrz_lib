@@ -243,4 +243,4 @@ class HrzCustomFieldsController < ApplicationController
       return false
     end
   end
-end
+end  # class HrzCustomFieldsController

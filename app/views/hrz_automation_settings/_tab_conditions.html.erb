@@ -1,0 +1,96 @@
+<%# ------------------------------------------------------------------------------------------- %>
+<%#  Redmine utility/library plugin. Provides common functions to other plugins + REST API.     %>
+<%#  Copyright (C) 2026 Franz Apeltauer                                                         %>
+<%#                                                                                             %>
+<%#  This program is free software: you can redistribute it and/or modify it under the terms    %>
+<%#  of the GNU Affero General Public License as published by the Free Software Foundation,     %>
+<%#  either version 3 of the License, or (at your option) any later version.                    %>
+<%#                                                                                             %>
+<%#  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;  %>
+<%#  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  %>
+<%#  See the GNU Affero General Public License for more details.                                %>
+<%#                                                                                             %>
+<%#  You should have received a copy of the GNU Affero General Public License                   %>
+<%#  along with this program.  If not, see <https://www.gnu.org/licenses/>.                     %>
+<%# -------------------------------------------------------------------------------------eohdr- %>
+<h3><%= l(:label_conditions) %></h3>
+
+<% if @conditions.any? %>
+<table class="list">
+  <thead>
+    <tr>
+      <th><%= l(:field_condition_id) %></th>
+      <th><%= l(:field_question) %></th>
+      <th><%= l(:field_formula) %></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @conditions.each do |condition| %>
+    <tr>
+      <td><%= condition.j_condition_id %></td>
+      <td><%= condition.b_cond_question %></td>
+      <td><%= truncate(condition.b_cond_hrz, length: 100) %></td>
+      <td class="buttons">
+        <%= link_to l(:button_edit), 'javascript:void(0)', 
+            onclick: "showEditForm('condition', #{condition.j_condition_id})", 
+            class: 'icon icon-edit' %>
+        <%= link_to l(:button_delete), 
+            { action: 'destroy_condition', id: condition.j_condition_id }, 
+            method: :delete, 
+            data: { confirm: l(:text_are_you_sure) }, 
+            class: 'icon icon-del' %>
+      </td>
+    </tr>
+    <tr id="edit_condition_<%= condition.j_condition_id %>" style="display:none;">
+      <td colspan="4">
+        <%= form_for condition, url: { action: 'update_condition', id: condition.j_condition_id }, method: :patch do |f| %>
+          <div class="box tabular">
+            <p>
+              <%= f.label :b_cond_question, l(:field_question) %>
+              <%= f.text_field :b_cond_question, size: 80 %>
+            </p>
+            <p>
+              <%= f.label :b_cond_hrz, l(:field_formula) %>
+              <%= f.text_area :b_cond_hrz, rows: 5, cols: 80 %>
+            </p>
+            <p>
+              <%= f.submit l(:button_save) %>
+              <%= link_to l(:button_cancel), 'javascript:void(0)', onclick: "hideEditForm('condition', #{condition.j_condition_id})" %>
+            </p>
+          </div>
+        <% end %>
+      </td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+<% else %>
+<p class="nodata"><%= l(:label_no_data) %></p>
+<% end %>
+
+<h3><%= l(:label_new_condition) %></h3>
+<%= form_for @condition, url: { action: 'create_condition' }, html: { class: 'tabular' } do |f| %>
+  <div class="box">
+    <p>
+      <%= f.label :b_cond_question, l(:field_question) %>
+      <%= f.text_field :b_cond_question, size: 80, required: true %>
+      <em class="info"><%= l(:help_question) %></em>
+    </p>
+    <p>
+      <%= f.label :b_cond_hrz, l(:field_formula) %>
+      <%= f.text_area :b_cond_hrz, rows: 5, cols: 80 %>
+      <em class="info"><%= l(:help_formula) %></em>
+    </p>
+    <%= f.submit l(:button_create) %>
+  </div>
+<% end %>
+
+<script>
+function showEditForm(type, id) {
+  document.getElementById('edit_' + type + '_' + id).style.display = '';
+}
+function hideEditForm(type, id) {
+  document.getElementById('edit_' + type + '_' + id).style.display = 'none';
+}
+</script>

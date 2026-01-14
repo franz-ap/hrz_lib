@@ -1,0 +1,79 @@
+#-------------------------------------------------------------------------------------------#
+# Redmine utility/library plugin. Provides common functions to other plugins + REST API.    #
+# Copyright (C) 2026 Franz Apeltauer                                                        #
+#                                                                                           #
+# This program is free software: you can redistribute it and/or modify it under the terms   #
+# of the GNU Affero General Public License as published by the Free Software Foundation,    #
+# either version 3 of the License, or (at your option) any later version.                   #
+#                                                                                           #
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; #
+# without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. #
+# See the GNU Affero General Public License for more details.                               #
+#                                                                                           #
+# You should have received a copy of the GNU Affero General Public License                  #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.                    #
+#-------------------------------------------------------------------------------------eohdr-#
+en:
+  label_hrz_automation: "HRZ Automation"
+  label_conditions: "Conditions"
+  label_steps: "Steps"
+  label_actions: "Actions"
+  label_ai_models: "AI Models"
+  label_miscellaneous: "Miscellaneous"
+  label_todo_list: "ToDo List"
+  label_new_condition: "New Condition"
+  label_new_step: "New Step"
+  label_new_action: "New Action"
+  label_new_ai_model: "New AI Model"
+  label_new_todo: "New ToDo"
+  
+  field_condition_id: "Condition ID"
+  field_question: "Question"
+  field_formula: "Formula"
+  field_step_id: "Step ID"
+  field_step_title: "Step Title"
+  field_comment: "Remarks"
+  field_preparation: "Preparation"
+  field_todo: "ToDo"
+  field_related_ticket: "Related ticket"
+  field_subticket: "Sub-ticket"
+  field_issue_template: "Issue to be used as template"
+  field_project_id: "Project identifier"
+  field_only_once: "Only once"
+  field_key_abbr: "Key for testing 'once'"
+  field_cleanup: "Cleanup"
+  field_action_title: "Action Title"
+  field_on_new: "On new"
+  field_on_update: "On update"
+  field_on_new_ticket: "On new issue"
+  field_on_ticket_update: "On issue modification"
+  field_condition: "Condition"
+  field_step: "Step"
+  field_model_id: "Internal AI model ID"
+  field_short_name: "Short name"
+  field_model_name: "AI model name"
+  field_url: "URL"
+  field_api_key: "API Key"
+  field_json_post: "POST message, JSON format"
+  field_json_res_path: "JSON Path"
+  field_todo_key: "Internal ToDo name"
+  field_todo_name: "Display name of ToDo"
+  field_sort_order: "Sort order"
+  
+  help_question: "Verbal version of the condition"
+  help_formula: "Algebraic version of the condition, usually with <HRZ> tags"
+  help_comment_admin: "Comments about this step, for administrators. Optional."
+  help_comment_users: "Comments about this action, description for users. Optional."
+  help_preparation: "Things to do before, usually including <HRZ> tags, optional"
+  help_project_id: "Text or numeric ID, optional"
+  help_only_once: "Perform this only once, even if the conditions trigger again, later?"
+  help_key_abbr: "For issues: Will be appended to the subject."
+  help_cleanup: "Things to do afterwards, usually including <HRZ> tags, optional"
+  help_on_new_ticket: "Perform this action when creating a new ticket?"
+  help_on_ticket_update: "Perform this action when updating a ticket?"
+  help_conditions_all: "The action will only be performed if ALL given conditions are met (AND)"
+  help_model_id: "Retrieve the possible values via CustomFieldHelper"
+  help_auto_filled: "Automatically filled when model ID gets modified"
+  help_json_post: "Mark the place where the prompt has to be inserted with MY_PROMPT."
+  help_json_res_path: "To find the final result in the result data. Example: $.xydata.items[0].value"
+  help_sort_order: "For displaying in lists"

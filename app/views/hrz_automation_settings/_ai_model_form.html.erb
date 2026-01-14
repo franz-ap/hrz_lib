@@ -1,0 +1,60 @@
+<%# ------------------------------------------------------------------------------------------- %>
+<%#  Redmine utility/library plugin. Provides common functions to other plugins + REST API.     %>
+<%#  Copyright (C) 2026 Franz Apeltauer                                                         %>
+<%#                                                                                             %>
+<%#  This program is free software: you can redistribute it and/or modify it under the terms    %>
+<%#  of the GNU Affero General Public License as published by the Free Software Foundation,     %>
+<%#  either version 3 of the License, or (at your option) any later version.                    %>
+<%#                                                                                             %>
+<%#  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;  %>
+<%#  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  %>
+<%#  See the GNU Affero General Public License for more details.                                %>
+<%#                                                                                             %>
+<%#  You should have received a copy of the GNU Affero General Public License                   %>
+<%#  along with this program.  If not, see <https://www.gnu.org/licenses/>.                     %>
+<%# -------------------------------------------------------------------------------------eohdr- %>
+<%= form_for ai_model, url: url, method: method, html: { class: 'tabular' } do |f| %>
+  <div class="box">
+    <p>
+      <%= f.label :j_key, l(:field_model_id) %>
+      <%= f.select :j_key, 
+          options_for_select(available_models.to_a, ai_model.j_key), 
+          { include_blank: true }, 
+          { required: true, readonly: (method == :patch) } %>
+      <em class="info"><%= l(:help_model_id) %></em>
+    </p>
+    <p>
+      <%= f.label :b_key, l(:field_short_name) %>
+      <%= f.text_field :b_key, size: 30, readonly: true %>
+      <em class="info"><%= l(:help_auto_filled) %></em>
+    </p>
+    <p>
+      <%= f.label :b_name, l(:field_model_name) %>
+      <%= f.text_field :b_name, size: 80, required: true %>
+    </p>
+    <p>
+      <%= f.label :b_url, l(:field_url) %>
+      <%= f.text_field :b_url, size: 80 %>
+    </p>
+    <p>
+      <%= f.label :b_api_key, l(:field_api_key) %>
+      <%= f.text_field :b_api_key, size: 80, type: 'password' %>
+    </p>
+    <p>
+      <%= f.label :b_json_post, l(:field_json_post) %>
+      <%= f.text_area :b_json_post, rows: 5, cols: 80 %>
+      <em class="info"><%= l(:help_json_post) %></em>
+    </p>
+    <p>
+      <%= f.label :b_json_res_path, l(:field_json_res_path) %>
+      <%= f.text_field :b_json_res_path, size: 80 %>
+      <em class="info"><%= l(:help_json_res_path) %></em>
+    </p>
+    <p>
+      <%= f.submit method == :post ? l(:button_create) : l(:button_save) %>
+      <% if method == :patch %>
+        <%= link_to l(:button_cancel), 'javascript:void(0)', onclick: "hideEditForm('aimodel', #{ai_model.j_key})" %>
+      <% end %>
+    </p>
+  </div>
+<% end %>
