@@ -57,5 +57,4 @@ class HrzlibAiModel < ActiveRecord::Base
       Rails.logger.error "Error auto-filling b_key: #{e.message}"
     end
   end
-end
 end  # class HrzlibAiModel

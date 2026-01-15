@@ -43,7 +43,7 @@ class CreateHrzlibAutomationTables < ActiveRecord::Migration[6.1]
       t.string :b_todo, limit: 25
       t.integer :jq_related, limit: 1
       t.integer :jq_subticket, limit: 1
-      t.integer :j_issue_template_id
+      t.bigint :j_issue_template_id
       t.string :b_project_id, limit: 50
       t.integer :jq_only_1x, limit: 1
       t.string :b_key_abbr, limit: 50
@@ -60,16 +60,16 @@ class CreateHrzlibAutomationTables < ActiveRecord::Migration[6.1]
       t.string :b_comment, limit: 4000
       t.integer :jq_on_new_ticket, limit: 1
       t.integer :jq_on_ticket_update, limit: 1
-      t.integer :j_cond1_id
-      t.integer :j_cond2_id
-      t.integer :j_cond3_id
-      t.integer :j_cond4_id
-      t.integer :j_cond5_id
-      t.integer :j_step1_id
-      t.integer :j_step2_id
-      t.integer :j_step3_id
-      t.integer :j_step4_id
-      t.integer :j_step5_id
+      t.bigint :j_cond1_id
+      t.bigint :j_cond2_id
+      t.bigint :j_cond3_id
+      t.bigint :j_cond4_id
+      t.bigint :j_cond5_id
+      t.bigint :j_step1_id
+      t.bigint :j_step2_id
+      t.bigint :j_step3_id
+      t.bigint :j_step4_id
+      t.bigint :j_step5_id
       t.integer :created_by
       t.integer :updated_by
       t.timestamps
