@@ -319,5 +319,84 @@ module HrzLib
     end  # pop_recursion
 
 
+
+    # ------------------------------------------------------------------------------------------------------------------------------
+    # Action information retrieval from the database
+    # ------------------------------------------------------------------------------------------------------------------------------
+
+    # Retrieves (all) details about the given action ID.
+    # @param  j_action_id [Integer] Action ID to be retrieved
+    # @return [Hash, nil] Action details.
+    def self.get_action_details(j_action_id)
+      action = HrzlibAutAction.find_by(id: j_action_id)
+      if action
+        condition_ids = [
+          action.j_cond1_id, action.j_cond2_id, action.j_cond3_id, action.j_cond4_id, action.j_cond5_id
+        ].compact.uniq
+
+        step_ids = [
+          action.j_step1_id, action.j_step2_id, action.j_step3_id, action.j_step4_id, action.j_step5_id
+        ].compact.uniq
+
+        conditions_by_id =
+          if condition_ids.empty?
+            {}
+          else
+            HrzlibAutCondition.where(j_condition_id: condition_ids).index_by(&:j_condition_id)
+          end
+
+        steps_by_id =
+          if step_ids.empty?
+            {}
+          else
+            HrzlibAutStep.where(j_step_id: step_ids).index_by(&:j_step_id)
+          end
+
+        conditions = condition_ids.map do |cid|
+          c = conditions_by_id[cid]
+          next nil unless c
+
+          {
+            j_condition_id:  c.j_condition_id,
+            b_cond_question: c.b_cond_question,
+            b_cond_hrz:      c.b_cond_hrz
+          }
+        end.compact
+
+        steps = step_ids.map do |sid|
+          s = steps_by_id[sid]
+          next nil unless s
+
+          {
+            j_step_id:         s.j_step_id,
+            b_title:           s.b_title,
+            b_comment:         s.b_comment,
+            b_hrz_prep:        s.b_hrz_prep,
+            b_todo:            s.b_todo,
+            q_related:         (s.jq_related.to_i   > 0),
+            q_subticket:       (s.jq_subticket.to_i > 0),
+            issue_template_id: s.j_issue_template_id,
+            b_project_id:      s.b_project_id,
+            q_only_1x:         (s.jq_only_1x.to_i > 0),
+            b_key_abbr:        s.b_key_abbr,
+            b_hrz_clean:       s.b_hrz_clean
+          }
+        end.compact
+
+        {
+          j_action_id:        j_action_id,  #action.id, # Rails-PK of table hrzlib_aut_actions
+          b_title:            action.b_title,
+          b_comment:          action.b_comment,
+          q_on_new_ticket:    (action.jq_on_new_ticket.to_i    > 0),
+          q_on_ticket_update: (action.jq_on_ticket_update.to_i > 0),
+          arr_cond:           conditions,
+          arr_steps:          steps
+        }
+      else
+        HrzLogger.logger.debug_msg "HrzAutoAction.get_action_details(#{j_action_id}): Action not defined."
+        nil
+      end # if action
+    end  # get_action_details
+
   end  # class HrzAutoAction
 end  # module HrzLib

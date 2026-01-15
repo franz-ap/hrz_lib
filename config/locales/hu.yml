@@ -31,7 +31,7 @@ hu:
   label_action_new: "Új művelet"
   label_ai_model_new: "Új AI modell"
   label_todo_new: "Új ToDo"
-  
+
   field_condition_id: "Feltétel ID"
   field_question: "Kérdés"
   field_formula: "Formula"
@@ -64,7 +64,7 @@ hu:
   field_todo_key: "Belső ToDo név"
   field_todo_name: "ToDo megjelenítési neve"
   field_sort_order: "Rendezési sorrend"
-  
+
   help_question: "A feltétel verbális változata"
   help_formula: "A feltétel algebrai változata, általában <HRZ> címkékkel"
   help_comment_admin: "Megjegyzések ehhez a lépéshez, adminisztrátorok számára. Opcionális."
@@ -77,7 +77,7 @@ hu:
   help_on_new_ticket: "Hajtsa végre ezt a műveletet új jegy létrehozásakor?"
   help_on_ticket_update: "Hajtsa végre ezt a műveletet jegy frissítésekor?"
   help_conditions_all: "A művelet csak akkor kerül végrehajtásra, ha MINDEN megadott feltétel teljesül (ÉS)"
-  help_model_id: "A lehetséges értékek lekérése a CustomFieldHelper segítségével"
+  help_model_id: "A lehetséges értékek a projekt egyedi mezőjéből, az „AI Model”-ből származnak. Kérjük, először oda vigye fel a további értékeket."
   help_auto_filled: "Automatikusan kitöltődik, amikor a modell ID módosul"
   help_json_post: "Jelölje meg azt a helyet, ahová a promptot be kell illeszteni, a MY_PROMPT jelzéssel."
   help_json_res_path: "A végeredmény megtalálásához az eredményadatokban. Példa: $.xydata.items[0].value"

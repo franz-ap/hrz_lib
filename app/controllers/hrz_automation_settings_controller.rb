@@ -261,7 +261,7 @@ class HrzAutomationSettingsController < ApplicationController
     begin
       field = HrzLib::CustomFieldHelper.get_custom_field(ProjectCustomField.find_by(name: 'AI Model')&.id)
       if field && field[:possible_val_keys] && field[:possible_values]
-        field[:possible_val_keys].zip(field[:possible_values]).to_h
+        field[:possible_values].zip(field[:possible_val_keys]).to_h
       else
         {}
       end

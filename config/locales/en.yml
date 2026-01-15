@@ -31,7 +31,7 @@ en:
   label_action_new: "New action"
   label_ai_model_new: "New AI model"
   label_todo_new: "New todo"
-  
+
   field_condition_id: "Condition ID"
   field_question: "Question"
   field_formula: "Formula"
@@ -64,7 +64,7 @@ en:
   field_todo_key: "Internal ToDo name"
   field_todo_name: "Display name of ToDo"
   field_sort_order: "Sort order"
-  
+
   help_question: "Verbal version of the condition"
   help_formula: "Algebraic version of the condition, usually with <HRZ> tags"
   help_comment_admin: "Comments about this step, for administrators. Optional."
@@ -77,7 +77,7 @@ en:
   help_on_new_ticket: "Perform this action when creating a new ticket?"
   help_on_ticket_update: "Perform this action when updating a ticket?"
   help_conditions_all: "The action will only be performed if ALL given conditions are met (AND)"
-  help_model_id: "Retrieve the possible values via CustomFieldHelper"
+  help_model_id: "Possible values are from the 'AI Model' ProjectCustomField. Please add values to this field, if you want to use them here."
   help_auto_filled: "Automatically filled when model ID gets modified"
   help_json_post: "Mark the place where the prompt has to be inserted with MY_PROMPT."
   help_json_res_path: "To find the final result in the result data. Example: $.xydata.items[0].value"

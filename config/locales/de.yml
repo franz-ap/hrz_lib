@@ -31,7 +31,7 @@ de:
   label_action_new: "Neue Aktion"
   label_ai_model_new: "Neues KI-Modell"
   label_todo_new: "Neues ToDo"
-  
+
   field_condition_id: "Bedingungs-ID"
   field_question: "Frage"
   field_formula: "Formel"
@@ -64,7 +64,7 @@ de:
   field_todo_key: "Interner ToDo-Name"
   field_todo_name: "Anzeigename des ToDo"
   field_sort_order: "Sortierreihenfolge"
-  
+
   help_question: "Verbale Version der Bedingung"
   help_formula: "Algebraische Version der Bedingung, normalerweise mit <HRZ>-Tags"
   help_comment_admin: "Kommentare zu diesem Schritt, für Administratoren. Optional."
@@ -77,7 +77,7 @@ de:
   help_on_new_ticket: "Diese Aktion beim Erstellen eines neuen Tickets ausführen?"
   help_on_ticket_update: "Diese Aktion beim Aktualisieren eines Tickets ausführen?"
   help_conditions_all: "Die Aktion wird nur ausgeführt, wenn ALLE angegebenen Bedingungen erfüllt sind (UND)"
-  help_model_id: "Mögliche Werte über CustomFieldHelper abrufen"
+  help_model_id: "Die möglichen Werte kommen aus dem Projekt-CustomField 'AI Model'. Zusätzliche Werte bitte zuerst dort eintragen."
   help_auto_filled: "Wird automatisch ausgefüllt, wenn die Modell-ID geändert wird"
   help_json_post: "Markieren Sie die Stelle, an der die Eingabeaufforderung eingefügt werden soll, mit MY_PROMPT."
   help_json_res_path: "Um das Endergebnis in den Ergebnisdaten zu finden. Beispiel: $.xydata.items[0].value"
