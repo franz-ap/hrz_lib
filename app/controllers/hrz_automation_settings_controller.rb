@@ -259,7 +259,7 @@ class HrzAutomationSettingsController < ApplicationController
 
   def fetch_available_ai_models
     begin
-      field = HrzLib::CustomFieldHelper.get_custom_field(5)
+      field = HrzLib::CustomFieldHelper.get_custom_field(ProjectCustomField.find_by(name: 'AI Model')&.id)
       if field && field[:possible_val_keys] && field[:possible_values]
         field[:possible_val_keys].zip(field[:possible_values]).to_h
       else
