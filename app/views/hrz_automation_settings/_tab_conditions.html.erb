@@ -13,6 +13,14 @@
 <%#  You should have received a copy of the GNU Affero General Public License                   %>
 <%#  along with this program.  If not, see <https://www.gnu.org/licenses/>.                     %>
 <%# -------------------------------------------------------------------------------------eohdr- %>
+
+<div class="contextual">
+  <%= link_to l(:label_condition_new),
+      'javascript:void(0)',
+      onclick: "showNewForm('condition')",
+      class: 'icon icon-add' %>
+</div>
+
 <h3><%= l(:label_conditions) %></h3>
 
 <% if @conditions.any? %>
@@ -32,13 +40,13 @@
       <td><%= condition.b_cond_question %></td>
       <td><%= truncate(condition.b_cond_hrz, length: 100) %></td>
       <td class="buttons">
-        <%= link_to l(:button_edit), 'javascript:void(0)', 
-            onclick: "showEditForm('condition', #{condition.j_condition_id})", 
+        <%= link_to l(:button_edit), 'javascript:void(0)',
+            onclick: "showEditForm('condition', #{condition.j_condition_id})",
             class: 'icon icon-edit' %>
-        <%= link_to l(:button_delete), 
-            { action: 'destroy_condition', id: condition.j_condition_id }, 
-            method: :delete, 
-            data: { confirm: l(:text_are_you_sure) }, 
+        <%= link_to l(:button_delete),
+            { action: 'destroy_condition', id: condition.j_condition_id },
+            method: :delete,
+            data: { confirm: l(:text_are_you_sure) },
             class: 'icon icon-del' %>
       </td>
     </tr>
@@ -69,24 +77,33 @@
 <p class="nodata"><%= l(:label_no_data) %></p>
 <% end %>
 
-<h3><%= l(:label_new_condition) %></h3>
-<%= form_for @condition, url: { action: 'create_condition' }, html: { class: 'tabular' } do |f| %>
-  <div class="box">
-    <p>
-      <%= f.label :b_cond_question, l(:field_question) %>
-      <%= f.text_field :b_cond_question, size: 80, required: true %>
-      <em class="info"><%= l(:help_question) %></em>
-    </p>
-    <p>
-      <%= f.label :b_cond_hrz, l(:field_formula) %>
-      <%= f.text_area :b_cond_hrz, rows: 5, cols: 80 %>
-      <em class="info"><%= l(:help_formula) %></em>
-    </p>
-    <%= f.submit l(:button_create) %>
-  </div>
-<% end %>
+<div id="new_condition_form" style="display:none;">
+  <h3><%= l(:label_new_condition) %></h3>
+  <%= form_for @condition, url: { action: 'create_condition' }, html: { class: 'tabular' } do |f| %>
+    <div class="box">
+      <p>
+        <%= f.label :b_cond_question, l(:field_question) %>
+        <%= f.text_field :b_cond_question, size: 80, required: true %>
+        <em class="info"><%= l(:help_question) %></em>
+      </p>
+      <p>
+        <%= f.label :b_cond_hrz, l(:field_formula) %>
+        <%= f.text_area :b_cond_hrz, rows: 5, cols: 80 %>
+        <em class="info"><%= l(:help_formula) %></em>
+      </p>
+      <%= f.submit l(:button_create) %>
+      <%= link_to l(:button_cancel), 'javascript:void(0)', onclick: "hideNewForm('condition')" %>
+    </div>
+  <% end %>
+</div>
 
 <script>
+function showNewForm(type) {
+  document.getElementById('new_' + type + '_form').style.display = '';
+}
+function hideNewForm(type) {
+  document.getElementById('new_' + type + '_form').style.display = 'none';
+}
 function showEditForm(type, id) {
   document.getElementById('edit_' + type + '_' + id).style.display = '';
 }

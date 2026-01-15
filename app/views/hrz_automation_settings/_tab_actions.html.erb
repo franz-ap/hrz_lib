@@ -13,6 +13,14 @@
 <%#  You should have received a copy of the GNU Affero General Public License                   %>
 <%#  along with this program.  If not, see <https://www.gnu.org/licenses/>.                     %>
 <%# -------------------------------------------------------------------------------------eohdr- %>
+
+<div class="contextual">
+  <%= link_to l(:label_action_new),
+      'javascript:void(0)',
+      onclick: "showNewForm('action')",
+      class: 'icon icon-add' %>
+</div>
+
 <h3><%= l(:label_actions) %></h3>
 
 <% if @actions.any? %>
@@ -32,24 +40,24 @@
       <td><%= checked_image(action.jq_on_new_ticket == 1) %></td>
       <td><%= checked_image(action.jq_on_ticket_update == 1) %></td>
       <td class="buttons">
-        <%= link_to l(:button_edit), 'javascript:void(0)', 
-            onclick: "showEditForm('action', '#{j action.b_title}')", 
+        <%= link_to l(:button_edit), 'javascript:void(0)',
+            onclick: "showEditForm('action', '#{j action.b_title}')",
             class: 'icon icon-edit' %>
-        <%= link_to l(:button_delete), 
-            { action: 'destroy_action', id: action.b_title }, 
-            method: :delete, 
-            data: { confirm: l(:text_are_you_sure) }, 
+        <%= link_to l(:button_delete),
+            { action: 'destroy_action', id: action.b_title },
+            method: :delete,
+            data: { confirm: l(:text_are_you_sure) },
             class: 'icon icon-del' %>
       </td>
     </tr>
     <tr id="edit_action_<%= action.b_title.gsub(/[^a-zA-Z0-9]/, '_') %>" style="display:none;">
       <td colspan="4">
-        <%= render partial: 'action_form', locals: { 
-          action: action, 
-          conditions: @conditions, 
-          steps: @steps, 
-          url: { action: 'update_action', id: action.b_title }, 
-          method: :patch 
+        <%= render partial: 'action_form', locals: {
+          action: action,
+          conditions: @conditions,
+          steps: @steps,
+          url: { action: 'update_action', id: action.b_title },
+          method: :patch
         } %>
       </td>
     </tr>
@@ -60,16 +68,24 @@
 <p class="nodata"><%= l(:label_no_data) %></p>
 <% end %>
 
-<h3><%= l(:label_new_action) %></h3>
-<%= render partial: 'action_form', locals: { 
-  action: @action, 
-  conditions: @conditions, 
-  steps: @steps, 
-  url: { action: 'create_action' }, 
-  method: :post 
-} %>
+<div id="new_action_form" style="display:none;">
+  <h3><%= l(:label_new_action) %></h3>
+  <%= render partial: 'action_form', locals: {
+    action: @action,
+    conditions: @conditions,
+    steps: @steps,
+    url: { action: 'create_action' },
+    method: :post
+  } %>
+</div>
 
 <script>
+function showNewForm(type) {
+  document.getElementById('new_' + type + '_form').style.display = '';
+}
+function hideNewForm(type) {
+  document.getElementById('new_' + type + '_form').style.display = 'none';
+}
 function showEditForm(type, id) {
   var cleanId = id.replace(/[^a-zA-Z0-9]/g, '_');
   document.getElementById('edit_' + type + '_' + cleanId).style.display = '';

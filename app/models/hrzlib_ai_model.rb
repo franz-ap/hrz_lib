@@ -48,7 +48,7 @@ class HrzlibAiModel < ActiveRecord::Base
     return unless j_key.present?
 
     begin
-      field = HrzLib::CustomFieldHelper.get_custom_field(5)
+      field = HrzLib::CustomFieldHelper.get_custom_field(IssueCustomField.find_by(name: 'AI Model')&.id)
       if field && field[:possible_val_keys] && field[:possible_values]
         idx = field[:possible_val_keys].index(j_key)
         self.b_key = field[:possible_values][idx] if idx

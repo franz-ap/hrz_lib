@@ -26,6 +26,11 @@ de:
   label_new_action: "Neue Aktion"
   label_new_ai_model: "Neues KI-Modell"
   label_new_todo: "Neues ToDo"
+  label_condition_new: "Neue Bedingung"
+  label_step_new: "Neuer Schritt"
+  label_action_new: "Neue Aktion"
+  label_ai_model_new: "Neues KI-Modell"
+  label_todo_new: "Neues ToDo"
   
   field_condition_id: "Bedingungs-ID"
   field_question: "Frage"

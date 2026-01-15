@@ -26,6 +26,11 @@ en:
   label_new_action: "New Action"
   label_new_ai_model: "New AI Model"
   label_new_todo: "New ToDo"
+  label_condition_new: "New condition"
+  label_step_new: "New step"
+  label_action_new: "New action"
+  label_ai_model_new: "New AI model"
+  label_todo_new: "New todo"
   
   field_condition_id: "Condition ID"
   field_question: "Question"

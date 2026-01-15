@@ -13,6 +13,14 @@
 <%#  You should have received a copy of the GNU Affero General Public License                   %>
 <%#  along with this program.  If not, see <https://www.gnu.org/licenses/>.                     %>
 <%# -------------------------------------------------------------------------------------eohdr- %>
+
+<div class="contextual">
+  <%= link_to l(:label_ai_model_new),
+      'javascript:void(0)',
+      onclick: "showNewForm('aimodel')",
+      class: 'icon icon-add' %>
+</div>
+
 <h3><%= l(:label_ai_models) %></h3>
 
 <% if @ai_models.any? %>
@@ -32,23 +40,23 @@
       <td><%= model.b_name %></td>
       <td><%= truncate(model.b_url, length: 50) %></td>
       <td class="buttons">
-        <%= link_to l(:button_edit), 'javascript:void(0)', 
-            onclick: "showEditForm('aimodel', #{model.j_key})", 
+        <%= link_to l(:button_edit), 'javascript:void(0)',
+            onclick: "showEditForm('aimodel', #{model.j_key})",
             class: 'icon icon-edit' %>
-        <%= link_to l(:button_delete), 
-            { action: 'destroy_ai_model', id: model.j_key }, 
-            method: :delete, 
-            data: { confirm: l(:text_are_you_sure) }, 
+        <%= link_to l(:button_delete),
+            { action: 'destroy_ai_model', id: model.j_key },
+            method: :delete,
+            data: { confirm: l(:text_are_you_sure) },
             class: 'icon icon-del' %>
       </td>
     </tr>
     <tr id="edit_aimodel_<%= model.j_key %>" style="display:none;">
       <td colspan="4">
-        <%= render partial: 'ai_model_form', locals: { 
-          ai_model: model, 
-          available_models: @available_models, 
-          url: { action: 'update_ai_model', id: model.j_key }, 
-          method: :patch 
+        <%= render partial: 'ai_model_form', locals: {
+          ai_model: model,
+          available_models: @available_models,
+          url: { action: 'update_ai_model', id: model.j_key },
+          method: :patch
         } %>
       </td>
     </tr>
@@ -59,15 +67,23 @@
 <p class="nodata"><%= l(:label_no_data) %></p>
 <% end %>
 
-<h3><%= l(:label_new_ai_model) %></h3>
-<%= render partial: 'ai_model_form', locals: { 
-  ai_model: @ai_model, 
-  available_models: @available_models, 
-  url: { action: 'create_ai_model' }, 
-  method: :post 
-} %>
+<div id="new_aimodel_form" style="display:none;">
+  <h3><%= l(:label_new_ai_model) %></h3>
+  <%= render partial: 'ai_model_form', locals: {
+    ai_model: @ai_model,
+    available_models: @available_models,
+    url: { action: 'create_ai_model' },
+    method: :post
+  } %>
+</div>
 
 <script>
+function showNewForm(type) {
+  document.getElementById('new_' + type + '_form').style.display = '';
+}
+function hideNewForm(type) {
+  document.getElementById('new_' + type + '_form').style.display = 'none';
+}
 function showEditForm(type, id) {
   document.getElementById('edit_' + type + '_' + id).style.display = '';
 }

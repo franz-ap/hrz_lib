@@ -54,6 +54,8 @@
       <%= f.submit method == :post ? l(:button_create) : l(:button_save) %>
       <% if method == :patch %>
         <%= link_to l(:button_cancel), 'javascript:void(0)', onclick: "hideEditForm('aimodel', #{ai_model.j_key})" %>
+      <% else %>
+        <%= link_to l(:button_cancel), 'javascript:void(0)', onclick: "hideNewForm('aimodel')" %>
       <% end %>
     </p>
   </div>

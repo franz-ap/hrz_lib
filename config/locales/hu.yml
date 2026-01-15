@@ -26,6 +26,11 @@ hu:
   label_new_action: "Új művelet"
   label_new_ai_model: "Új AI modell"
   label_new_todo: "Új ToDo"
+  label_condition_new: "Új feltétel"
+  label_step_new: "Új lépés"
+  label_action_new: "Új művelet"
+  label_ai_model_new: "Új AI modell"
+  label_todo_new: "Új ToDo"
   
   field_condition_id: "Feltétel ID"
   field_question: "Kérdés"

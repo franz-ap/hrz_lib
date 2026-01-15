@@ -13,6 +13,14 @@
 <%#  You should have received a copy of the GNU Affero General Public License                   %>
 <%#  along with this program.  If not, see <https://www.gnu.org/licenses/>.                     %>
 <%# -------------------------------------------------------------------------------------eohdr- %>
+
+<div class="contextual">
+  <%= link_to l(:label_step_new),
+      'javascript:void(0)',
+      onclick: "showNewForm('step')",
+      class: 'icon icon-add' %>
+</div>
+
 <h3><%= l(:label_steps) %></h3>
 
 <% if @steps.any? %>
@@ -32,13 +40,13 @@
       <td><%= step.b_title %></td>
       <td><%= step.todo&.b_name %></td>
       <td class="buttons">
-        <%= link_to l(:button_edit), 'javascript:void(0)', 
-            onclick: "showEditForm('step', #{step.j_step_id})", 
+        <%= link_to l(:button_edit), 'javascript:void(0)',
+            onclick: "showEditForm('step', #{step.j_step_id})",
             class: 'icon icon-edit' %>
-        <%= link_to l(:button_delete), 
-            { action: 'destroy_step', id: step.j_step_id }, 
-            method: :delete, 
-            data: { confirm: l(:text_are_you_sure) }, 
+        <%= link_to l(:button_delete),
+            { action: 'destroy_step', id: step.j_step_id },
+            method: :delete,
+            data: { confirm: l(:text_are_you_sure) },
             class: 'icon icon-del' %>
       </td>
     </tr>
@@ -54,10 +62,18 @@
 <p class="nodata"><%= l(:label_no_data) %></p>
 <% end %>
 
-<h3><%= l(:label_new_step) %></h3>
-<%= render partial: 'step_form', locals: { step: @step, todos: @todos, url: { action: 'create_step' }, method: :post } %>
+<div id="new_step_form" style="display:none;">
+  <h3><%= l(:label_new_step) %></h3>
+  <%= render partial: 'step_form', locals: { step: @step, todos: @todos, url: { action: 'create_step' }, method: :post } %>
+</div>
 
 <script>
+function showNewForm(type) {
+  document.getElementById('new_' + type + '_form').style.display = '';
+}
+function hideNewForm(type) {
+  document.getElementById('new_' + type + '_form').style.display = 'none';
+}
 function showEditForm(type, id) {
   document.getElementById('edit_' + type + '_' + id).style.display = '';
 }
