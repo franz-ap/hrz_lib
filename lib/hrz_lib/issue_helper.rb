@@ -647,6 +647,32 @@ module HrzLib
 
 
 
+    # Tests, if the given Redmine issue contains a note with a certain text.
+    # @param issue_id      [Integer]   The ID of the issue to be tested.
+    # @param b_txt_test    [String]    Text
+    # @return [Boolean, nil] true:  Issue contains such a note.
+    #                        false: No such note in this issue.
+    #                        nil:   Issue not found or at least one parameter is nil/empty.
+    def self.issue_has_text_note?(issue_id, b_txt_test)
+      return nil  if issue_id.nil? || b_txt_test.nil? || b_txt_test.empty?
+      begin
+        # Find the issue
+        issue = Issue.find(issue_id)
+        q_ret = issue.journals.any? { |j| j.notes == b_txt_test }
+        HrzLogger.error_msg "HRZ Lib issue_has_text_note?: Issue ##{issue_id} #{q_ret ? 'contains a' : 'does not contain any'} note '#{b_txt_test}'."
+        q_ret
+      rescue ActiveRecord::RecordNotFound => e
+        HrzLogger.error_msg "HRZ Lib issue_has_text_note?: Issue ##{issue_id} not found: #{e.message}"
+        return nil
+      rescue => e
+        HrzLogger.error_msg "HRZ Lib issue_has_text_note?: Error reading issue ##{issue_id}: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
+        return nil
+      end
+    end  # issue_has_text_note?
+
+
+
     # ------------------------------------------------------------------------------------------------------------------------------
     # Watchers
     # ------------------------------------------------------------------------------------------------------------------------------

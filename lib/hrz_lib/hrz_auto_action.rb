@@ -170,65 +170,140 @@ module HrzLib
 
       case b_todo
         when 'mk_issue_from_templ'
-          if hsh_opt[:issue_template_id]
-            q_related     = hsh_opt[:q_related]
-            q_child       = hsh_opt[:q_child]
-            q_only_1x     = hsh_opt[:q_only_1x]
-            b_issue_abbr  = hsh_opt[:b_issue_abbr]
-            project_id    = hsh_opt[:project_id]
-            project_id    = HrzTagFunctions.get_context_value('tkt_new', 'project_id')  if project_id.nil?
-            issue_main_id = HrzTagFunctions.get_context_value('tkt_new', 'issue_id')
-            if q_only_1x && (b_issue_abbr.nil? || b_issue_abbr.empty?)
-              HrzLogger.logger.debug_msg "perform_step_todo: Ignoring q_only_1x for task '#{b_todo}', because b_issue_abbr is empty."
-              q_only_1x = false
-            end
-            q_creat_tkt = true
-            b_suf       = ''
-            if q_only_1x
-              # See, if the requested ticket already exists. We want only 1 of them.
-              b_suf    = " {#{b_issue_abbr}}"
-              found_id = nil
-              if q_related
-                found_id = HrzLib::IssueHelper.find_related_with_subject(issue_main_id, b_suf)
-              end # if q_related
-              if q_child && (! found_id)
-                found_id = HrzLib::IssueHelper.find_subtask_with_subject(42, 'testing')
-              end # if q_child
-              if found_id
-                 HrzLogger.logger.info_msg "Ticket '#{b_issue_abbr}' exists already: ##{found_id}"
-                 q_creat_tkt = false
-              end
-            end # if q_only_1x
-            if q_creat_tkt
-              template_issue_data = HrzLib::IssueHelper.get_issue(hsh_opt[:issue_template_id])
-              if template_issue_data
-                j_assignee      = HrzTagFunctions.get_context_value('tkt_prep', 'assigned_to_id')
-                arr_watcher_ids = HrzTagFunctions.get_context_value('tkt_prep', 'arr_watcher_ids')
-                new_options     = template_issue_data[:options]
-                new_options[:parent_issue_id] = issue_main_id   if q_child
-                new_issue_id = HrzLib::IssueHelper.mk_issue(
-                                project_id,
-                                template_issue_data[:b_subject] + b_suf,
-                                template_issue_data[:b_desc],
-                                j_assignee,
-                                arr_watcher_ids,
-                                new_options)
-                if ! new_issue_id.nil?
-                  if q_related
-                    HrzLib::IssueHelper.create_relation(issue_main_id, new_issue_id, 'relates')
-                  end
-                  HrzLogger.logger.info_msg "Created #{q_related ? 'related ' : ''}#{q_child ? 'child ' : ''}ticket ##{new_issue_id}"
-                end
-              end # if template_issue_data
-            end # if q_creat_tkt
-          end # if hsh_opt[:issue_template_id]
+          todo_mk_issue_from_templ(hsh_opt)
+        when 'send_email_issue_templ'
+          todo_send_email_issue_templ(hsh_opt)
         else
-           HrzLogger.logger.debug_msg "perform_step_todo: task '#{b_todo}' is not implemented yet. Skipping it."
+          HrzLogger.logger.debug_msg "perform_step_todo: task '#{b_todo}' is not implemented yet. Skipping it."
       end # case
     ensure
       # Restore the original recursion level. We might as well pop_recursion(), but since we know the original level, this adds extra safety.
       set_recursion_level(j_lvl_recu_orig)
     end  # perform_step_todo
+
+
+
+    # ------------------------------------------------------------------------------------------------------------------------------
+    # "ToDo"s
+    # ------------------------------------------------------------------------------------------------------------------------------
+
+    # "ToDo": Create an issue from a template
+    # @param hsh_opt  [Hash]  Information about the task.
+    def todo_mk_issue_from_templ(hsh_opt)
+      if hsh_opt[:issue_template_id]
+        q_related     = hsh_opt[:q_related]
+        q_child       = hsh_opt[:q_child]
+        q_only_1x     = hsh_opt[:q_only_1x]
+        b_issue_abbr  = hsh_opt[:b_issue_abbr]
+        project_id    = hsh_opt[:project_id]
+        project_id    = HrzTagFunctions.get_context_value('tkt_new', 'project_id')  if project_id.nil?
+        issue_main_id = HrzTagFunctions.get_context_value('tkt_new', 'issue_id')
+        if q_only_1x && (b_issue_abbr.nil? || b_issue_abbr.empty?)
+          HrzLogger.logger.debug_msg "todo_mk_issue_from_templ: Ignoring q_only_1x, because b_issue_abbr is empty."
+          q_only_1x = false
+        end
+        q_creat_tkt = true
+        b_suf       = ''
+        if q_only_1x
+          # See, if the requested ticket already exists. We want only 1 of them.
+          b_suf    = " {#{b_issue_abbr}}"
+          found_id = nil
+          if q_related
+            found_id = HrzLib::IssueHelper.find_related_with_subject(issue_main_id, b_suf)
+          end # if q_related
+          if q_child && (! found_id)
+            found_id = HrzLib::IssueHelper.find_subtask_with_subject(42, 'testing')
+          end # if q_child
+          if found_id
+              HrzLogger.logger.info_msg "Ticket '#{b_issue_abbr}' exists already: ##{found_id}"
+              q_creat_tkt = false
+          end
+        end # if q_only_1x
+        if q_creat_tkt
+          template_issue_data = HrzLib::IssueHelper.get_issue(hsh_opt[:issue_template_id])
+          if template_issue_data
+            j_assignee      = HrzTagFunctions.get_context_value('tkt_prep', 'assigned_to_id')
+            arr_watcher_ids = HrzTagFunctions.get_context_value('tkt_prep', 'arr_watcher_ids')
+            new_options     = template_issue_data[:options]
+            new_options[:parent_issue_id] = issue_main_id   if q_child
+            new_issue_id = HrzLib::IssueHelper.mk_issue(
+                            project_id,
+                            template_issue_data[:b_subject] + b_suf,
+                            template_issue_data[:b_desc],
+                            j_assignee,
+                            arr_watcher_ids,
+                            new_options)
+            if ! new_issue_id.nil?
+              if q_related
+                HrzLib::IssueHelper.create_relation(issue_main_id, new_issue_id, 'relates')
+              end
+              HrzLogger.logger.info_msg "Created #{q_related ? 'related ' : ''}#{q_child ? 'child ' : ''}ticket ##{new_issue_id}"
+            end
+          end # if template_issue_data
+        end # if q_creat_tkt
+      end # if hsh_opt[:issue_template_id]
+    end  # todo_mk_issue_from_templ
+
+
+
+    # "ToDo": Send an e-mail and take an issue as a template
+    # @param hsh_opt  [Hash]  Information about the task.
+    def todo_send_email_issue_templ(hsh_opt)
+      if hsh_opt[:issue_template_id]
+        q_related     = hsh_opt[:q_related]
+        q_child       = hsh_opt[:q_child]
+        q_only_1x     = hsh_opt[:q_only_1x]
+        b_issue_abbr  = hsh_opt[:b_issue_abbr]
+        issue_main_id = HrzTagFunctions.get_context_value('tkt_new', 'issue_id')
+        if q_only_1x && (b_issue_abbr.nil? || b_issue_abbr.empty?)
+          HrzLogger.logger.debug_msg "todo_send_email_issue_templ: Ignoring q_only_1x, because b_issue_abbr is empty."
+          q_only_1x = false
+        end
+        q_send = true
+        b_test = nil
+        if q_only_1x
+          b_test = "e-mail notification {#{b_issue_abbr}} sent."
+          # See, if the main ticket already contains the test text.
+          if HrzLib::IssueHelper.issue_has_text_note?(issue_main_id, b_test)
+            q_send = false
+          end
+        end # if q_only_1x
+        if q_send
+          template_issue_data = HrzLib::IssueHelper.get_issue(hsh_opt[:issue_template_id])
+          if template_issue_data
+            j_assignee      = HrzTagFunctions.get_context_value('tkt_prep', 'assigned_to_id')
+            arr_watcher_ids = HrzTagFunctions.get_context_value('tkt_prep', 'arr_watcher_ids')
+            arr_unam = []
+            arr_to   = []
+            arr_cc   = []
+            usr = User.find(j_assignee)
+            arr_to   << usr
+            arr_unam << usr.to_s
+            arr_watcher_ids.each do |j_watcher_id|
+              usr = User.find(j_watcher_id)
+              arr_cc   << usr
+              arr_unam << "CC #{usr.to_s}"
+            end
+            HrzLogger.logger.debug_msg "todo_send_email_issue_templ: Sending e-mail notification to " + arr_unam.join (', ')
+            CustomWorkflowMailer.deliver_custom_email(
+                user,      # Redmine-User-Kontext
+                to:        arr_to,
+                cc:        arr_cc,
+                subject:   template_issue_data[:b_subject],
+                text_body: template_issue_data[:b_desc] #,
+                #headers: {
+                #  'Reply-To' => 'reply@deinefirma.com',
+                #  'From'     => '"Support Team" <support@xy.com>'
+                #}
+              )
+            if ! b_test.nil?
+              # Remember, that we sent this e-mail.
+              HrzLib::IssueHelper.add_comment(issue_main_id, b_test)
+            end
+          end # if template_issue_data
+        end # if q_send
+      end # if hsh_opt[:issue_template_id]
+    end  # todo_send_email_issue_templ
 
 
 
