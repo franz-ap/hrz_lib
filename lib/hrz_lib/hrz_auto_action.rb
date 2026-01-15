@@ -284,7 +284,7 @@ module HrzLib
               arr_cc   << usr
               arr_unam << "CC #{usr.to_s}"
             end
-            HrzLogger.logger.debug_msg "todo_send_email_issue_templ: Sending e-mail notification to " + arr_unam.join (', ')
+            HrzLogger.logger.debug_msg "todo_send_email_issue_templ: Sending e-mail notification to " + arr_unam.join(', ')
             CustomWorkflowMailer.deliver_custom_email(
                 user,      # Redmine-User-Kontext
                 to:        arr_to,
