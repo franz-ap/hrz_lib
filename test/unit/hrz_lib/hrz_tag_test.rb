@@ -43,15 +43,15 @@ def run_tests
   puts "=" * 80
   puts "HRZ Tag Parser Tests"
   puts "=" * 80
-  
+
   # ============================================================================
   # BASIC TESTS: get_param und set_param
   # ============================================================================
-  
+
   puts "\n" + "=" * 80
   puts "BASIC TESTS: get_param und set_param"
   puts "=" * 80
-  
+
   # Initialize the context
   HrzLib::HrzTagFunctions.initialize_context({
     price:    "1234",
@@ -63,6 +63,7 @@ def run_tests
   })
 
   #test_case("Test 0: special dev/debug test", '<HRZ prep_clear_all><HRZ prep_add_asgn_watch 7163 set_assignee:falxse>', 'x')
+  #test_case("Test 0: special dev/debug test", 'U:<HRZ usr_name>, Rm-ID:<HRZ usr_id>', 'x')
 
   # Test 1: Simple text and get_param without default value
   test_case("Test A.1: text",                                  'abc',                                          'abc')
@@ -93,22 +94,29 @@ def run_tests
   # Nested <HRZ> tags
   test_case("Test A.8: nested <HRZ> tags", "<HRZ get_param nonex+>  nvl=<HRZ get_param discount>uvw </HRZ get_param> ghi",  "10 uvw ghi")
 
+  # With <HRZ comment> tags
+  test_case("Test A.9: text and comment",                      'ab<HRZ comment "This is a comment.">c',            'abc')
+  test_case("Test A.10: text and longer comment",              'ab<HRZ C+>"This is a longer comment!"</HRZ C>c',   'abc')
+  test_case("Test A.10a: text and longer comment",             'ab<HRZ C +>"This is a longer comment!"</HRZ C >c', 'abc')
+  test_case("Test A.10b: text and longer comment",             'ab<HRZ C This is +>"a longer comment!"</HRZ C >c', 'abc')
+
+
   #HrzLib::HrzTagFunctions.clear_context
-  
+
   # ============================================================================
   # BOOLEAN EXPRESSION TESTS
   # ============================================================================
-  
+
   puts "\n" + "=" * 80
   puts "BOOLEAN EXPRESSION TESTS"
   puts "=" * 80
-  
+
   # Tests: evaluate_hrz_condition with simple constants
   test_condition("Test B.1: Boolean true", "true", true)
   test_condition("Test B.2: Boolean false", "false", false)
   test_condition("Test B.3: Boolean TRUE", "TRUE", true)
   test_condition("Test B.4: Boolean FALSE", "FALSE", false)
-  
+
   # Tests: Comparing numbers
   test_condition("Test B.5: 5 == 5", "5 == 5", true)
   test_condition("Test B.6: 5 == 3", "5 == 3", false)
@@ -116,23 +124,23 @@ def run_tests
   test_condition("Test B.8: 5 > 3", "5 > 3", true)
   test_condition("Test B.9: 5 <= 5", "5 <= 5", true)
   test_condition("Test B.10: 3 >= 5", "3 >= 5", false)
-  
+
   # Tests: Arithmetic in comparisons
   test_condition("Test B.11: 2 * 3 == 6", "2 * 3 == 6", true)
   test_condition("Test B.12: 10 / 2 == 5", "10 / 2 == 5", true)
   test_condition("Test B.13: 2 + 3 > 4", "2 + 3 > 4", true)
-  
+
   # Tests: Boolean operators
   test_condition("Test B.14: true AND true", "true AND true", true)
   test_condition("Test B.15: true AND false", "true AND false", false)
   test_condition("Test B.16: true OR false", "true OR false", true)
   test_condition("Test B.17: NOT true", "NOT true", false)
   test_condition("Test B.18: NOT false", "NOT false", true)
-  
+
   # Tests: A little bit more complex expressions
   test_condition("Test B.19: (3 < 5) AND (2 > 1)", "(3 < 5) AND (2 > 1)", true)
   test_condition("Test B.20: (3 > 5) OR (2 < 4)", "(3 > 5) OR (2 < 4)", true)
-  
+
   # Tests: with get_param
   test_condition("Test B.21: <HRZ get_param qty> > 5",                "<HRZ get_param qty> > 5", true)
   test_condition("Test B.22: <HRZ get_param qty> > 5 AND 2 * 3 == 6", "<HRZ get_param qty> > 5 AND 2 * 3 == 6", true)
@@ -157,35 +165,35 @@ def run_tests
   # ============================================================================
   # IF-THEN-ELSE TESTS
   # ============================================================================
-  
+
   puts "\n" + "=" * 80
   puts "IF-THEN-ELSE TESTS"
   puts "=" * 80
-  
+
   #HrzLib::HrzTagFunctions.clear_context
-  
+
   test_case("Test 27: IF-THEN with true",       '<HRZ if>true<HRZ then>YES<HRZ end_if>',    'YES')
   test_case("Test 28: IF-THEN with false",      '<HRZ if>false<HRZ then>YES<HRZ end_if>',   ''   )
   test_case("Test 29: IF-THEN-ELSE with true",  '<HRZ if>true<HRZ then>YES<HRZ else>NO<HRZ end_if>',      'YES')
   test_case("Test 30: IF-THEN-ELSE with false", '<HRZ if >false<HRZ then >YES<HRZ else >NO<HRZ end_if >', 'NO' )
   test_case("Test 31: IF comparing get_param",  'Qty: <HRZ if><HRZ get_param qty> > 5<HRZ then>HIGH<HRZ else>LOW<HRZ end_if>', 'Qty: HIGH')
   test_case("Test 32: IF with AND",             '<HRZ if>(3 < 5) AND (2 > 1)<HRZ then>Both true<HRZ else>Not both<HRZ end_if>', 'Both true')
-  
+
   # ============================================================================
   # ERROR HANDLING TESTS
   # ============================================================================
-  
+
   puts "\n" + "=" * 80
   puts "ERROR HANDLING TESTS"
   puts "=" * 80
-  
+
   # Test 33: Division durch 0 mit on_error
   test_case(
     "Test 33: Division durch 0 mit on_error",
     'Result: <HRZ on_error Problem detected. +>Value: <HRZ if>10 / 0 > 5<HRZ then>OK<HRZ end_if></HRZ on_error>',
     'Result: Problem detected.'
   )
-  
+
   # Test 34: Division durch 0 OHNE on_error - sollte Fehler werfen
   puts "\n" + "-" * 80
   puts "Test 34: Division durch 0 OHNE on_error (erwartet Fehler)"
@@ -201,14 +209,14 @@ def run_tests
     puts "✓ PASS - Fehler korrekt gefangen: #{e.message}"
     puts "Errors: #{HrzLib::TagStringHelper.errors_text}" if HrzLib::TagStringHelper.has_errors?
   end
-  
+
   # Test 35: on_error mit normalem Inhalt (kein Fehler)
   test_case(
     "Test 35: on_error ohne Fehler",
     'Result: <HRZ on_error ERROR +>Value: <HRZ if />5 > 3<HRZ then />OK<HRZ end_if /></HRZ on_error>',
     'Result: Value: OK'
   )
-  
+
   # Test 36: Fehlerprüfung nach str_hrz
   puts "\n" + "-" * 80
   puts "Test 36: Fehlerprüfung nach str_hrz"
@@ -223,39 +231,39 @@ def run_tests
   rescue HrzLib::HrzError => e
     puts "✗ FAIL - Unerwarteter Fehler: #{e.message}"
   end
-  
+
   # ============================================================================
   # WHITESPACE TESTS
   # ============================================================================
-  
+
   puts "\n" + "=" * 80
   puts "WHITESPACE TESTS"
   puts "=" * 80
-  
+
   HrzLib::HrzTagFunctions.initialize_context({ price: "99" })
-  
+
   # Test 37: Whitespace außerhalb Tags bleibt erhalten
   test_case(
     "Test 37: Whitespace außerhalb Tags",
     'Hello   World  <HRZ get_param price />  End',
     'Hello   World  99  End'
   )
-  
+
   # Test 38: Whitespace innerhalb Tags wird ignoriert
   test_case(
     "Test 38: Whitespace innerhalb Tags",
     'X<HRZ    get_param    price    />Y',
     'X99Y'
   )
-  
+
   # ============================================================================
   # DRY RUN TESTS
   # ============================================================================
-  
+
   puts "\n" + "=" * 80
   puts "DRY RUN / SYNTAX VALIDATION TESTS"
   puts "=" * 80
-  
+
   # Test 39: Dry-Run mit gültiger Syntax
   puts "\n" + "-" * 80
   puts "Test 39: Dry-Run mit gültiger Syntax"
@@ -270,7 +278,7 @@ def run_tests
   rescue HrzLib::HrzError => e
     puts "✗ FAIL - Exception: #{e.message}"
   end
-  
+
   # Test 40: Dry-Run mit ungültiger Syntax
   puts "\n" + "-" * 80
   puts "Test 40: Dry-Run mit ungültiger Syntax"
@@ -284,7 +292,7 @@ def run_tests
     puts "Input:  #{input}"
     puts "✓ PASS - Fehler korrekt erkannt: #{e.message}"
   end
-  
+
   # Test 41: validate_syntax mit gültiger Syntax
   puts "\n" + "-" * 80
   puts "Test 41: validate_syntax mit gültiger Syntax"
@@ -294,7 +302,7 @@ def run_tests
   puts "Valid:  #{validation[:valid]}"
   puts "Errors: #{validation[:errors].inspect}"
   puts validation[:valid] ? "✓ PASS" : "✗ FAIL"
-  
+
   # Test 42: validate_syntax mit ungültiger Syntax
   puts "\n" + "-" * 80
   puts "Test 42: validate_syntax mit ungültiger Syntax"
@@ -304,15 +312,15 @@ def run_tests
   puts "Valid:  #{validation[:valid]}"
   puts "Errors: #{validation[:errors].inspect}"
   puts !validation[:valid] ? "✓ PASS" : "✗ FAIL"
-  
+
   # ============================================================================
   # TAG EVALUATION IN CONDITIONS
   # ============================================================================
-  
+
   puts "\n" + "=" * 80
   puts "TAG EVALUATION IN CONDITIONS"
   puts "=" * 80
-  
+
   # Test 43: HRZ-Tag in Condition
   HrzLib::HrzTagFunctions.initialize_context({ threshold: "10" })
   test_case(
@@ -320,7 +328,7 @@ def run_tests
     '<HRZ if /><HRZ get_param threshold /> > 5<HRZ then />Above threshold<HRZ else />Below<HRZ end_if />',
     'Above threshold'
   )
-  
+
   # Test 44: Mehrere HRZ-Tags in Condition
   HrzLib::HrzTagFunctions.initialize_context({ val1: "3", val2: "7" })
   test_case(
@@ -328,7 +336,7 @@ def run_tests
     '<HRZ if /><HRZ get_param val1 /> + <HRZ get_param val2 /> == 10<HRZ then />Sum is 10<HRZ else />Other sum<HRZ end_if />',
     'Sum is 10'
   )
-  
+
   # Test 45: evaluate_hrz_condition mit HRZ-Tag
   puts "\n" + "-" * 80
   puts "Test 45: evaluate_hrz_condition mit HRZ-Tag"
@@ -343,15 +351,15 @@ def run_tests
   rescue HrzLib::HrzError => e
     puts "✗ FAIL - Exception: #{e.message}"
   end
-  
+
   # ============================================================================
   # ERROR REPORTING FROM FUNCTIONS
   # ============================================================================
-  
+
   puts "\n" + "=" * 80
   puts "ERROR REPORTING FROM FUNCTIONS"
   puts "=" * 80
-  
+
   # Test 46: Fehler in Funktion wird gemeldet
   puts "\n" + "-" * 80
   puts "Test 46: Fehler in get_param (fehlender Parameter-Name)"
@@ -367,11 +375,11 @@ def run_tests
     puts "✓ PASS - Fehler korrekt gemeldet: #{e.message}"
     puts "Errors: #{HrzLib::TagStringHelper.errors_text}" if HrzLib::TagStringHelper.has_errors?
   end
-  
+
   puts "\n" + "=" * 80
   puts "Tests abgeschlossen"
   puts "=" * 80
-  
+
   # Kontext bereinigen
   HrzLib::HrzTagFunctions.clear_context
 end

@@ -66,6 +66,12 @@ module HrzLib
           q_assignee  = (bq_assignee.downcase == 'true')
           HrzLogger.debug_msg "tkt_prep_set_assignee_add_watchers: set_assignee=#{bq_assignee}, but should be true or false. Taking it as false."  if (! q_assignee) && (bq_assignee.downcase != 'false')
           HrzAutoAction.tkt_prep_clear_assignee_watchers()
+        when 'comment', "C"
+          ""
+        when 'usr_name', 'user_name'
+          hrz_strfunc_usr_name(params)
+        when 'usr_id', 'user_id'
+          hrz_strfunc_usr_id()
         else
           HrzLogger.logger.warning_msg "Unknown HRZ function: #{b_function}"
           raise HrzError.new("Unknown function: #{b_function}", { function: b_function })
@@ -80,11 +86,11 @@ module HrzLib
     end  # call_dispatcher
 
 
-    
+
     # ============================================================================
     # Implementation of all those HRZ tag functions
     # ============================================================================
-    
+
     # Analyze named parameters/arguments: array of strings -> hash
     # This utility method facilitates mixing position parameters with named parameters.
     # Position parameters must be at the beginning (if any), before any named parameters.
@@ -268,7 +274,7 @@ module HrzLib
         TagStringHelper.report_error(b_msg, { function: 'get_param', arr_args: arr_args })
         raise HrzError.new(b_msg, { function: 'get_param', arr_args: arr_args })
       end
-      
+
       value = get_context_value(b_key_main, b_key_sub, b_nvl);
       if ! b_conv.nil?
         case b_conv
@@ -357,29 +363,95 @@ module HrzLib
         TagStringHelper.report_error(b_msg, { function: 'set_param', arr_args: arr_args })
         raise HrzError.new(b_msg, { function: 'set_param', arr_args: arr_args })
       end
-      
+
       set_context_value(b_key_main, b_key_sub, b_value);
       # Debug info:
       b_keys = [ b_key_main, (b_key_sub unless b_key_sub.nil? || b_key_sub.empty?) ].compact.join(".")
       HrzLogger.logger.debug_msg "set_param(#{b_keys} := #{b_value})"
-      
+
       # set_param never returns a text, only this empty string:
       ""
     end  # hrz_strfunc_set_param
 
 
-    
+    # usr_name: Returns the full name or other attribute of the current user or the one with the given ID.
+    # Examples:
+    #   <HRZ usr_name> ............ Full name of currently logged in user.
+    #   <HRZ usr_name 1234> ....... Full name of user with RedmineUserID 1234
+    # @param arr_args [Array<String> or Hash] Argument array: position parameters and/or named parameters. See analyze_named_params.
+    #                                         Hash: Like the result of analyze_named_params. See there for details.
+    #   arr_args[0] = 'usr_id/id/user_id'   = Redmine user ID. Optional. Missing means: currently logged in user.
+    #   arr_args[1] = 'attrib'              = Attribute to return instead of the full name:
+    #                                         mail ................. e-mail address
+    #                                         login ................ Login name
+    #                                         firstname ............ First name
+    #                                         lastname ............. Last name
+    #                                         name ................. Full name (default)
+    #              'nvl/default/if_missing'   Pass a string, that you want instead of an empty result.
+    # @return [String] Full user name.
+    #                  "" in case of errors and when there is no current user.
+    def self.hrz_strfunc_usr_name(arr_args)
+      hsh_param  = analyze_named_params(['usr_id/id/user_id', 'attrib', 'nvl/default/if_missing'], arr_args, 'get_param', 1)
+      j_usr_id = hsh_param[:usr_id].to_i
+      b_attrib = hsh_param[:attrib]
+      b_attrib = 'name'  if b_attrib.nil? || b_attrib.empty?
+      b_nvl    = hsh_param[:nvl]
+      begin
+        if j_usr_id
+          usr = User.find(j_usr_id)
+        else
+          usr = User.current
+        end
+      rescue StandardError => e
+        HrzLogger.logger.debug_msg "hrz_strfunc_usr_name(usr_id=#{j_usr_id.nil? ? 'nil' : j_usr_id.to_s}, attrib=#{b_attrib}): #{e.message}"
+        usr = nil
+      end
+      if usr
+         case b_attrib
+           when 'name'
+             b_ret = usr.name
+           when 'mail'
+             b_ret = usr.mail
+           when 'login'
+             b_ret = usr.login
+           when 'firstname'
+             b_ret = usr.firstname
+           when 'lastname'
+             b_ret = usr.lastname
+           else
+             b_ret = "?#{b_attrib}?"
+             HrzLogger.logger.debug_msg "hrz_strfunc_usr_name(attrib=#{b_attrib}) is not implemented yet."
+         end # case
+      else
+        b_ret = ''
+      end
+      b_ret = b_nvl  if b_ret.nil? || b_ret.empty?
+      b_ret
+    end  # hrz_strfunc_usr_name
+
+
+
+    # usr_id: Returns the Redmine user ID of the currently logged in user.
+    # Examples:
+    #   <HRZ usr_id> ........... Redmine user ID of currently logged in user.
+    # @return [String] ......... Redmine user ID. "0" if nobody is logged in in the current session.
+    def self.hrz_strfunc_usr_id
+      User.current&.id.to_s  rescue "0"
+    end  # hrz_strfunc_usr_id
+
+
+
     # ============================================================================
     # Context management utilities
     # ============================================================================
-    
+
     # Initializes the context.
     # @param initial_context [Hash] Initial context, optional.
     def self.initialize_context(initial_context = {})
       Thread.current[:hrz_context] = initial_context.dup
       @q_context_initialized       = true
     end  # initialize_context
-    
+
 
 
     # Returns the current context.
@@ -388,7 +460,7 @@ module HrzLib
       initialize_context()  unless @q_context_initialized
       Thread.current[:hrz_context] || {}
     end  # current_context
-    
+
 
 
     # Clears the context, e.g. at the end of a session.
@@ -396,7 +468,7 @@ module HrzLib
       Thread.current[:hrz_context] = nil
       @q_context_initialized       = false
     end  # clear_context
-    
+
 
 
     # Sets a value in the context, overwriting the previous value, in case a parameter/key already existed.
@@ -417,7 +489,7 @@ module HrzLib
         Thread.current[:hrz_context][key_main.to_sym][key_sub.to_sym] = value
       end
     end  # set_context_value
-    
+
 
 
     # Reads a value from the context.
