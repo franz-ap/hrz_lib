@@ -393,19 +393,19 @@ module HrzLib
     #                  "" in case of errors and when there is no current user.
     def self.hrz_strfunc_usr_name(arr_args)
       hsh_param  = analyze_named_params(['usr_id/id/user_id', 'attrib', 'nvl/default/if_missing'], arr_args, 'get_param', 1)
-      j_usr_id = hsh_param[:usr_id].to_i
+      usr_id = hsh_param[:usr_id]
       b_attrib = hsh_param[:attrib]
       b_attrib = 'name'  if b_attrib.nil? || b_attrib.empty?
       b_nvl    = hsh_param[:nvl]
       begin
-        if j_usr_id
-          usr = User.find(j_usr_id)
-        else
+        if usr_id.nil?
           usr = User.current
           HrzLogger.logger.debug_msg "hrz_strfunc_usr_name(usr_id=nil) --> Current user: #{User.current.inspect}"
+        else
+          usr = User.find(usr_id.to_i)
         end
       rescue StandardError => e
-        HrzLogger.logger.debug_msg "hrz_strfunc_usr_name(usr_id=#{j_usr_id.nil? ? 'nil' : j_usr_id.to_s}, attrib=#{b_attrib}): #{e.message}"
+        HrzLogger.logger.debug_msg "hrz_strfunc_usr_name(usr_id=#{usr_id.nil? ? 'nil' : usr_id.to_s}, attrib=#{b_attrib}): #{e.message}"
         usr = nil
       end
       if usr
