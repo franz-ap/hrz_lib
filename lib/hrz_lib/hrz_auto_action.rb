@@ -105,6 +105,7 @@ module HrzLib
         hsh_action[:arr_steps].each do |hsh_step|
           b_title_step = hsh_step[:b_title]
           HrzLogger.logger.debug_msg "--- action1: step '#{b_title_step}' ---"
+          HrzLogger.logger.debug_msg "Step details (except title): #{hsh_step.reject { |k, _| k == :b_title_step }.inspect}"
           # a) Preparation
           b_part_problem = 'preparation of step'
           b_hrz_problem  = hsh_step[:b_hrz_prep]
