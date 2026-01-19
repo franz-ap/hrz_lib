@@ -108,7 +108,10 @@ module HrzLib
           b_part_problem = 'preparation of step'
           b_hrz_problem  = hsh_step[:b_hrz_prep]
           b_result_prep  = TagStringHelper::str_hrz(hsh_step[:b_hrz_prep])
-          HrzLogger.logger.debug_msg "action1: Preparation returned '#{b_result_prep}'. Should be empty. Discarding it."  if (! b_result_prep.empty?)
+          if (! b_result_prep.gsub(/\s+/, "").empty?)
+            # The preparation result contains more than whitespace. Warn about this.
+            HrzLogger.logger.debug_msg "action1: Preparation returned '#{b_result_prep}'. Should be empty. Discarding it."
+          end
           # Do nothing else with the results of preparation and cleanup for now. No idea yet.
           # b) The main step
           b_part_problem = 'main step'
@@ -122,7 +125,10 @@ module HrzLib
           b_part_problem = 'cleanup of step'
           b_hrz_problem  = hsh_step[:b_hrz_clean]
           b_result_cln   = TagStringHelper::str_hrz(hsh_step[:b_hrz_clean])
-          HrzLogger.logger.debug_msg "action1: Cleanup returned '#{b_result_cln}'. Should be empty. Discarding it."  if (! b_result_cln.empty?)
+          if (! b_result_cln.gsub(/\s+/, "").empty?)
+            # The cleanup result contains more than whitespace. Warn about this.
+            HrzLogger.logger.debug_msg "action1: Cleanup returned '#{b_result_cln}'. Should be empty. Discarding it."
+          end
         end
 
       rescue Parslet::ParseFailed => e
@@ -165,9 +171,10 @@ module HrzLib
       # Remember the original recursion level.
       j_lvl_recu_orig = get_recursion_level()
       return  if b_todo.nil? || b_todo.empty?
+
       # We will possibly start a new recursion in here, e.g. by creating an additionl ticket while we are still working on the other, main ticket.
       push_recursion()
-
+      HrzLogger.logger.debug_msg "---perform_step_todo(task='#{b_todo}', opt=#{hsh_opt.inspect})---"
       case b_todo
         when 'mk_issue_from_templ'
           todo_mk_issue_from_templ(hsh_opt)
