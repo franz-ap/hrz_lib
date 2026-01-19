@@ -42,7 +42,8 @@ module HrzLib
     #      b_title            [String]   Title of this step.
     #      b_comment          [String]   Remarks about this step. Optional, for documentation.
     #      b_hrz_prep         [String]   <HRZ> tag string, that performs preparation actions. Optional.
-    #        TODO step
+    #      b_todo             [String]   Task to be performed, see perform_step_todo.
+    #      hsh_todo_opt       [Hash]     Additional information about this task.
     #      b_hrz_clean        [String]   <HRZ> tag string, that performs cleanup actions.     Optional.
     def self.ticket_actions(q_new_ticket,  # Are we currently working on a new ticket?
                             arr_actions)   # Array of actions to be performed.
@@ -105,7 +106,7 @@ module HrzLib
         hsh_action[:arr_steps].each do |hsh_step|
           b_title_step = hsh_step[:b_title]
           HrzLogger.logger.debug_msg "--- action1: step '#{b_title_step}' ---"
-          HrzLogger.logger.debug_msg "Step details (except title): #{hsh_step.reject { |k, _| k == :b_title_step }.inspect}"
+          HrzLogger.logger.debug_msg "Step details (except title): #{hsh_step.reject { |k, _| k == :b_title }.inspect}"
           # a) Preparation
           b_part_problem = 'preparation of step'
           b_hrz_problem  = hsh_step[:b_hrz_prep]
@@ -452,18 +453,22 @@ module HrzLib
           s = steps_by_id[sid]
           next nil unless s
 
+          hsh_todo_opt = {
+              q_related:         (s.jq_related.to_i   > 0),
+              q_subticket:       (s.jq_subticket.to_i > 0),
+              issue_template_id: s.j_issue_template_id,
+              b_project_id:      s.b_project_id,
+              q_only_1x:         (s.jq_only_1x.to_i > 0),
+              b_key_abbr:        s.b_key_abbr,
+            }
+
           {
             j_step_id:         s.j_step_id,
             b_title:           s.b_title,
             b_comment:         s.b_comment,
             b_hrz_prep:        s.b_hrz_prep,
             b_todo:            s.b_todo,
-            q_related:         (s.jq_related.to_i   > 0),
-            q_subticket:       (s.jq_subticket.to_i > 0),
-            issue_template_id: s.j_issue_template_id,
-            b_project_id:      s.b_project_id,
-            q_only_1x:         (s.jq_only_1x.to_i > 0),
-            b_key_abbr:        s.b_key_abbr,
+            hsh_todo_opt:      hsh_todo_opt,
             b_hrz_clean:       s.b_hrz_clean
           }
         end.compact
