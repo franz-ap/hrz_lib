@@ -648,18 +648,35 @@ module HrzLib
 
 
     # Tests, if the given Redmine issue contains a note with a certain text.
-    # @param issue_id      [Integer]   The ID of the issue to be tested.
-    # @param b_txt_test    [String]    Text
+    # @param issue_id      [Integer] The ID of the issue to be tested.
+    # @param b_txt_test    [String]  Text
+    # @param b_search_mode [String]  Search mode, optional:
+    #                                '==' ........... The whole note text must be equal to b_txt_test.
+    #                                'start_with' ... The note text must begin with the text in b_txt_test.
+    #                                'include' ...... The note text must contain the text in b_txt_test.
     # @return [Boolean, nil] true:  Issue contains such a note.
     #                        false: No such note in this issue.
-    #                        nil:   Issue not found or at least one parameter is nil/empty.
-    def self.issue_has_text_note?(issue_id, b_txt_test)
+    #                        nil:   Issue not found or at least one parameter is nil/empty/invalid.
+    def self.issue_has_text_note?(issue_id, b_txt_test, b_search_mode = '==')
       return nil  if issue_id.nil? || b_txt_test.nil? || b_txt_test.empty?
       begin
         # Find the issue
         issue = Issue.find(issue_id)
-        q_ret = issue.journals.any? { |j| j.notes == b_txt_test }
-        HrzLogger.debug_msg "HRZ Lib issue_has_text_note?: Issue ##{issue_id} #{q_ret ? 'contains a' : 'does not contain any'} note '#{b_txt_test}'."
+        b_inf = ''
+        case b_search_mode
+          when '=='
+            q_ret = issue.journals.any? { |j| j.notes == b_txt_test }
+          when 'start_with', 'start_with?'
+            q_ret = issue.journals.any? { |j| j.notes.start_with?(b_txt_test) }
+            b_inf =', that starts with'
+          when 'include', 'include?'
+            q_ret = issue.journals.any? { |j| j.notes.include?(b_txt_test) }
+            b_inf =', that contains'
+          else
+            q_ret = nil
+            HrzLogger.debug_msg "HRZ Lib issue_has_text_note?: Search mode '#{b_search_mode}' is not implemented yet."
+        end # case
+        HrzLogger.debug_msg "HRZ Lib issue_has_text_note?: Issue ##{issue_id} #{q_ret ? 'contains a' : 'does not contain any'} note#{b_inf} '#{b_txt_test}'."
         q_ret
       rescue ActiveRecord::RecordNotFound => e
         HrzLogger.error_msg "HRZ Lib issue_has_text_note?: Issue ##{issue_id} not found: #{e.message}"

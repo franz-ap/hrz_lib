@@ -280,10 +280,11 @@ module HrzLib
         q_send = true
         b_test = nil
         if q_only_1x
-          b_test = "e-mail notification {#{b_key_1x}} sent."
+          b_test = "e-mail notification {#{b_key_1x}} sent"
           # See, if the main ticket already contains the test text.
-          if HrzLib::IssueHelper.issue_has_text_note?(issue_main_id, b_test)
+          if HrzLib::IssueHelper.issue_has_text_note?(issue_main_id, b_test, 'start_with')
             q_send = false
+            HrzLogger.logger.info_msg "e-mail notification '#{b_key_1x}' already sent during a previous transition, not sending it again."
           end
         end # if q_only_1x
         if q_send
@@ -307,7 +308,7 @@ module HrzLib
               arr_cc   << usr
               arr_unam << "CC #{usr.to_s}"
             end
-            HrzLogger.logger.debug_msg "todo_send_email_issue_templ: Sending e-mail notification to " + arr_unam.join(', ')
+            #HrzLogger.logger.debug_msg "todo_send_email_issue_templ: Sending e-mail notification to " + arr_unam.join(', ')
             CustomWorkflowMailer.deliver_custom_email(
                 User.current, # Redmine-User-Context of recipient. Probably meaningless, because it will be overwritten by "to" below.
                 headers: {
@@ -320,10 +321,10 @@ module HrzLib
                   #  'From'     => '"Support Team" <support@xy.com>'
                 }
               )
-            HrzLogger.logger.info_msg "e-mail notification sent to " + arr_unam.join(', ')
+            HrzLogger.logger.info_msg "e-mail notification '#{b_key_1x}' sent to " + arr_unam.join(', ')
             if ! b_test.nil?
-              # Remember, that we sent this e-mail.
-              HrzLib::IssueHelper.add_comment(issue_main_id, b_test)
+              # Remember, that we sent this e-mail: make a note in the issue.
+              HrzLib::IssueHelper.add_comment(issue_main_id, b_test + " to " + arr_unam.join(', '))
             end
           end # if template_issue_data
         end # if q_send
