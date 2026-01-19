@@ -321,7 +321,7 @@ module HrzLib
 
 
     # Set assignee and add watchers as a preparation for creating a ticket.
-    # @param principal_id   [Integer] The ID of a Redmine group or user.
+    # @param principal_id   [Integer] The ID of a Redmine group or user. nil is ok, will do nothing.
     # @param q_assignee_ena [Boolean] Enable setting/overwriting the assigne? true=yes, false=no
     # For Groups: The group's leader (if available) will be the assignee (if enabled above)
     #             All group members will be added as watchers.
@@ -332,6 +332,7 @@ module HrzLib
     #    <HRZ prep_add_asgn_watch 7163> ......................    -----"-----
     #       Synonyms for "set_assignee": "assignee", "asgn"  (in case you want to type less)
     def self.tkt_prep_set_assignee_add_watchers(principal_id, q_assignee_ena=true)
+      return  if principal_id.nil?
       hsh_grp_info = HrzLib::IssueHelper.get_group_members(principal_id)
       if hsh_grp_info
         if q_assignee_ena && hsh_grp_info[:leader_id]

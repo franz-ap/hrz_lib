@@ -327,14 +327,14 @@ module HrzLib
          hrz_outs_param_list.as(:params2) >> tag_start_cl >> hrz_function.as(:func_close) >> tag_end_closed).as(:hrz_tag_long) |
 
         # IF-THEN-ELSE
-        (tag_start >> func_if     >> tag_end_closed >> bool_expr.as(:condition)      >> space? >>
-         tag_start >> func_then   >> tag_end_closed >> hrz_tag_text.as(:then_branch) >> space? >>
-         tag_start >> func_else   >> tag_end_closed >> hrz_tag_text.as(:else_branch) >> space? >>
+        (tag_start >> func_if     >> tag_end_closed >> space? >> bool_expr.as(:condition)      >> space? >>
+         tag_start >> func_then   >> tag_end_closed >>           hrz_tag_text.as(:then_branch) >> space? >>
+         tag_start >> func_else   >> tag_end_closed >>           hrz_tag_text.as(:else_branch) >> space? >>
          tag_start >> func_end_if >> tag_end_closed).as(:if_else_tag) |
 
         # IF-THEN (without ELSE)
-        (tag_start >> func_if     >> tag_end_closed >> bool_expr.as(:condition)      >> space? >>
-         tag_start >> func_then   >> tag_end_closed >> hrz_tag_text.as(:then_branch) >> space? >>
+        (tag_start >> func_if     >> tag_end_closed >> space? >> bool_expr.as(:condition)      >> space? >>
+         tag_start >> func_then   >> tag_end_closed >>           hrz_tag_text.as(:then_branch) >> space? >>
          tag_start >> func_end_if >> tag_end_closed).as(:if_then_tag) |
 
         # ON_ERROR <HRZ on_error replacement_text +> params2 </HRZ on_error >

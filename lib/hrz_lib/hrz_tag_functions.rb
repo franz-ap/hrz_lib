@@ -59,13 +59,14 @@ module HrzLib
           HrzLogger.logger.error_msg (params.join(' '))
           ""
         when 'prep_clear_all'
-          HrzAutoAction.tkt_prep_clear_assignee_watchers()
+          HrzAutoAction.tkt_prep_clear_assignee_watchers()   # That's all for now.
         when 'prep_add_asgn_watch'
-          hsh_param   = analyze_named_params(['set_assignee/assignee/asgn'], params, 'get_param', 0)
-          bq_assignee = hsh_param[:set_assignee] || 'true'
-          q_assignee  = (bq_assignee.downcase == 'true')
+          hsh_param    = analyze_named_params(['principal_id/id', 'set_assignee/assignee/asgn'], params, 'get_param', 1)
+          bq_assignee  = hsh_param[:set_assignee] || 'true'
+          q_assignee   = (bq_assignee.downcase == 'true')
+          principal_id = hsh_param[:principal_id]
           HrzLogger.debug_msg "tkt_prep_set_assignee_add_watchers: set_assignee=#{bq_assignee}, but should be true or false. Taking it as false."  if (! q_assignee) && (bq_assignee.downcase != 'false')
-          HrzAutoAction.tkt_prep_clear_assignee_watchers()
+          HrzAutoAction.tkt_prep_set_assignee_add_watchers(principal_id, q_assignee)
         when 'comment', "C"
           ""
         when 'usr_name', 'user_name'

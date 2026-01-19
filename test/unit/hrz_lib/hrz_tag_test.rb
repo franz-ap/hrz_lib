@@ -31,7 +31,10 @@
 #   HRZ_DEBUG=1 EXIT_ON_FAIL=1 ruby test/unit/hrz_lib/hrz_tag_test.rb
 #-------------------------------------------------------------------------------------------#
 
+require_relative '../../../lib/hrz_lib/issue_helper'
 require_relative '../../../lib/hrz_lib/hrz_tag_parser'
+require_relative '../../../lib/hrz_lib/hrz_auto_action'
+
 
 # Globale Variable für Fehler-Zähler
 $test_failures = 0
@@ -62,8 +65,11 @@ def run_tests
     tkt_new:  { cf_id_291: '3.3' },
   })
 
-  #test_case("Test 0: special dev/debug test", '<HRZ prep_clear_all><HRZ prep_add_asgn_watch 7163 set_assignee:falxse>', 'x')
-  #test_case("Test 0: special dev/debug test", 'U:<HRZ usr_name>, Rm-ID:<HRZ usr_id>', 'x')
+  #test_case("Test 0a: special dev/debug test", '<HRZ prep_clear_all><HRZ prep_add_asgn_watch 7163 set_assignee:falxse>', 'x')
+  #test_case("Test 0b: special dev/debug test", 'U:<HRZ usr_name>, Rm-ID:<HRZ usr_id>', 'x')
+  #test_case("Test 0c: special dev/debug test", '<HRZ if> <HRZ tkt_new cf_id_105 vfy="G1 Initiator Division"> == "CB" <HRZ then> <HRZ prep_add_asgn_watch 9249 set_assignee:false vfy:"[Role-CB]Information-Security"> <HRZ endif>', 'x')
+
+
 
   # Test 1: Simple text and get_param without default value
   test_case("Test A.1: text",                                  'abc',                                          'abc')
