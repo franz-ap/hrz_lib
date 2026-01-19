@@ -320,6 +320,7 @@ module HrzLib
                   #  'From'     => '"Support Team" <support@xy.com>'
                 }
               )
+            HrzLogger.logger.info_msg "e-mail notification sent to " + arr_unam.join(', ')
             if ! b_test.nil?
               # Remember, that we sent this e-mail.
               HrzLib::IssueHelper.add_comment(issue_main_id, b_test)
