@@ -72,6 +72,7 @@ module HrzLib
 
       # Ok, really something to do.
       HrzLogger.logger.debug_msg "== HrzAutoAction.action1: #{hsh_action[:b_title]} =="
+      HrzLogger.logger.debug_msg "Action details (except title): #{hsh_action.reject { |k, _| k == :b_title }.inspect}"
 
       # Check all conditions:
       q_all_cond_true = true  # So far ...
