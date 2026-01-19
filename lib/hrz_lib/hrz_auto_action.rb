@@ -311,14 +311,14 @@ module HrzLib
             #HrzLogger.logger.debug_msg "todo_send_email_issue_templ: Sending e-mail notification to " + arr_unam.join(', ')
             CustomWorkflowMailer.deliver_custom_email(
                 User.current, # Redmine-User-Context of recipient. Probably meaningless, because it will be overwritten by "to" below.
-                headers: {
+                #headers: {
                   to:           arr_to,
                   cc:           arr_cc,
                   subject:      template_issue_data[:b_subject],
                   # html_body:  xxx
                   #  'Reply-To' => 'reply@xy.com',
                   #  'From'     => '"Support Team" <support@xy.com>'
-                },
+                #},
                 text_body:    template_issue_data[:b_desc]
               )
             HrzLogger.logger.info_msg "e-mail notification '#{b_key_1x}' sent to " + arr_unam.join(', ')
