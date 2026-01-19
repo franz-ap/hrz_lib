@@ -37,8 +37,8 @@
     <% @conditions.each do |condition| %>
     <tr>
       <td><%= condition.j_condition_id %></td>
-      <td><%= condition.b_cond_question %></td>
-      <td><%= truncate(condition.b_cond_hrz, length: 100) %></td>
+      <td style="text-align: left;"><%= condition.b_cond_question %></td>
+      <td style="text-align: left;"><%= truncate(condition.b_cond_hrz, length: 100) %></td>
       <td class="buttons">
         <%= link_to l(:button_edit), 'javascript:void(0)',
             onclick: "showEditForm('condition', #{condition.j_condition_id})",

@@ -36,8 +36,8 @@
   <tbody>
     <% @todos.each do |todo| %>
     <tr>
-      <td><%= todo.b_key %></td>
-      <td><%= todo.b_name %></td>
+      <td style="text-align: left;"><%= todo.b_key %></td>
+      <td style="text-align: left;"><%= todo.b_name %></td>
       <td><%= todo.j_sort %></td>
       <td class="buttons">
         <%= link_to l(:button_edit), 'javascript:void(0)',
