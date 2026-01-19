@@ -497,7 +497,7 @@ module HrzLib
         if issue.save
           journal = issue.journals.last
           if journal
-            HrzLogger.info_msg "HRZ Lib: Successfully added comment to issue ##{issue_id}"
+            HrzLogger.debug_msg "HRZ Lib: Successfully added comment to issue ##{issue_id}"
             return journal.id
           else
             HrzLogger.error_msg "HRZ Lib: Comment was saved but journal entry not found"
