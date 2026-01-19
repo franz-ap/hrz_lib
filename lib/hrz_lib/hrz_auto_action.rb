@@ -189,7 +189,7 @@ module HrzLib
 
     # "ToDo": Create an issue from a template
     # @param hsh_opt  [Hash]  Information about the task.
-    def todo_mk_issue_from_templ(hsh_opt)
+    def self.todo_mk_issue_from_templ(hsh_opt)
       if hsh_opt[:issue_template_id]
         q_related     = hsh_opt[:q_related]
         q_child       = hsh_opt[:q_child]
@@ -248,7 +248,7 @@ module HrzLib
 
     # "ToDo": Send an e-mail and take an issue as a template
     # @param hsh_opt  [Hash]  Information about the task.
-    def todo_send_email_issue_templ(hsh_opt)
+    def self.todo_send_email_issue_templ(hsh_opt)
       if hsh_opt[:issue_template_id]
         q_related     = hsh_opt[:q_related]
         q_child       = hsh_opt[:q_child]
