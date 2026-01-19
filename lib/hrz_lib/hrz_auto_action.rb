@@ -158,7 +158,8 @@ module HrzLib
 
 
     # Perfom the main part of the step, i.e. what needs to be done aside from preparation and cleanup.
-    # @param b_todo   [String] Short name for the task to be performed: 'mk_issue_from_templ'  (The only one for now)
+    # @param b_todo   [String] Short name for the task to be performed: 'mk_issue_from_templ', 'send_email_issue_templ', ...
+    #                          See "case b_todo" in this method.
     # @param hsh_opt  [Hash]   Additional information about the above task.
     #   For task 'mk_issue_from_templ':
     #     :q_related         [Boolean] Make the new ticket related to the current main ticket (tkt_new)? true=yes, false=no, don't.
@@ -167,9 +168,9 @@ module HrzLib
     #     :project_id        [Integer, String] The ID or identifier of the project.
     #                                          Optional. Pass it only, if you do not want the new ticket
     #                                          to be created where the main ticket resides.
-    #     :q_only_1x         [Boolean] Do you want to avoid creating the 'same' ticket more than once (same b_issue_abbr and same parent/related)?
+    #     :q_only_1x         [Boolean] Do you want to avoid creating the 'same' ticket more than once (same b_key_1x and same parent/related)?
     #                                  true=yes false=no, don't care, create a new ticket with every call.
-    #     :b_issue_abbr      [String]  A unique abbreviation for this kind of ticket. Required for q_only_1x.
+    #     :b_key_1x          [String]  A unique abbreviation for this kind of ticket. Required for q_only_1x.
     def self.perform_step_todo(b_todo, hsh_opt)
       # Remember the original recursion level.
       j_lvl_recu_orig = get_recursion_level()
@@ -204,19 +205,19 @@ module HrzLib
         q_related     = hsh_opt[:q_related]
         q_child       = hsh_opt[:q_child]
         q_only_1x     = hsh_opt[:q_only_1x]
-        b_issue_abbr  = hsh_opt[:b_issue_abbr]
+        b_key_1x      = hsh_opt[:b_key_1x]
         project_id    = hsh_opt[:project_id]
         project_id    = HrzTagFunctions.get_context_value('tkt_new', 'project_id')  if project_id.nil?
         issue_main_id = HrzTagFunctions.get_context_value('tkt_new', 'issue_id')
-        if q_only_1x && (b_issue_abbr.nil? || b_issue_abbr.empty?)
-          HrzLogger.logger.debug_msg "todo_mk_issue_from_templ: Ignoring q_only_1x, because b_issue_abbr is empty."
+        if q_only_1x && (b_key_1x.nil? || b_key_1x.empty?)
+          HrzLogger.logger.debug_msg "todo_mk_issue_from_templ: Ignoring q_only_1x, because b_key_1x is empty."
           q_only_1x = false
         end
         q_creat_tkt = true
         b_suf       = ''
         if q_only_1x
           # See, if the requested ticket already exists. We want only 1 of them.
-          b_suf    = " {#{b_issue_abbr}}"
+          b_suf    = " {#{b_key_1x}}"
           found_id = nil
           if q_related
             found_id = HrzLib::IssueHelper.find_related_with_subject(issue_main_id, b_suf)
@@ -225,7 +226,7 @@ module HrzLib
             found_id = HrzLib::IssueHelper.find_subtask_with_subject(42, 'testing')
           end # if q_child
           if found_id
-              HrzLogger.logger.info_msg "Ticket '#{b_issue_abbr}' exists already: ##{found_id}"
+              HrzLogger.logger.info_msg "Ticket '#{b_key_1x}' exists already: ##{found_id}"
               q_creat_tkt = false
           end
         end # if q_only_1x
@@ -263,16 +264,16 @@ module HrzLib
         q_related     = hsh_opt[:q_related]
         q_child       = hsh_opt[:q_child]
         q_only_1x     = hsh_opt[:q_only_1x]
-        b_issue_abbr  = hsh_opt[:b_issue_abbr]
+        b_key_1x      = hsh_opt[:b_key_1x]
         issue_main_id = HrzTagFunctions.get_context_value('tkt_new', 'issue_id')
-        if q_only_1x && (b_issue_abbr.nil? || b_issue_abbr.empty?)
-          HrzLogger.logger.debug_msg "todo_send_email_issue_templ: Ignoring q_only_1x, because b_issue_abbr is empty."
+        if q_only_1x && (b_key_1x.nil? || b_key_1x.empty?)
+          HrzLogger.logger.debug_msg "todo_send_email_issue_templ: Ignoring q_only_1x, because b_key_1x is empty."
           q_only_1x = false
         end
         q_send = true
         b_test = nil
         if q_only_1x
-          b_test = "e-mail notification {#{b_issue_abbr}} sent."
+          b_test = "e-mail notification {#{b_key_1x}} sent."
           # See, if the main ticket already contains the test text.
           if HrzLib::IssueHelper.issue_has_text_note?(issue_main_id, b_test)
             q_send = false
@@ -459,7 +460,7 @@ module HrzLib
               issue_template_id: s.j_issue_template_id,
               b_project_id:      s.b_project_id,
               q_only_1x:         (s.jq_only_1x.to_i > 0),
-              b_key_abbr:        s.b_key_abbr,
+              b_key_1x:          s.b_key_1x,
             }
 
           {
