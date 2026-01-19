@@ -31,8 +31,8 @@
     </p>
     <p>
       <%= f.label :b_todo, l(:field_todo) %>
-      <%= f.select :b_todo, 
-          options_for_select(todos.map { |t| [t.b_name, t.b_key] }, step.b_todo), 
+      <%= f.select :b_todo,
+          options_for_select(todos.map { |t| [t.b_name, t.b_key] }, step.b_todo),
           { include_blank: true } %>
     </p>
     <p>
@@ -58,8 +58,8 @@
       <em class="info"><%= l(:help_only_once) %></em>
     </p>
     <p>
-      <%= f.label :b_key_abbr, l(:field_key_abbr) %>
-      <%= f.text_field :b_key_abbr, size: 30 %>
+      <%= f.label :b_key_1x, l(:field_key_once) %>
+      <%= f.text_field :b_key_1x, size: 30 %>
       <em class="info"><%= l(:help_key_abbr) %></em>
     </p>
     <p>

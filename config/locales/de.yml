@@ -45,7 +45,7 @@ de:
   field_issue_template: "Ticket als Vorlage"
   field_project_id: "Projektkennung"
   field_only_once: "Nur einmal"
-  field_key_abbr: "Schlüssel für 'einmal'-Prüfung"
+  field_key_once: "Schlüssel für 'einmal'-Prüfung"
   field_cleanup: "Bereinigung"
   field_action_title: "Aktions-Titel"
   field_on_new: "Bei Neu"

@@ -45,7 +45,7 @@ hu:
   field_issue_template: "Sablonként használandó jegy"
   field_project_id: "Projekt azonosító"
   field_only_once: "Csak egyszer"
-  field_key_abbr: "Kulcs az 'egyszer' teszteléshez"
+  field_key_once: "Kulcs az 'egyszer' teszteléshez"
   field_cleanup: "Tisztítás"
   field_action_title: "Művelet címe"
   field_on_new: "Új esetén"

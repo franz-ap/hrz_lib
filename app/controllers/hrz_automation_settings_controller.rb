@@ -235,7 +235,7 @@ class HrzAutomationSettingsController < ApplicationController
     params.require(:hrzlib_aut_step).permit(
       :b_title, :b_comment, :b_hrz_prep, :b_todo, :jq_related,
       :jq_subticket, :j_issue_template_id, :b_project_id,
-      :jq_only_1x, :b_key_abbr, :b_hrz_clean
+      :jq_only_1x, :b_key_1x, :b_hrz_clean
     )
   end
 

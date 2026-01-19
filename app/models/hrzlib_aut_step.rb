@@ -29,7 +29,7 @@ class HrzlibAutStep < ActiveRecord::Base
   validates :b_hrz_prep, length: { maximum: 4000 }
   validates :b_todo, length: { maximum: 25 }
   validates :b_project_id, length: { maximum: 50 }
-  validates :b_key_abbr, length: { maximum: 50 }
+  validates :b_key_1x, length: { maximum: 50 }
   validates :b_hrz_clean, length: { maximum: 4000 }
 
   before_create :set_created_by

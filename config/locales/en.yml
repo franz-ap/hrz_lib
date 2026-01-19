@@ -45,7 +45,7 @@ en:
   field_issue_template: "Issue to be used as template"
   field_project_id: "Project identifier"
   field_only_once: "Only once"
-  field_key_abbr: "Key for testing 'once'"
+  field_key_once: "Key for testing 'once'"
   field_cleanup: "Cleanup"
   field_action_title: "Action Title"
   field_on_new: "On new"
