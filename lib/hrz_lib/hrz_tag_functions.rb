@@ -81,7 +81,7 @@ module HrzLib
       # Pass HrzErrors on
       raise
     rescue StandardError => e
-      HrzLogger.logger.error_msg "Error in HRZ function #{b_function}: #{e.message}"
+      HrzLogger.logger.error_msg "Error in HRZ function #{b_function}: #{e.message}\n#{e.backtrace.join("\n")"
       raise HrzError.new("Error in function #{b_function}: #{e.message}",
                         { function: b_function, params: params, cause: e })
     end  # call_dispatcher
