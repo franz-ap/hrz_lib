@@ -315,11 +315,11 @@ module HrzLib
                   to:           arr_to,
                   cc:           arr_cc,
                   subject:      template_issue_data[:b_subject],
-                  text_body:    template_issue_data[:b_desc] #,
                   # html_body:  xxx
                   #  'Reply-To' => 'reply@xy.com',
                   #  'From'     => '"Support Team" <support@xy.com>'
-                }
+                },
+                text_body:    template_issue_data[:b_desc]
               )
             HrzLogger.logger.info_msg "e-mail notification '#{b_key_1x}' sent to " + arr_unam.join(', ')
             if ! b_test.nil?
