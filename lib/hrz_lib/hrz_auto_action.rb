@@ -282,14 +282,19 @@ module HrzLib
         if q_send
           template_issue_data = HrzLib::IssueHelper.get_issue(hsh_opt[:issue_template_id])
           if template_issue_data
-            j_assignee      = HrzTagFunctions.get_context_value('tkt_prep', 'assigned_to_id')
-            arr_watcher_ids = HrzTagFunctions.get_context_value('tkt_prep', 'arr_watcher_ids')
+            # Combine data from tkt_prep (1 assignee + 0..n watchers) with the data from the template ticket:
+            arr_assignees   = [ HrzTagFunctions.get_context_value('tkt_prep', 'assigned_to_id'),
+                                template_issue_data[:j_assignee]                               ].compact.uniq
+            arr_watcher_ids = (HrzTagFunctions.get_context_value('tkt_prep', 'arr_watcher_ids') +
+                               template_issue_data[:arr_watcher_ids]                            ).uniq   # No compact required for arr+arr.
             arr_unam = []
             arr_to   = []
             arr_cc   = []
-            usr = User.find(j_assignee)
-            arr_to   << usr
-            arr_unam << usr.to_s
+            arr_assignees.each do |j_assignee|
+              usr = User.find(j_assignee)
+              arr_to   << usr
+              arr_unam << usr.to_s
+            end
             arr_watcher_ids.each do |j_watcher_id|
               usr = User.find(j_watcher_id)
               arr_cc   << usr
@@ -297,15 +302,16 @@ module HrzLib
             end
             HrzLogger.logger.debug_msg "todo_send_email_issue_templ: Sending e-mail notification to " + arr_unam.join(', ')
             CustomWorkflowMailer.deliver_custom_email(
-                user,      # Redmine-User-Kontext
-                to:        arr_to,
-                cc:        arr_cc,
-                subject:   template_issue_data[:b_subject],
-                text_body: template_issue_data[:b_desc] #,
-                #headers: {
-                #  'Reply-To' => 'reply@deinefirma.com',
-                #  'From'     => '"Support Team" <support@xy.com>'
-                #}
+                User.current, # Redmine-User-Context of recipient. Probably meaningless, because it will be overwritten by "to" below.
+                headers: {
+                  to:           arr_to,
+                  cc:           arr_cc,
+                  subject:      template_issue_data[:b_subject],
+                  text_body:    template_issue_data[:b_desc] #,
+                  # html_body:  xxx
+                  #  'Reply-To' => 'reply@xy.com',
+                  #  'From'     => '"Support Team" <support@xy.com>'
+                }
               )
             if ! b_test.nil?
               # Remember, that we sent this e-mail.
