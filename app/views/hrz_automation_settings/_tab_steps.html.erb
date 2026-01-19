@@ -51,7 +51,7 @@
       </td>
     </tr>
     <tr id="edit_step_<%= step.j_step_id %>" style="display:none;">
-      <td colspan="4">
+      <td colspan="4" style="text-align: left;">
         <%= render partial: 'step_form', locals: { step: step, todos: @todos, url: { action: 'update_step', id: step.j_step_id }, method: :patch } %>
       </td>
     </tr>

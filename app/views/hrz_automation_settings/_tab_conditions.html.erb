@@ -51,7 +51,7 @@
       </td>
     </tr>
     <tr id="edit_condition_<%= condition.j_condition_id %>" style="display:none;">
-      <td colspan="4">
+      <td colspan="4" style="text-align: left;">
         <%= form_for condition, url: { action: 'update_condition', id: condition.j_condition_id }, method: :patch do |f| %>
           <div class="box tabular">
             <p>

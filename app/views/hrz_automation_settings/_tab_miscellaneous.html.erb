@@ -51,7 +51,7 @@
       </td>
     </tr>
     <tr id="edit_todo_<%= todo.b_key.gsub(/[^a-zA-Z0-9]/, '_') %>" style="display:none;">
-      <td colspan="4">
+      <td colspan="4" style="text-align: left;">
         <%= form_for todo, url: { action: 'update_todo', id: todo.b_key }, method: :patch, html: { class: 'tabular' } do |f| %>
           <div class="box">
             <p>
