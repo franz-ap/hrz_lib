@@ -659,7 +659,7 @@ module HrzLib
         # Find the issue
         issue = Issue.find(issue_id)
         q_ret = issue.journals.any? { |j| j.notes == b_txt_test }
-        HrzLogger.error_msg "HRZ Lib issue_has_text_note?: Issue ##{issue_id} #{q_ret ? 'contains a' : 'does not contain any'} note '#{b_txt_test}'."
+        HrzLogger.debug_msg "HRZ Lib issue_has_text_note?: Issue ##{issue_id} #{q_ret ? 'contains a' : 'does not contain any'} note '#{b_txt_test}'."
         q_ret
       rescue ActiveRecord::RecordNotFound => e
         HrzLogger.error_msg "HRZ Lib issue_has_text_note?: Issue ##{issue_id} not found: #{e.message}"

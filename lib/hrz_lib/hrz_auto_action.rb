@@ -24,8 +24,9 @@ module HrzLib
   class HrzAutoAction
 
     # Perform automatic actions for a given ticket
-    # @param q_new_ticket [Boolean]     Are we currently working on a new ticket? true=yes, false=no
-    # @param arr_actions  [Array<Hash>] Array of actions. Each action is a hash.
+    # @param q_new_ticket  [Boolean]     Are we currently working on a new ticket? true=yes, false=no
+    # @param q_before_save [Boolean]     Is the current call before (true) or after (false) saving the issue?
+    # @param arr_actions   [Array<Hash>] Array of actions. Each action is a hash.
     #   Action hash:
     #    q_on_new_ticket    [Boolean]  Perform this action on new tickets?      true=yes, false=no
     #    q_on_ticket_update [Boolean]  Perform this action upon modification of an existing ticket.
@@ -46,26 +47,32 @@ module HrzLib
     #      hsh_todo_opt       [Hash]     Additional information about this task.
     #      b_hrz_clean        [String]   <HRZ> tag string, that performs cleanup actions.     Optional.
     def self.ticket_actions(q_new_ticket,  # Are we currently working on a new ticket?
+                            q_before_save, # Is the current call before (true) or after (false) saving the issue?
                             arr_actions)   # Array of actions to be performed.
       arr_actions.each do |hsh_action|
-        action1('ticket', q_new_ticket, hsh_action)
+        action1('ticket', q_new_ticket, q_before_save, hsh_action)
       end
     end  # ticket_actions
 
 
     # Perform one action (possibly consisting of multiple steps).
-    # @param b_m_obj_type [String]  Type of main object: 'ticket', ...
-    # @param q_new_m_obj  [Boolean] Are we currently working on a new object (ticket, ...)? true=yes, false=no, update of existing object.
-    # @param q_ticket_upd [Boolean]   Are we currently working on a ticket update? true=yes, false=no
-    # @param hsh_action   [Hash]      Action hash. See ticket_actions for details.
+    # @param b_m_obj_type  [String]  Type of main object: 'ticket', ...
+    # @param q_new_m_obj   [Boolean] Are we currently working on a new object (issue/ticket, ...)? true=yes, false=no, update of existing object.
+    # @param q_before_save [Boolean] Is the current call before (true) or after (false) saving the main object (issue, ...)?
+    # @param q_ticket_upd  [Boolean] Are we currently working on a ticket update? true=yes, false=no
+    # @param hsh_action    [Hash]    Action hash. See ticket_actions for details.
     def self.action1(b_m_obj_type,  # Type of main object
                      q_new_m_obj,   # Are we currently working on a new main object (ticket, ...)?
+                     q_before_save, # Is the current call before (true) or after (false) saving the main object?
                      hsh_action)    # Action hash.
       q_trigger = false
       case b_m_obj_type
         when 'ticket'
           q_trigger = (  q_new_m_obj   &&  hsh_action[:q_on_new_ticket]    == true) ||
                       ((!q_new_m_obj)  &&  hsh_action[:q_on_ticket_update] == true)
+          if q_before_save
+            q_trigger = false   # TODO Currently we have no steps, that could be performed in the before-save call.
+          end
         else
           b_msg  = "Unknown/unimplemented action object type '#{b_m_obj_type}' in HrzAutoAction.action1."
       end # case
