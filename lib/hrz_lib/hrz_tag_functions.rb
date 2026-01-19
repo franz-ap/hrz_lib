@@ -402,6 +402,7 @@ module HrzLib
           usr = User.find(j_usr_id)
         else
           usr = User.current
+          HrzLogger.logger.debug_msg "hrz_strfunc_usr_name(usr_id=nil) --> Current user: #{User.current.inspect}"
         end
       rescue StandardError => e
         HrzLogger.logger.debug_msg "hrz_strfunc_usr_name(usr_id=#{j_usr_id.nil? ? 'nil' : j_usr_id.to_s}, attrib=#{b_attrib}): #{e.message}"
