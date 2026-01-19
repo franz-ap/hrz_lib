@@ -351,7 +351,7 @@ module HrzLib
         end
         HrzTagFunctions.context_array_push( 'tkt_prep', 'arr_watcher_ids', hsh_grp_info[:arr_member_ids], true)
       end
-      HrzLogger.logger.debug_msg 'Result tkt_prep_set_assignee_add_watchers: assignee=' + HrzTagFunctions.get_context_value('tkt_prep', 'assigned_to_id') + '  watchers: ' + HrzTagFunctions.get_context_value('tkt_prep', 'arr_watcher_ids').inspect
+      HrzLogger.logger.debug_msg 'Result tkt_prep_set_assignee_add_watchers: assignee=' + HrzTagFunctions.get_context_value('tkt_prep', 'assigned_to_id').to_s + '  watchers: ' + HrzTagFunctions.get_context_value('tkt_prep', 'arr_watcher_ids').inspect
     end  # tkt_prep_set_assignee_add_watchers
 
 
