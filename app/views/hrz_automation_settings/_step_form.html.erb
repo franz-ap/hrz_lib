@@ -14,7 +14,7 @@
 <%#  along with this program.  If not, see <https://www.gnu.org/licenses/>.                     %>
 <%# -------------------------------------------------------------------------------------eohdr- %>
 <%= form_for step, url: url, method: method, html: { class: 'tabular' } do |f| %>
-  <div class="box">
+  <div class="box tabular">
     <p>
       <%= f.label :b_title, l(:field_step_title) %>
       <%= f.text_field :b_title, size: 80, required: true %>
