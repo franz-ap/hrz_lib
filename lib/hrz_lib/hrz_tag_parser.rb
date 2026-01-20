@@ -482,17 +482,39 @@ module HrzLib
 
     # IF-THEN-ELSE tag
     rule(if_else_tag: {
-      condition: simple(:cond),
-      then_branch: sequence(:then_content),
-      else_branch: sequence(:else_content)
+      condition:   simple(:cond),
+      then_branch: sequence(:then_content),   # subtree(:then_branch_raw),
+      else_branch: sequence(:else_content)    # subtree(:else_branch_raw)
     }) do
+      HrzLogger.transform_beg 'if_else_tag_TRANSFORM', "cond = #{cond.inspect}"
+
       condition_result = cond.is_a?(TrueClass) || cond.is_a?(FalseClass) ? cond : (cond.to_s.upcase == 'TRUE')
 
+      # Standard
       if condition_result
-        then_content.map(&:to_s).join
+        result = then_content
       else
-        else_content.map(&:to_s).join
+        result = else_content
       end
+
+      # lazy
+      #transform = HrzTagTransform.new
+      #if condition_result
+      #  HrzLogger.debug_msg "Transforming 'then': #{then_branch_raw}"
+      #  result = transform.apply(then_branch_raw)
+      #else
+      #  HrzLogger.debug_msg "Transforming 'else': #{else_branch_raw}"
+      #  result = transform.apply(else_branch_raw)
+      #end
+      #ret = result
+
+      if result.is_a?(Array)
+        ret = result.map(&:to_s).join
+      else
+        ret = result.to_s
+      end
+      HrzLogger.transform_res ret.inspect
+      ret
     end  # if_else_tag
 
 
