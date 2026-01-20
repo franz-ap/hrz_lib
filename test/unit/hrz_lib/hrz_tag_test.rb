@@ -178,12 +178,14 @@ def run_tests
 
   #HrzLib::HrzTagFunctions.clear_context
 
-  test_case("Test 27: IF-THEN with true",       '<HRZ if>true<HRZ then>YES<HRZ end_if>',    'YES')
-  test_case("Test 28: IF-THEN with false",      '<HRZ if>false<HRZ then>YES<HRZ end_if>',   ''   )
-  test_case("Test 29: IF-THEN-ELSE with true",  '<HRZ if>true<HRZ then>YES<HRZ else>NO<HRZ end_if>',      'YES')
-  test_case("Test 30: IF-THEN-ELSE with false", '<HRZ if >false<HRZ then >YES<HRZ else >NO<HRZ end_if >', 'NO' )
-  test_case("Test 31: IF comparing get_param",  'Qty: <HRZ if><HRZ get_param qty> > 5<HRZ then>HIGH<HRZ else>LOW<HRZ end_if>', 'Qty: HIGH')
-  test_case("Test 32: IF with AND",             '<HRZ if>(3 < 5) AND (2 > 1)<HRZ then>Both true<HRZ else>Not both<HRZ end_if>', 'Both true')
+  test_case("Test C.1: IF-THEN with true",       '<HRZ if>true<HRZ then>YES<HRZ end_if>',    'YES')
+  test_case("Test C.2: IF-THEN with false",      '<HRZ if>false<HRZ then>YES<HRZ end_if>',   ''   )
+  test_case("Test C.3: IF-THEN-ELSE with true",  '<HRZ if>true<HRZ then>YES<HRZ else>NO<HRZ end_if>',      'YES')
+  test_case("Test C.4: IF-THEN-ELSE with false", '<HRZ if >false<HRZ then >YES<HRZ else >NO<HRZ end_if >', 'NO' )
+  test_case("Test C.5: IF comparing get_param",  'Qty: <HRZ if><HRZ get_param qty> > 5<HRZ then>HIGH<HRZ else>LOW<HRZ end_if>', 'Qty: HIGH')
+  test_case("Test C.6: IF with AND",             '<HRZ if>(3 < 5) AND (2 > 1)<HRZ then>Both true<HRZ else>Not both<HRZ end_if>', 'Both true')
+
+  test_case("Test C.10: IF with set_param",      '<HRZ set_param x 1><HRZ if>(3 < 5)<HRZ then><HRZ set_param x 2><HRZ else><HRZ set_param x 3><HRZ end_if>x=<HRZ get_param x>', 'x=2')
 
   # ============================================================================
   # ERROR HANDLING TESTS
