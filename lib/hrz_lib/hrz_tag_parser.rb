@@ -584,6 +584,9 @@ module HrzLib
 
     rule(single_hrz_tag: simple(:res))  { res.to_s }
     rule(single_hrz_tag: { hrz_tag_short: simple(:res)})  { res.to_s }
+    rule(single_hrz_tag: sequence(:content)) do   # from evaluate_if_tags_in_tree
+      content.map(&:to_s).join
+    end
 
 
 
@@ -616,9 +619,18 @@ module HrzLib
         else
           parse_tree = parser.parse(input_text, reporter: Parslet::ErrorReporter::Deepest.new)
         end
-        HrzLogger.logger.debug_msg "HRZ Tag str_hrz: No parse result for input '#{input_text}'!"   if parse_tree.nil?
-        # Transform
-        result = transform.apply(parse_tree)
+        if parse_tree.nil?
+          HrzLogger.logger.debug_msg "HRZ Tag str_hrz: No parse result for input '#{input_text}'!"
+        else
+          HrzLogger.logger.debug_msg "HRZ Tag str_hrz parse_tree: #{parse_tree}"
+        end
+
+        # Pre-transform: evaluate only "if tags" (to avoid transformation of then/else blocks where conditions do not match).
+        processed_tree = evaluate_if_tags_in_tree(parse_tree)
+        HrzLogger.logger.debug_msg "HRZ Tag str_hrz processed_tree: #{processed_tree}"
+
+        # Main transformation
+        result = transform.apply(processed_tree)
 
         # Combine results into a single string
         output = if result.is_a?(Array)
@@ -652,6 +664,59 @@ module HrzLib
       end
     end  # str_hrz
 
+
+    # Pre-transform: evaluate only if tags (to avoid transformation of then/else blocks where conditions do not match).
+    def self.evaluate_if_tags_in_tree(tree)
+      case tree
+      when Hash
+        if tree[:if_then_tag]
+          evaluate_if_then(tree[:if_then_tag])
+        elsif tree[:if_else_tag]
+          evaluate_if_else(tree[:if_else_tag])
+        else
+          tree.transform_values { |v| evaluate_if_tags_in_tree(v) }
+        end
+      when Array
+        tree.map { |item| evaluate_if_tags_in_tree(item) }
+      else
+        tree
+      end
+    end  # evaluate_if_tags_in_tree
+
+
+    def self.evaluate_if_then(if_node)
+      # Condition transformieren
+      transform = HrzTagTransform.new
+      cond_result = transform.apply(if_node[:condition])
+
+      condition_true = cond_result.is_a?(TrueClass) || cond_result.is_a?(FalseClass) ?
+                      cond_result : (cond_result.to_s.upcase == 'TRUE')
+
+      if condition_true
+        # Nur then_branch zurückgeben (wird später transformiert)
+        evaluate_if_tags_in_tree(if_node[:then_branch])
+      else
+        # Leerer Array, wird zu "" transformiert
+        []
+      end
+    end  # evaluate_if_then
+
+
+    def self.evaluate_if_else(if_node)
+      transform = HrzTagTransform.new
+      cond_result = transform.apply(if_node[:condition])
+
+      condition_true = cond_result.is_a?(TrueClass) || cond_result.is_a?(FalseClass) ?
+                      cond_result : (cond_result.to_s.upcase == 'TRUE')
+
+      if condition_true
+        evaluate_if_tags_in_tree(if_node[:then_branch])
+      else
+        evaluate_if_tags_in_tree(if_node[:else_branch])
+      end
+    end  # evaluate_if_else
+
+    # ---------------------------------------------------------------
 
 
     # Performs a syntax check

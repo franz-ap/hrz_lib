@@ -185,7 +185,8 @@ def run_tests
   test_case("Test C.5: IF comparing get_param",  'Qty: <HRZ if><HRZ get_param qty> > 5<HRZ then>HIGH<HRZ else>LOW<HRZ end_if>', 'Qty: HIGH')
   test_case("Test C.6: IF with AND",             '<HRZ if>(3 < 5) AND (2 > 1)<HRZ then>Both true<HRZ else>Not both<HRZ end_if>', 'Both true')
 
-  test_case("Test C.10: IF with set_param",      '<HRZ set_param x 1><HRZ if>(3 < 5)<HRZ then><HRZ set_param x 2>tr<HRZ else><HRZ set_param x 3>fa<HRZ end_if> x=<HRZ get_param x>', 'tr x=2')
+  test_case("Test C.10a: IF with set_param",      '<HRZ set_param x 1><HRZ if>(3 < 5)<HRZ then><HRZ set_param x 2>tr<HRZ else><HRZ set_param x 3>fa<HRZ end_if> x=<HRZ get_param x>', 'tr x=2')
+  test_case("Test C.10b: IF with set_param",      '<HRZ set_param x 1><HRZ if>(3 < 2)<HRZ then><HRZ set_param x 2>tr<HRZ else><HRZ set_param x 3>fa<HRZ end_if> x=<HRZ get_param x>', 'fa x=3')
 
   # ============================================================================
   # ERROR HANDLING TESTS
