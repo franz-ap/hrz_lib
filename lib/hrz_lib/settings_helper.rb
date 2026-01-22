@@ -120,7 +120,7 @@ module HrzLib
       settings = get_settings
 
       # Only redirect if debug_user_id is set and redirect_emails is enabled
-      return false unless settings[:debug_user_id] > 0 && settings[:q_redirect_emails]
+      return 0 unless settings[:debug_user_id] > 0 && settings[:q_redirect_emails]
 
       # Return the user ID to redirect to
       settings[:debug_user_id]
