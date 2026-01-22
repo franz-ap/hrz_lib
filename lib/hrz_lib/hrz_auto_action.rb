@@ -49,6 +49,8 @@ module HrzLib
     def self.ticket_actions(q_new_ticket,  # Are we currently working on a new ticket?
                             q_before_save, # Is the current call before (true) or after (false) saving the issue?
                             arr_actions)   # Array of actions to be performed.
+     #HrzLogger.logger.debug_msg "========= HrzAutoAction.ticket_actions, User #{HrzTagFunctions.hrz_strfunc_usr_id.to_i}, debug settings: #{SettingsHelper.get_settings().inspect}, j_usr_redirect=#{SettingsHelper.redirect_emails(HrzTagFunctions.hrz_strfunc_usr_id.to_i)}"
+
       arr_actions.each do |hsh_action|
         action1('ticket', q_new_ticket, q_before_save, hsh_action)
       end

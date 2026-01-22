@@ -19,6 +19,9 @@
 <div class="box">
   <h3><%= l(:label_hrz_lib_debug_settings) %></h3>
 
+  <%# Clear the settings cache whenever we display this settings page. Settings might have changed right before. %>
+  <%  HrzLib::SettingsHelper.clear_cache %>
+
   <p>
     <label>
       <%= l(:field_debug_user_id) %>

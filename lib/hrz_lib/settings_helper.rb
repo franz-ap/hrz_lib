@@ -57,20 +57,29 @@ module HrzLib
     # @return [Hash] Reloaded settings
     def self.reload_settings
       settings = Setting.plugin_hrz_lib || {}
+      #HrzLogger.logger.info_msg "SettingsHelper.reload_settings: " + settings.inspect
 
       @settings_cache = {
-        debug_user_id:                 settings['debug_user_id'].to_i,
-        q_verbose_log:                 settings['q_verbose_log'] == '1'                 || settings['q_verbose_log'] == true,
-        q_verbose_issue_helper:        settings['q_verbose_issue_helper'] == '1'        || settings['q_verbose_issue_helper'] == true,
-        q_verbose_custom_field_helper: settings['q_verbose_custom_field_helper'] == '1' || settings['q_verbose_custom_field_helper'] == true,
-        q_verbose_parser:              settings['q_verbose_parser'] == '1'              || settings['q_verbose_parser'] == true,
-        q_verbose_tag_functions:       settings['q_verbose_tag_functions'] == '1'       || settings['q_verbose_tag_functions'] == true,
-        q_verbose_http_requests:       settings['q_verbose_http_requests'] == '1'       || settings['q_verbose_http_requests'] == true,
-        q_redirect_emails:             settings['q_redirect_emails'] == '1'             || settings['q_redirect_emails'] == true
+        debug_user_id:                                     settings['debug_user_id'].to_i,
+        q_verbose_log:                 settings_to_boolean(settings['q_verbose_log']),
+        q_verbose_issue_helper:        settings_to_boolean(settings['q_verbose_issue_helper']),
+        q_verbose_custom_field_helper: settings_to_boolean(settings['q_verbose_custom_field_helper']),
+        q_verbose_parser:              settings_to_boolean(settings['q_verbose_parser']),
+        q_verbose_tag_functions:       settings_to_boolean(settings['q_verbose_tag_functions']),
+        q_verbose_http_requests:       settings_to_boolean(settings['q_verbose_http_requests']),
+        q_redirect_emails:             settings_to_boolean(settings['q_redirect_emails'])
       }
       @cache_time = Time.now
       @settings_cache
     end  #reload_settings
+
+
+    # Convert the given setting to a boolean value.
+    # @param  val [String, Boolean, Integer] Settings value
+    # @return     [Boolean]                  Settings value converted to Boolean.
+    def self.settings_to_boolean(val)
+      val == 'true'  ||  val == 1  ||  val == true
+    end  # settings_to_boolean
 
 
     # Clear the settings cache.
@@ -119,8 +128,8 @@ module HrzLib
     def self.redirect_emails(user_id)
       settings = get_settings
 
-      # Only redirect if debug_user_id is set and redirect_emails is enabled
-      return 0 unless settings[:debug_user_id] > 0 && settings[:q_redirect_emails]
+      # Only redirect if debug_user_id is set and redirect_emails + main swicth are enabled
+      return 0   unless settings[:debug_user_id] > 0  &&  settings[:q_redirect_emails]  &&  settings[:q_verbose_log]
 
       # Return the user ID to redirect to
       settings[:debug_user_id]
