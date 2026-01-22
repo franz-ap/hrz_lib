@@ -85,7 +85,7 @@ de:
 
   # Plugin settings
   label_hrz_lib_debug_settings: "Debug & Logging Einstellungen"
-  label_verbose_areas: "Bereiche für ausführliche Protokollierung"
+  label_verbose_areas: "Bereiche für Debug & ausführliche Protokollierung"
   label_all_users: "Alle Benutzer"
 
   field_debug_user_id: "Nur für Redmine Benutzer-ID"
@@ -95,8 +95,8 @@ de:
   field_verbose_parser: "Parser"
   field_verbose_tag_functions: "Tag-Funktionen"
   field_verbose_http_requests: "HTTP-Anfragen"
-  field_redirect_emails: "E-Mails an obigen Redmine-Benutzer umleiten"
+  field_redirect_emails: "Automatische e-mails umleiten"
 
   help_debug_user_id: "Die folgenden Einstellungen gelten nur, wenn die ID des aktuell angemeldeten Benutzers mit der angegebenen übereinstimmt. Leer lassen für 'alle'."
   help_verbose_log: "Dies ist der Hauptschalter für detaillierte Protokollausgabe. Interessante Bereiche können unten ausgewählt werden."
-  help_redirect_emails: "Wird ignoriert, wenn oben keine Redmine-Benutzer-ID angegeben wurde."
+  help_redirect_emails: "Automatische e-mails an obigen Redmine-Benutzer umleiten. Wird ignoriert, wenn oben keine Redmine-Benutzer-ID angegeben wurde."

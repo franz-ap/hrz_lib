@@ -115,8 +115,8 @@ module HrzLib
 
     # Check if emails should be redirected for the current user.
     # @param user_id [Integer] Current user ID
-    # @return        [Integer] 0 if not redirecting, or User ID to redirect to
-    def self.redirect_emails?(user_id)
+    # @return        [Integer] 0 if not redirecting, or User ID to redirect to.
+    def self.redirect_emails(user_id)
       settings = get_settings
 
       # Only redirect if debug_user_id is set and redirect_emails is enabled
@@ -124,7 +124,7 @@ module HrzLib
 
       # Return the user ID to redirect to
       settings[:debug_user_id]
-    end  # redirect_emails?
+    end  # redirect_emails
 
 
     # Get a specific setting value

@@ -308,23 +308,40 @@ module HrzLib
               arr_cc   << usr
               arr_unam << "CC #{usr.to_s}"
             end
+            b_subject = template_issue_data[:b_subject]
+            b_body    = template_issue_data[:b_desc]
+            # Redirect?
+            j_usr_redirect = SettingsHelper.redirect_emails(HrzTagFunctions.hrz_strfunc_usr_id.to_i)
+            b_inf_redir    = ''
+            if j_usr_redirect > 0
+              arr_to       = [ j_usr_redirect ]
+              arr_cc       = []
+              b_inf_redir  = HrzTagFunctions.hrz_strfunc_usr_name({usr_id: j_usr_redirect})
+              if b_inf_redir.empty?
+                HrzLogger.logger.debug_msg "Debug redirection of e-mail notification to INVALID user id #{j_usr_redirect}! Sending no e-mail at all!"
+                return
+              end
+              b_inf_redir  = ' was REDIRECTED to ' + b_inf_redir
+              b_body       = 'REDIRECTION! This e-mail was sent to you because of test/debug settings.\r\nNormally it would have been delivered to ' +
+                             arr_unam.join(', ') + ".\r\n\r\n" + b_body
+            end
             #HrzLogger.logger.debug_msg "todo_send_email_issue_templ: Sending e-mail notification to " + arr_unam.join(', ')
             CustomWorkflowMailer.deliver_custom_email(
                 User.current, # Redmine-User-Context of recipient. Probably meaningless, because it will be overwritten by "to" below.
                 #headers: {
                   to:           arr_to,
                   cc:           arr_cc,
-                  subject:      template_issue_data[:b_subject],
+                  subject:      b_subject,
                   # html_body:  xxx
                   #  'Reply-To' => 'reply@xy.com',
                   #  'From'     => '"Support Team" <support@xy.com>'
                 #},
-                text_body:    template_issue_data[:b_desc]
+                text_body:      b_body
               )
-            HrzLogger.logger.info_msg "e-mail notification '#{b_key_1x}' sent to " + arr_unam.join(', ')
+            HrzLogger.logger.info_msg "e-mail notification '#{b_key_1x}' #{j_usr_redirect > 0 ? '' : 'sent '}to " + arr_unam.join(', ') + b_inf_redir
             if ! b_test.nil?
               # Remember, that we sent this e-mail: make a note in the issue.
-              HrzLib::IssueHelper.add_comment(issue_main_id, b_test + " to " + arr_unam.join(', '))
+              HrzLib::IssueHelper.add_comment(issue_main_id, b_test + " to " + arr_unam.join(', ')) + b_inf_redir
             end
           end # if template_issue_data
         end # if q_send

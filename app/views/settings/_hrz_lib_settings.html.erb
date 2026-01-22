@@ -19,23 +19,28 @@
 <div class="box">
   <h3><%= l(:label_hrz_lib_debug_settings) %></h3>
 
-  <p style="text-align: left;">
-    <label><%= l(:field_debug_user_id) %></label>
+  <p>
+    <label>
+      <%= l(:field_debug_user_id) %>
+    </label>
     <%= number_field_tag 'settings[debug_user_id]',
-                         @settings['debug_user_id'],
-                         placeholder: l(:label_all_users),
-                         style: 'width: 150px;' %>
+                          @settings['debug_user_id'],
+                          placeholder: l(:label_all_users),
+                          style: 'width: 150px;' %>
+    <%= (@settings['debug_user_id'].nil? || @settings['debug_user_id'].to_i == 0                         ?
+         ''                                                                                              :
+         HrzLib::HrzTagFunctions.hrz_strfunc_usr_name({usr_id: @settings['debug_user_id'], nvl: '???' }) ) %>
     <br/>
     <em class="info"><%= l(:help_debug_user_id) %></em>
   </p>
 
-  <p style="text-align: left;">
+  <p>
     <label>
-      <%= check_box_tag 'settings[q_verbose_log]',
-                        true,
-                        @settings['q_verbose_log'] %>
       <%= l(:field_verbose_log) %>
     </label>
+    <%= check_box_tag 'settings[q_verbose_log]',
+                  true,
+                  @settings['q_verbose_log'] %>
     <br/>
     <em class="info"><%= l(:help_verbose_log) %></em>
   </p>
@@ -45,55 +50,55 @@
 
     <p>
       <label>
+        <%= l(:field_verbose_issue_helper) %>
         <%= check_box_tag 'settings[q_verbose_issue_helper]',
                           true,
                           @settings['q_verbose_issue_helper'] %>
-        <%= l(:field_verbose_issue_helper) %>
       </label>
     </p>
 
     <p>
       <label>
+        <%= l(:field_verbose_custom_field_helper) %>
         <%= check_box_tag 'settings[q_verbose_custom_field_helper]',
                           true,
                           @settings['q_verbose_custom_field_helper'] %>
-        <%= l(:field_verbose_custom_field_helper) %>
       </label>
     </p>
 
     <p>
       <label>
+        <%= l(:field_verbose_parser) %>
         <%= check_box_tag 'settings[q_verbose_parser]',
                           true,
                           @settings['q_verbose_parser'] %>
-        <%= l(:field_verbose_parser) %>
       </label>
     </p>
 
     <p>
       <label>
+        <%= l(:field_verbose_tag_functions) %>
         <%= check_box_tag 'settings[q_verbose_tag_functions]',
                           true,
                           @settings['q_verbose_tag_functions'] %>
-        <%= l(:field_verbose_tag_functions) %>
       </label>
     </p>
 
     <p>
       <label>
+        <%= l(:field_verbose_http_requests) %>
         <%= check_box_tag 'settings[q_verbose_http_requests]',
                           true,
                           @settings['q_verbose_http_requests'] %>
-        <%= l(:field_verbose_http_requests) %>
       </label>
     </p>
 
     <p>
       <label>
+        <%= l(:field_redirect_emails) %>
         <%= check_box_tag 'settings[q_redirect_emails]',
                           true,
                           @settings['q_redirect_emails'] %>
-        <%= l(:field_redirect_emails) %>
       </label>
       <br/>
       <em class="info"><%= l(:help_redirect_emails) %></em>
