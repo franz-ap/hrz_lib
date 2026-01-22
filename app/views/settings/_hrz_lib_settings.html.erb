@@ -19,7 +19,7 @@
 <div class="box">
   <h3><%= l(:label_hrz_lib_debug_settings) %></h3>
 
-  <p style="text-align: left;>
+  <p style="text-align: left;">
     <label><%= l(:field_debug_user_id) %></label>
     <%= number_field_tag 'settings[debug_user_id]',
                          @settings['debug_user_id'],
@@ -29,7 +29,7 @@
     <em class="info"><%= l(:help_debug_user_id) %></em>
   </p>
 
-  <p style="text-align: left;>
+  <p style="text-align: left;">
     <label>
       <%= check_box_tag 'settings[q_verbose_log]',
                         true,
