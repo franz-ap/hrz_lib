@@ -332,7 +332,7 @@ module HrzLib
                 return
               end
               b_inf_redir  = ' was REDIRECTED to ' + b_inf_redir
-              b_body       = 'REDIRECTION! This e-mail was sent to you because of test/debug settings.\r\nNormally it would have been delivered to ' +
+              b_body       = "REDIRECTION! This e-mail was sent to you because of test/debug settings.\r\nNormally it would have been delivered to " +
                              arr_unam.join(', ') + ".\r\n\r\n" + b_body
             end #  j_usr_redirect > 0
             #HrzLogger.logger.debug_msg "todo_send_email_issue_templ: Sending e-mail notification to " + arr_unam.join(', ')
