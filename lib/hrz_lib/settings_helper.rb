@@ -92,7 +92,7 @@ module HrzLib
 
     # Check if verbose logging is enabled for the current user and specific area
     # @param user_id [Integer] Current user ID
-    # @param area    [Symbol]  Area to check (:issue_helper, :custom_field_helper, :parser, :tag_functions, :http_requests)
+    # @param area    [Symbol]  Area to check (:main, :issue_helper, :custom_field_helper, :parser, :tag_functions, :http_requests)
     # @return [Boolean] True if logging should be verbose.
     def self.verbose_log?(user_id, area)
       settings = get_settings
@@ -105,6 +105,8 @@ module HrzLib
 
       # Check specific area
       case area
+        when :main
+          true   # Already checked above
         when :issue_helper
           settings[:q_verbose_issue_helper]
         when :custom_field_helper
@@ -128,8 +130,8 @@ module HrzLib
     def self.redirect_emails(user_id)
       settings = get_settings
 
-      # Only redirect if debug_user_id is set and redirect_emails + main swicth are enabled
-      return 0   unless settings[:debug_user_id] > 0  &&  settings[:q_redirect_emails]  &&  settings[:q_verbose_log]
+      # Only redirect if debug_user_id is set and redirect_emails + "main debug" are enabled
+      return 0   unless settings[:debug_user_id] > 0  &&  settings[:q_redirect_emails]  &&  verbose_log?(user_id, :main)
 
       # Return the user ID to redirect to
       settings[:debug_user_id]
