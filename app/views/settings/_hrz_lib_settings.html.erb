@@ -1,0 +1,102 @@
+<%# ------------------------------------------------------------------------------------------- %>
+<%#  Redmine utility/library plugin. Provides common functions to other plugins + REST API.     %>
+<%#  Copyright (C) 2026 Franz Apeltauer                                                         %>
+<%#                                                                                             %>
+<%#  This program is free software: you can redistribute it and/or modify it under the terms    %>
+<%#  of the GNU Affero General Public License as published by the Free Software Foundation,     %>
+<%#  either version 3 of the License, or (at your option) any later version.                    %>
+<%#                                                                                             %>
+<%#  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;  %>
+<%#  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  %>
+<%#  See the GNU Affero General Public License for more details.                                %>
+<%#                                                                                             %>
+<%#  You should have received a copy of the GNU Affero General Public License                   %>
+<%#  along with this program.  If not, see <https://www.gnu.org/licenses/>.                     %>
+<%# -------------------------------------------------------------------------------------eohdr- %>
+<%# Purpose:  Settings view for HRZ Lib plugin                                                  %>
+<%# Location: app/views/settings/_hrz_lib_settings.html.erb                                     %>
+
+<div class="box">
+  <h3><%= l(:label_hrz_lib_debug_settings) %></h3>
+
+  <p>
+    <label><%= l(:field_debug_user_id) %></label>
+    <%= number_field_tag 'settings[debug_user_id]',
+                         @settings['debug_user_id'],
+                         placeholder: l(:label_all_users),
+                         style: 'width: 150px;' %>
+    <br/>
+    <em class="info"><%= l(:help_debug_user_id) %></em>
+  </p>
+
+  <p>
+    <label>
+      <%= check_box_tag 'settings[q_verbose_log]',
+                        true,
+                        @settings['q_verbose_log'] %>
+      <%= l(:field_verbose_log) %>
+    </label>
+    <br/>
+    <em class="info"><%= l(:help_verbose_log) %></em>
+  </p>
+
+  <fieldset style="margin-left: 20px;">
+    <legend><%= l(:label_verbose_areas) %></legend>
+
+    <p>
+      <label>
+        <%= check_box_tag 'settings[q_verbose_issue_helper]',
+                          true,
+                          @settings['q_verbose_issue_helper'] %>
+        <%= l(:field_verbose_issue_helper) %>
+      </label>
+    </p>
+
+    <p>
+      <label>
+        <%= check_box_tag 'settings[q_verbose_custom_field_helper]',
+                          true,
+                          @settings['q_verbose_custom_field_helper'] %>
+        <%= l(:field_verbose_custom_field_helper) %>
+      </label>
+    </p>
+
+    <p>
+      <label>
+        <%= check_box_tag 'settings[q_verbose_parser]',
+                          true,
+                          @settings['q_verbose_parser'] %>
+        <%= l(:field_verbose_parser) %>
+      </label>
+    </p>
+
+    <p>
+      <label>
+        <%= check_box_tag 'settings[q_verbose_tag_functions]',
+                          true,
+                          @settings['q_verbose_tag_functions'] %>
+        <%= l(:field_verbose_tag_functions) %>
+      </label>
+    </p>
+
+    <p>
+      <label>
+        <%= check_box_tag 'settings[q_verbose_http_requests]',
+                          true,
+                          @settings['q_verbose_http_requests'] %>
+        <%= l(:field_verbose_http_requests) %>
+      </label>
+    </p>
+  </fieldset>
+
+  <p>
+    <label>
+      <%= check_box_tag 'settings[q_redirect_emails]',
+                        true,
+                        @settings['q_redirect_emails'] %>
+      <%= l(:field_redirect_emails) %>
+    </label>
+    <br/>
+    <em class="info"><%= l(:help_redirect_emails) %></em>
+  </p>
+</div>

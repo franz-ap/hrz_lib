@@ -82,3 +82,21 @@ de:
   help_json_post: "Markieren Sie die Stelle, an der die Eingabeaufforderung eingefügt werden soll, mit MY_PROMPT."
   help_json_res_path: "Um das Endergebnis in den Ergebnisdaten zu finden. Beispiel: $.xydata.items[0].value"
   help_sort_order: "Für die Anzeige in Listen"
+
+  # Plugin settings
+  label_hrz_lib_debug_settings: "Debug & Logging Einstellungen"
+  label_verbose_areas: "Bereiche für ausführliche Protokollierung"
+  label_all_users: "Alle Benutzer"
+
+  field_debug_user_id: "Nur für Redmine Benutzer-ID"
+  field_verbose_log: "Ausführliche Protokollierung (Hauptschalter)"
+  field_verbose_issue_helper: "Issue Helper"
+  field_verbose_custom_field_helper: "Custom Field Helper"
+  field_verbose_parser: "Parser"
+  field_verbose_tag_functions: "Tag-Funktionen"
+  field_verbose_http_requests: "HTTP-Anfragen"
+  field_redirect_emails: "E-Mails an obigen Redmine-Benutzer umleiten"
+
+  help_debug_user_id: "Die folgenden Einstellungen gelten nur, wenn die ID des aktuell angemeldeten Benutzers mit der angegebenen übereinstimmt. Leer lassen für 'alle'."
+  help_verbose_log: "Dies ist der Hauptschalter für detaillierte Protokollausgabe. Interessante Bereiche können unten ausgewählt werden."
+  help_redirect_emails: "Wird ignoriert, wenn oben keine Redmine-Benutzer-ID angegeben wurde."

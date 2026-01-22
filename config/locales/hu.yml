@@ -82,3 +82,21 @@ hu:
   help_json_post: "Jelölje meg azt a helyet, ahová a promptot be kell illeszteni, a MY_PROMPT jelzéssel."
   help_json_res_path: "A végeredmény megtalálásához az eredményadatokban. Példa: $.xydata.items[0].value"
   help_sort_order: "Listákban való megjelenítéshez"
+
+  # Plugin settings
+  label_hrz_lib_debug_settings: "Hibakeresési és naplózási beállítások"
+  label_verbose_areas: "Részletes naplózási területek"
+  label_all_users: "Minden felhasználó"
+
+  field_debug_user_id: "Csak Redmine felhasználói azonosítóhoz"
+  field_verbose_log: "Részletes napló (fő kapcsoló)"
+  field_verbose_issue_helper: "Issue Helper"
+  field_verbose_custom_field_helper: "Custom Field Helper"
+  field_verbose_parser: "Parser"
+  field_verbose_tag_functions: "Tag funkciók"
+  field_verbose_http_requests: "HTTP kérések"
+  field_redirect_emails: "E-mailek átirányítása a fenti Redmine felhasználóhoz"
+
+  help_debug_user_id: "Az alábbi beállítások csak akkor érvényesek, ha a bejelentkezett felhasználó azonosítója megegyezik a megadottal. Hagyja üresen az 'összes' értékhez."
+  help_verbose_log: "Ez a fő kapcsoló a részletes naplókimenethez. Az érdeklődési területek alább választhatók ki."
+  help_redirect_emails: "Figyelmen kívül hagyva, ha fent nincs megadva Redmine felhasználói azonosító."

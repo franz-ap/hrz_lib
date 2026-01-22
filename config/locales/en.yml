@@ -82,3 +82,21 @@ en:
   help_json_post: "Mark the place where the prompt has to be inserted with MY_PROMPT."
   help_json_res_path: "To find the final result in the result data. Example: $.xydata.items[0].value"
   help_sort_order: "For displaying in lists"
+
+  # Plugin settings
+  label_hrz_lib_debug_settings: "Debug & Logging Settings"
+  label_verbose_areas: "Verbose logging areas"
+  label_all_users: "All users"
+
+  field_debug_user_id: "Only for Redmine User ID"
+  field_verbose_log: "Verbose log (main switch)"
+  field_verbose_issue_helper: "Issue helper"
+  field_verbose_custom_field_helper: "Custom Field helper"
+  field_verbose_parser: "Parser"
+  field_verbose_tag_functions: "Tag functions"
+  field_verbose_http_requests: "HTTP requests"
+  field_redirect_emails: "Redirect (automatic) e-mails to the above Redmine user"
+
+  help_debug_user_id: "The below settings only apply if the currently logged in user's ID matches the given one. Leave empty for 'all'."
+  help_verbose_log: "This is the main switch for detailed log output. Areas of interest can be selected below."
+  help_redirect_emails: "Ignored if no Redmine User ID entered above."
