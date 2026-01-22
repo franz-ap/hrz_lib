@@ -341,7 +341,7 @@ module HrzLib
             HrzLogger.logger.info_msg "e-mail notification '#{b_key_1x}' #{j_usr_redirect > 0 ? '' : 'sent '}to " + arr_unam.join(', ') + b_inf_redir
             if ! b_test.nil?
               # Remember, that we sent this e-mail: make a note in the issue.
-              HrzLib::IssueHelper.add_comment(issue_main_id, b_test + " to " + arr_unam.join(', ')) + b_inf_redir
+              HrzLib::IssueHelper.add_comment(issue_main_id, b_test + " to " + arr_unam.join(', ') + b_inf_redir)
             end
           end # if template_issue_data
         end # if q_send
