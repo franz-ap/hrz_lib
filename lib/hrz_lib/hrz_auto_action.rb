@@ -297,26 +297,34 @@ module HrzLib
                                 template_issue_data[:j_assignee]                               ].compact.uniq
             arr_watcher_ids = (HrzTagFunctions.get_context_value('tkt_prep', 'arr_watcher_ids') +
                                template_issue_data[:arr_watcher_ids]                            ).uniq   # No compact required for arr+arr.
-            arr_unam = []
-            arr_to   = []
-            arr_cc   = []
+            arr_unam  = []
+            arr_to    = []
+            arr_to_id = []  # arr_assignees might contain strings. arr_to_id certainly contains only Integers. Important for include? below.
+            arr_cc    = []
             arr_assignees.each do |j_assignee|
-              usr = User.find(j_assignee)
-              arr_to   << usr
-              arr_unam << usr.to_s
+              usr = User.find(j_assignee.to_i)
+              arr_to    << usr
+              arr_to_id << j_assignee.to_i
+              arr_unam  << usr.to_s
             end
             arr_watcher_ids.each do |j_watcher_id|
-              usr = User.find(j_watcher_id)
-              arr_cc   << usr
-              arr_unam << "CC #{usr.to_s}"
+              #HrzLogger.logger.debug_msg "todo_send_email_issue_templ CC test for j_watcher_id=#{j_watcher_id.inspect} in arr_to_id=#{arr_to_id.inspect}"
+              if ! arr_to_id.include?(j_watcher_id)  # Do not repeat persons in CC, if they are already in 'to'.
+                usr = User.find(j_watcher_id.to_i)
+                arr_cc   << usr
+                arr_unam << "CC #{usr.to_s}"
+              end
             end
             b_subject = template_issue_data[:b_subject]
             b_body    = template_issue_data[:b_desc]
             # Redirect?
             j_usr_redirect = SettingsHelper.redirect_emails(HrzTagFunctions.hrz_strfunc_usr_id.to_i)
             b_inf_redir    = ''
+            #HrzLogger.logger.debug_msg "todo_send_email_issue_templ ... j_usr_redirect=#{j_usr_redirect}"
             if j_usr_redirect > 0
-              arr_to       = [ j_usr_redirect ]
+              # We re-direct this e-mail for testing/debugging.
+              usr          = User.find(j_usr_redirect)
+              arr_to       = [ usr ]
               arr_cc       = []
               b_inf_redir  = HrzTagFunctions.hrz_strfunc_usr_name({usr_id: j_usr_redirect})
               if b_inf_redir.empty?
@@ -326,7 +334,7 @@ module HrzLib
               b_inf_redir  = ' was REDIRECTED to ' + b_inf_redir
               b_body       = 'REDIRECTION! This e-mail was sent to you because of test/debug settings.\r\nNormally it would have been delivered to ' +
                              arr_unam.join(', ') + ".\r\n\r\n" + b_body
-            end
+            end #  j_usr_redirect > 0
             #HrzLogger.logger.debug_msg "todo_send_email_issue_templ: Sending e-mail notification to " + arr_unam.join(', ')
             CustomWorkflowMailer.deliver_custom_email(
                 User.current, # Redmine-User-Context of recipient. Probably meaningless, because it will be overwritten by "to" below.
