@@ -92,7 +92,7 @@ module HrzLib
       return false if settings[:debug_user_id] > 0 && settings[:debug_user_id] != user_id
 
       # Check main switch
-      return false unless settings[:verbose_log]
+      return false unless settings[:q_verbose_log]
 
       # Check specific area
       case area

@@ -89,7 +89,7 @@ en:
   label_all_users: "All users"
 
   field_debug_user_id: "Only for Redmine User ID"
-  field_verbose_log: "Verbose log (main switch)"
+  field_verbose_log: "Debug & Verbose log (main switch)"
   field_verbose_issue_helper: "Issue helper"
   field_verbose_custom_field_helper: "Custom Field helper"
   field_verbose_parser: "Parser"

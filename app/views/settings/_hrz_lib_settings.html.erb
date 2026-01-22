@@ -19,7 +19,7 @@
 <div class="box">
   <h3><%= l(:label_hrz_lib_debug_settings) %></h3>
 
-  <p>
+  <p style="text-align: left;>
     <label><%= l(:field_debug_user_id) %></label>
     <%= number_field_tag 'settings[debug_user_id]',
                          @settings['debug_user_id'],
@@ -29,7 +29,7 @@
     <em class="info"><%= l(:help_debug_user_id) %></em>
   </p>
 
-  <p>
+  <p style="text-align: left;>
     <label>
       <%= check_box_tag 'settings[q_verbose_log]',
                         true,
@@ -40,7 +40,7 @@
     <em class="info"><%= l(:help_verbose_log) %></em>
   </p>
 
-  <fieldset style="margin-left: 20px;">
+  <fieldset style="margin-left: 20px; text-align: left;">
     <legend><%= l(:label_verbose_areas) %></legend>
 
     <p>
@@ -87,16 +87,17 @@
         <%= l(:field_verbose_http_requests) %>
       </label>
     </p>
-  </fieldset>
 
-  <p>
-    <label>
-      <%= check_box_tag 'settings[q_redirect_emails]',
-                        true,
-                        @settings['q_redirect_emails'] %>
-      <%= l(:field_redirect_emails) %>
-    </label>
-    <br/>
-    <em class="info"><%= l(:help_redirect_emails) %></em>
-  </p>
+    <p>
+      <label>
+        <%= check_box_tag 'settings[q_redirect_emails]',
+                          true,
+                          @settings['q_redirect_emails'] %>
+        <%= l(:field_redirect_emails) %>
+      </label>
+      <br/>
+      <em class="info"><%= l(:help_redirect_emails) %></em>
+    </p>
+
+  </fieldset>
 </div>
