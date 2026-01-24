@@ -29,44 +29,58 @@ module HrzLib
   # Logger wrapper, enabling standalone tests without Rails.
   class HrzLogger
     def initialize
-       @q_debug_enabled = false  # Default: Debug off
+       #@q_debug_enabled = false  # Default: Debug off
+       @q_verbose_parser = false
     end
 
 
     # Enable or disable debug output.
     # @param q_enabled [Boolean] Debug output enabled from now on (true) or not (false).
     def self.debug_enable(q_enabled)
-       @q_debug_enabled = q_enabled
+       #@q_debug_enabled = q_enabled
     end  # debug_enable
 
 
     # Is debug output enabled?
     def self.debug_enabled?
-      @q_debug_enabled
+      true #@q_debug_enabled
     end  # debug_enabled?
 
 
     # Issue a general debug message.
     # @param b_msg [String] The debug message.
     def self.debug_msg(b_msg)
-      return unless @q_debug_enabled
+      #return unless @q_debug_enabled
       puts '[DEBUG] ' + B_ANSI_YELLOW_BGCOLOR_STD + b_msg + B_ANSI_RESET_COLOR
       HrzTagFunctions.context_array_push('hrz_msgs', 'debug', b_msg)
     end  # debug_msg
 
 
-    # Issue a transform debug message, at the beinning of the transformation.
+    # Enable or disable verbose parser debug output.
+    # @param q_enabled [Boolean] Debug output enabled from now on (true) or not (false).
+    def self.parser_debug_enable(q_enabled)
+       @q_verbose_parser = q_enabled
+    end  # parser_debug_enable
+
+
+    # Issue a parser debug message (just like debug_msg above, but only if verbose parser output was enabled)
+    # @param b_msg [String] The debug message.
+    def self.parser_debug_msg(b_msg)
+      HrzLogger.debug_msg(b_msg)  if @q_verbose_parser
+    end  # parser_debug_msg
+
+    # Issue a transform debug message, at the beginning of the transformation.
     # @param b_rule [String] Name of the rule.
     # @param b_msg  [String] The debug message.
     def self.transform_beg(b_rule, b_msg)
-      HrzLogger.debug_msg("Transform '#{b_rule}': #{b_msg}")
+      HrzLogger.parser_debug_msg("Transform '#{b_rule}': #{b_msg}")
     end  # transform_beg
 
 
     # Issue a transform debug message, at the end of the transformation.
     # @param b_msg [String] The debug message: result.
     def self.transform_res(b_msg)
-      HrzLogger.debug_msg("  ----->  #{b_msg}")
+      HrzLogger.parser_debug_msg("  ----->  #{b_msg}")
     end  # transform_res
 
 
@@ -120,6 +134,16 @@ module HrzLib
         b_ret[0..l_max]
       end
     end  # retrieve_msgs
+
+
+    # Retrieve messages, that were collected so far. Array version
+    # @param b_category      [Symbol, String]   Message category to be retrieved: 'debug', 'info', 'warning', 'error', 'error_abort'
+    # @return                [Array of Strings] Collected messages, possibly []
+    def self.retrieve_msgs_arr(b_category)
+      arr_coll = HrzTagFunctions.get_context_value('hrz_msgs', b_category, nil)
+      arr_coll = []   if ! arr_coll.is_a?(Array)
+      arr_coll
+    end  # retrieve_msgs_arr
 
 
     # Rails compatible interface
@@ -342,7 +366,7 @@ module HrzLib
             hrz_tag_text.as(:protected_content) >> space? >>
         tag_start_cl >> func_on_error >> tag_end_closed).as(:on_error_tag)
       ).as(:single_hrz_tag)
-      #HrzLogger.debug_msg("Parsing single_hrz_tag")
+      #HrzLogger.parser_debug_msg("Parsing single_hrz_tag")
       result
     }
 
@@ -430,7 +454,7 @@ module HrzLib
         when '>=' then ret = (left_val >= right_val)
         else
           ret = "?#{o.to_s}?"
-          HrzLogger.debug_msg("Unimplemented arithmetic comparison '#{o.to_s}'.")
+          HrzLogger.parser_debug_msg("Unimplemented arithmetic comparison '#{o.to_s}'.")
       end # case
       HrzLogger.transform_res ret.inspect
       ret
@@ -451,7 +475,7 @@ module HrzLib
         #when '>=' then ret = (left_val >= right_val)
         else
           ret = "?#{o.to_s}?"
-          HrzLogger.debug_msg("Unimplemented string comparison '#{o.to_s}'.")
+          HrzLogger.parser_debug_msg("Unimplemented string comparison '#{o.to_s}'.")
       end # case
       HrzLogger.transform_res ret.inspect
       ret
@@ -500,10 +524,10 @@ module HrzLib
       # lazy
       #transform = HrzTagTransform.new
       #if condition_result
-      #  HrzLogger.debug_msg "Transforming 'then': #{then_branch_raw}"
+      #  HrzLogger.parser_debug_msg "Transforming 'then': #{then_branch_raw}"
       #  result = transform.apply(then_branch_raw)
       #else
-      #  HrzLogger.debug_msg "Transforming 'else': #{else_branch_raw}"
+      #  HrzLogger.parser_debug_msg "Transforming 'else': #{else_branch_raw}"
       #  result = transform.apply(else_branch_raw)
       #end
       #ret = result
@@ -600,12 +624,16 @@ module HrzLib
   class TagStringHelper
     # Processes a text, that may contain HRZ tags
     # @param input_text [String] Input text, may contain HRZ tags
-    # @param dry_run [Boolean, default false] If true, tag functions will not be perfomed. Only syntax check.
+    # @param q_dry_run [Boolean, default false] If true, tag functions will not be perfomed. Only syntax check.
     # @return [String] Processed string
     # @raise [HrzError] In case of errors, that were not caught by a surrounding on_error tag.
-    def self.str_hrz(input_text, dry_run: false)
+    def self.str_hrz(input_text, q_dry_run: false)
+      q_verbose_parser = SettingsHelper.verbose_log?(User.current&.id, :parser)
+      HrzLogger.parser_debug_enable(q_verbose_parser)
+      HrzLogger.parser_debug_msg "HRZ Tag str_hrz#{q_dry_run ? '/dry' : ''}: #{input_text}"  if q_verbose_parser
+
       clear_errors
-      set_dry_run_mode(dry_run)
+      set_dry_run_mode(q_dry_run)
 
       return "" if input_text.nil? || input_text.empty?
 
@@ -614,20 +642,20 @@ module HrzLib
         transform = HrzTagTransform.new
 
         # Parse
-        if HrzLogger.debug_enabled?
+        if q_verbose_parser
           parse_tree = parser.parse_with_debug(input_text, reporter: Parslet::ErrorReporter::Deepest.new)
         else
           parse_tree = parser.parse(input_text, reporter: Parslet::ErrorReporter::Deepest.new)
         end
         if parse_tree.nil?
-          HrzLogger.logger.debug_msg "HRZ Tag str_hrz: No parse result for input '#{input_text}'!"
+          HrzLogger.parser_debug_msg "HRZ Tag str_hrz: No parse result for input '#{input_text}'!"  if q_verbose_parser
         else
-          HrzLogger.logger.debug_msg "HRZ Tag str_hrz parse_tree: #{parse_tree}"
+          HrzLogger.parser_debug_msg "HRZ Tag str_hrz parse_tree: #{parse_tree}"                    if q_verbose_parser
         end
 
         # Pre-transform: evaluate only "if tags" (to avoid transformation of then/else blocks where conditions do not match).
         processed_tree = evaluate_if_tags_in_tree(parse_tree)
-        HrzLogger.logger.debug_msg "HRZ Tag str_hrz processed_tree: #{processed_tree}"
+        HrzLogger.parser_debug_msg "HRZ Tag str_hrz processed_tree: #{processed_tree}"              if q_verbose_parser
 
         # Main transformation
         result = transform.apply(processed_tree)
@@ -689,10 +717,11 @@ module HrzLib
       transform = HrzTagTransform.new
       cond_result = transform.apply(if_node[:condition])
 
-      condition_true = cond_result.is_a?(TrueClass) || cond_result.is_a?(FalseClass) ?
-                      cond_result : (cond_result.to_s.upcase == 'TRUE')
+      q_condition_true = cond_result.is_a?(TrueClass) || cond_result.is_a?(FalseClass) ?
+                         cond_result                                                   :
+                         (cond_result.to_s.upcase == 'TRUE')
 
-      if condition_true
+      if q_condition_true
         # Nur then_branch zurückgeben (wird später transformiert)
         evaluate_if_tags_in_tree(if_node[:then_branch])
       else
@@ -706,10 +735,11 @@ module HrzLib
       transform = HrzTagTransform.new
       cond_result = transform.apply(if_node[:condition])
 
-      condition_true = cond_result.is_a?(TrueClass) || cond_result.is_a?(FalseClass) ?
-                      cond_result : (cond_result.to_s.upcase == 'TRUE')
+      q_condition_true = cond_result.is_a?(TrueClass) || cond_result.is_a?(FalseClass) ?
+                         cond_result                                                   :
+                         (cond_result.to_s.upcase == 'TRUE')
 
-      if condition_true
+      if q_condition_true
         evaluate_if_tags_in_tree(if_node[:then_branch])
       else
         evaluate_if_tags_in_tree(if_node[:else_branch])

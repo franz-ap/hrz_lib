@@ -17,13 +17,13 @@
 
 module HrzLib
   module CustomFieldHelper
-    
+
     # Creates a new custom field
     #
     # @param name [String] The name of the custom field
-    # @param field_format [String] The format type: 'string', 'text', 'int', 'float', 'date', 
+    # @param field_format [String] The format type: 'string', 'text', 'int', 'float', 'date',
     #   'bool', 'list', 'user', 'version', 'link', 'attachment'
-    # @param customized_type [String] What the field applies to: 'issue', 'project', 'user', 
+    # @param customized_type [String] What the field applies to: 'issue', 'project', 'user',
     #   'time_entry', 'version', 'document', 'group'
     # @param options [Hash] Additional options for the custom field
     # @option options [String] :description Description of the field
@@ -42,6 +42,7 @@ module HrzLib
     # @option options [Array<String>] :role_ids Array of role IDs that can see/edit the field
     # @option options [String] :formula Ruby formula for computed custom fields (requires Computed Custom Field plugin)
     # @option options [Boolean] :is_computed Whether this is a computed field (default: false, requires plugin)
+    # @param q_verbose [Boolean] Be verbose? Default: false
     #
     # @return [Integer, nil] The ID of the created custom field, or nil if creation failed
     #
@@ -114,22 +115,24 @@ module HrzLib
     #     'project',
     #     default_value: "API_KEY=\nDATABASE_URL=\nLOG_LEVEL=info"
     #   )
-    def self.create_custom_field(name, field_format, customized_type, options = {})
+    def self.create_custom_field(name, field_format, customized_type, options = {}, q_verbose = false)
+      q_verbose_cf = q_verbose  ||  SettingsHelper.verbose_log?(User.current&.id, :custom_field_helper)
+      HrzLogger.debug_msg "HRZ Lib create_custom_field(name='#{name}', field_format='#{field_format}', customized_type='#{customized_type}', options=#{options.inspect}"  if q_verbose_cf
       begin
         # Validate field_format
         valid_formats = %w[string text int float date bool list user version link attachment key_value]
         unless valid_formats.include?(field_format)
-          Rails.logger.error "HRZ Lib: Invalid field format '#{field_format}'. Valid formats: #{valid_formats.join(', ')}"
+          HrzLogger.error_msg "HRZ Lib create_custom_field: Invalid field format '#{field_format}'. Valid formats: #{valid_formats.join(', ')}"
           return nil
         end
-        
+
         # Validate customized_type
         valid_types = %w[issue project user time_entry version document group]
         unless valid_types.include?(customized_type)
-          Rails.logger.error "HRZ Lib: Invalid customized type '#{customized_type}'. Valid types: #{valid_types.join(', ')}"
+          HrzLogger.error_msg "HRZ Lib create_custom_field: Invalid customized type '#{customized_type}'. Valid types: #{valid_types.join(', ')}"
           return nil
         end
-        
+
         # Determine the appropriate CustomField class based on type
         klass = case customized_type
                 when 'issue'
@@ -149,12 +152,12 @@ module HrzLib
                 else
                   CustomField
                 end
-        
+
         # Create the custom field
         custom_field = klass.new
         custom_field.name = name
         custom_field.field_format = field_format
-        
+
         # Set standard options with defaults
         custom_field.description = options[:description] if options[:description]
         custom_field.is_required = options[:is_required] || false
@@ -163,63 +166,81 @@ module HrzLib
         custom_field.searchable = options[:searchable] || false
         custom_field.multiple = options[:multiple] || false
         custom_field.default_value = options[:default_value] if options[:default_value]
-        
+
         # Set validation options
         custom_field.regexp = options[:regexp] if options[:regexp]
         custom_field.min_length = options[:min_length] if options[:min_length]
         custom_field.max_length = options[:max_length] if options[:max_length]
-        
+
         # Set possible values for list fields
         if field_format == 'list' && options[:possible_values]
           custom_field.possible_values = options[:possible_values]
         end
-        
+
         # Set projects if not for all
         if !custom_field.is_for_all && options[:project_ids]
           custom_field.project_ids = options[:project_ids]
         end
-        
+
         # Set trackers for issue custom fields
-        if customized_type == 'issue' && options[:tracker_ids]
-          custom_field.tracker_ids = options[:tracker_ids]
-        end
-        
+        if customized_type == 'issue'
+          if options[:trackers]
+            # Verify tracker names, adjusting IDs, if necessary
+            arr_tracker_ids = []
+            options[:trackers].each do |hsh_trk|
+              tracker = Tracker.find_by(name: hsh_trk[:name])
+              if tracker
+                arr_tracker_ids << tracker.id
+                if hsh_trk[:id] != tracker.id
+                  HrzLogger.info_msg "HRZ Lib create_custom_field: Adjusted tracker '#{hsh_trk[:name]}'s ID #{hsh_trk[:id]} --> #{tracker.id} before adding it to CF."
+                end
+              else
+                HrzLogger.warning_msg "HRZ Lib create_custom_field: Tracker '#{hsh_trk[:name]}' does not exist. Skipping it."
+              end
+            end
+            options[:tracker_ids] = arr_tracker_ids  # Overwrite :tracker_ids in options, in case they were passed. Prefer :trackers, if we have both. Safer.
+          end
+          if options[:tracker_ids]
+            custom_field.tracker_ids = options[:tracker_ids]
+          end
+        end # if customized_type == 'issue'
+
         # Set roles if specified
         if options[:role_ids]
           custom_field.role_ids = options[:role_ids]
         end
-        
+
         # Set formula for computed custom fields (requires Computed Custom Field plugin)
         if options[:is_computed] && options[:formula]
           if custom_field.respond_to?(:formula=)
             custom_field.formula = options[:formula]
-            Rails.logger.info "HRZ Lib: Setting formula for computed custom field: #{options[:formula]}"
+            HrzLogger.info_msg "HRZ Lib create_custom_field: Setting formula for computed custom field: #{options[:formula]}"  if q_verbose_cf
           else
-            Rails.logger.warn "HRZ Lib: Computed Custom Field plugin not detected. Formula will be ignored."
-            Rails.logger.warn "HRZ Lib: Install the plugin from: https://github.com/annikoff/redmine_plugin_computed_custom_field"
+            HrzLogger.warning_msg "HRZ Lib create_custom_field: Computed Custom Field plugin not detected. Formula will be ignored."
+            HrzLogger.warning_msg "HRZ Lib create_custom_field: Install the plugin from: https://github.com/annikoff/redmine_plugin_computed_custom_field"
           end
         elsif options[:formula] && !options[:is_computed]
-          Rails.logger.warn "HRZ Lib: Formula provided but is_computed not set to true. Formula will be ignored."
+          HrzLogger.warning_msg "HRZ Lib create_custom_field: Formula provided but is_computed not set to true. Formula will be ignored."
         end
-        
+
         # Save the custom field
         if custom_field.save
-          Rails.logger.info "HRZ Lib: Successfully created custom field '#{name}' (ID: #{custom_field.id})"
+          HrzLogger.info_msg "HRZ Lib create_custom_field: Successfully created custom field '#{name}' (ID: #{custom_field.id})"  if q_verbose_cf
           return custom_field.id
         else
-          Rails.logger.error "HRZ Lib: Failed to create custom field: #{custom_field.errors.full_messages.join(', ')}"
+          HrzLogger.error_msg "HRZ Lib create_custom_field: Failed to create custom field: #{custom_field.errors.full_messages.join(', ')}"
           return nil
         end
-        
+
       rescue => e
-        Rails.logger.error "HRZ Lib: Error creating custom field: #{e.message}"
-        Rails.logger.error e.backtrace.join("\n")
+        HrzLogger.error_msg "HRZ Lib create_custom_field: Error creating custom field: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
         return nil
       end
     end  # create_custom_field
-    
 
-    
+
+
     # Updates an existing custom field
     #
     # @param custom_field_id [Integer] The ID of the custom field to update
@@ -253,12 +274,12 @@ module HrzLib
     def self.update_custom_field(custom_field_id, attributes = {})
       begin
         custom_field = CustomField.find(custom_field_id)
-        
+
         # Update attributes
         attributes.each do |key, value|
           custom_field.send("#{key}=", value) if custom_field.respond_to?("#{key}=")
         end
-        
+
         if custom_field.save
           Rails.logger.info "HRZ Lib: Successfully updated custom field ##{custom_field_id}"
           return true
@@ -266,7 +287,7 @@ module HrzLib
           Rails.logger.error "HRZ Lib: Failed to update custom field: #{custom_field.errors.full_messages.join(', ')}"
           return false
         end
-        
+
       rescue ActiveRecord::RecordNotFound => e
         Rails.logger.error "HRZ Lib: Custom field not found: #{e.message}"
         return false
@@ -278,7 +299,7 @@ module HrzLib
     end  # update_custom_field
 
 
-    
+
     # Deletes a custom field
     #
     # @param custom_field_id [Integer] The ID of the custom field to delete
@@ -291,7 +312,7 @@ module HrzLib
     def self.delete_custom_field(custom_field_id)
       begin
         custom_field = CustomField.find(custom_field_id)
-        
+
         if custom_field.destroy
           Rails.logger.info "HRZ Lib: Successfully deleted custom field ##{custom_field_id}"
           return true
@@ -299,7 +320,7 @@ module HrzLib
           Rails.logger.error "HRZ Lib: Failed to delete custom field"
           return false
         end
-        
+
       rescue ActiveRecord::RecordNotFound => e
         Rails.logger.error "HRZ Lib: Custom field not found: #{e.message}"
         return false
@@ -309,9 +330,9 @@ module HrzLib
         return false
       end
     end  # delete_custom_field
-    
 
-    
+
+
     # Gets details of a custom field
     #
     # @param custom_field_id [Integer] The ID of the custom field.
@@ -410,7 +431,7 @@ module HrzLib
 
         #Rails.logger.info "HRZ Lib: Retrieved custom field ##{custom_field_id}"
         return result
-        
+
       rescue ActiveRecord::RecordNotFound => e
         Rails.logger.error "HRZ Lib: Custom field not found: #{e.message}"
         return nil
@@ -419,9 +440,9 @@ module HrzLib
         return nil
       end
     end  # get_custom_field
-    
 
-    
+
+
     # Lists all custom fields, optionally filtered by type
     #
     # @param customized_type [String, nil] Filter by type ('issue', 'project', etc.)
@@ -448,7 +469,7 @@ module HrzLib
         else
           fields = CustomField.all
         end
-        
+
         result = fields.map do |cf|
           {
             id: cf.id,
@@ -460,16 +481,16 @@ module HrzLib
             is_computed: cf.respond_to?(:formula) && !cf.formula.blank?
           }
         end
-        
+
         Rails.logger.info "HRZ Lib: Listed #{result.length} custom fields"
         return result
-        
+
       rescue => e
         Rails.logger.error "HRZ Lib: Error listing custom fields: #{e.message}"
         return []
       end
     end  # list_custom_fields
-    
+
 
 
     # ------------------------------------------------------------------------------------------------------------------------------

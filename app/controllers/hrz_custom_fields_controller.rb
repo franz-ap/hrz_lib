@@ -99,6 +99,7 @@ class HrzCustomFieldsController < ApplicationController
     end
   end
 
+
   # POST /hrz_custom_fields.xml
   # POST /hrz_custom_fields.json
   # Creates a new custom field
@@ -125,19 +126,39 @@ class HrzCustomFieldsController < ApplicationController
       name,
       field_format,
       customized_type,
-      options.to_h
+      options.to_h,
+      true
     )
 
     if field_id
       @custom_field = HrzLib::CustomFieldHelper.get_custom_field(field_id)
+      hsh_result = {custom_field: @custom_field, messages: resp_messages() }
       respond_to do |format|
-        format.json { render json: {custom_field: @custom_field}, status: :created }
-        format.xml { render xml: {custom_field: @custom_field}, status: :created }
+        format.json { render json: hsh_result, status: :created }
+        format.xml  { render xml:  hsh_result, status: :created }
       end
     else
-      render json: {error: 'Failed to create custom field'}, status: :unprocessable_entity
+      hsh_result = {error: 'Failed to create custom field', messages: resp_messages() }
+      respond_to do |format|
+        format.json { render json: hsh_result, status: :unprocessable_entity }
+        format.xml  { render xml:  hsh_result, status: :unprocessable_entity }
+      end
     end
-  end
+  end  # create
+
+
+  # Returns the collected messages, to be returned in the response.
+  # @return [Hash] messages
+  def resp_messages
+    {
+      debug:       HrzLib::HrzLogger.retrieve_msgs_arr('debug'),
+      info:        HrzLib::HrzLogger.retrieve_msgs_arr('info'),
+      warning:     HrzLib::HrzLogger.retrieve_msgs_arr('warning'),
+      error:       HrzLib::HrzLogger.retrieve_msgs_arr('error'),
+      error_abort: HrzLib::HrzLogger.retrieve_msgs_arr('error_abort')
+    }
+  end  # resp_messages
+
 
   # PUT /hrz_custom_fields/:id.xml
   # PUT /hrz_custom_fields/:id.json
@@ -237,7 +258,7 @@ class HrzCustomFieldsController < ApplicationController
       :is_computed,
       possible_values: [],
       project_ids: [],
-      trackers: [],
+      trackers: [:id, :name],  # Array of Hashes
       tracker_ids: [],
       role_ids: []
     )
