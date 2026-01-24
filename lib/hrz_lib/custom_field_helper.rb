@@ -178,9 +178,9 @@ module HrzLib
         end
 
         # Set projects if not for all
-        if !custom_field.is_for_all && options[:project_ids]
-          custom_field.project_ids = options[:project_ids]
-        end
+    #    if !custom_field.is_for_all && options[:project_ids]
+     #     custom_field.project_ids = options[:project_ids]
+      #  end     TODO names / only text identifiers
 
         # Set trackers for issue custom fields
         if customized_type == 'issue'
@@ -382,8 +382,8 @@ module HrzLib
           searchable:      custom_field.searchable,
           editable:        custom_field.editable,
           visible:         custom_field.visible,
-          is_for_new:      custom_field.is_for_new,
-          hint:            custom_field.hint,
+         #is_for_new:      custom_field.is_for_new,
+         #hint:            custom_field.hint,
           multiple:        custom_field.multiple,
           default_value:   custom_field.default_value,
           possible_values: custom_field.possible_values,
