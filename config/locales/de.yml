@@ -95,6 +95,7 @@ de:
   field_verbose_parser: "Parser"
   field_verbose_tag_functions: "Tag-Funktionen"
   field_verbose_http_requests: "HTTP-Anfragen"
+  field_verbose_http_request_dat: "...-Daten"
   field_redirect_emails: "Automatische e-mails umleiten"
 
   help_debug_user_id: "Die folgenden Einstellungen gelten nur, wenn die ID des aktuell angemeldeten Benutzers mit der angegebenen übereinstimmt. Leer lassen für 'alle'."

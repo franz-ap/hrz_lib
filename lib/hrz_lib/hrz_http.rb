@@ -66,8 +66,13 @@ module HrzLib
                           b_post_data  = '',    # Data to be sent in the request body of a POST.               Optional.
                           b_name_svc   = '',    # "Human readable name" of service to be called. For messages. Optional.
                           arr_resp_ok  = [200]) # HTTP response codes, that should be taken as ok.
-      HrzLogger.debug_msg "HrzHttp.http_request: #{b_method.to_s} #{b_url.to_s}" + (b_name_svc.empty? ? '' : ' / Service ') + b_name_svc
-      t_start = Time.now
+      user_id = User.current&.id
+      q_verbose_http_requests    =                              SettingsHelper.verbose_log?(user_id, :http_requests)
+      q_verbose_http_request_dat = q_verbose_http_requests  &&  SettingsHelper.verbose_log?(user_id, :http_request_dat)
+      if q_verbose_http_requests
+        HrzLogger.debug_msg "HrzHttp.http_request: #{b_method.to_s} #{b_url.to_s}" + (b_name_svc.empty? ? '' : ' / Service ') + b_name_svc
+        t_start = Time.now
+      end
       hsh_result = { q_ok: true, body: '' }
       return { q_ok: false, body: '' }  if b_url.nil? || b_url.empty?
       begin
@@ -84,7 +89,10 @@ module HrzLib
                request = Net::HTTP::Put.new(uri)
           when 'POST'
                request = Net::HTTP::Post.new(uri)
-               request.body = b_post_data  if ! b_post_data.nil?
+               if ! b_post_data.nil?
+                 request.body = b_post_data
+                 HrzLogger.debug_msg "POST data: " + b_post_data.inspect  if q_verbose_http_request_dat
+               end
           else
                request = nil
                HrzLogger.error_msg "Unimplemented REST method #{b_method} in HrzHttp.http_request" + (b_name_svc.empty? ? '' : ' / service ') + b_name_svc + '. Please inform an admin.'
@@ -95,33 +103,43 @@ module HrzLib
           if aux_hdr.is_a?(Array)
             for aux_hdr1 in aux_hdr
               request[ aux_hdr1[:key] ] = aux_hdr1[:val]
+              HrzLogger.debug_msg "Aux. header #{aux_hdr1[:key].to_s}: #{aux_hdr1[:val].to_s}"  if q_verbose_http_request_dat
             end
           elsif aux_hdr.is_a?(Hash)
             #request.merge!(aux_hdr)
             aux_hdr.each do |k, v|
               request[ k ] = v
+              HrzLogger.debug_msg "Aux. header #{k.to_s}: #{v.to_s}"  if q_verbose_http_request_dat
             end
           else
             HrzLogger.debug_msg "HrzHttp.http_request: Unsupported object type  #{aux_hdr.class.name} of aux_hdr. Ignoring it."
           end
           # Send the request
           response = http.request(request)
+          if q_verbose_http_request_dat
+            HrzLogger.debug_msg "Response: #{response.code} - #{response.message}"
+            HrzLogger.debug_msg "Response data: " + response.body.inspect
+          end
           # Check the answer
           if arr_resp_ok.include?(response.code.to_i)
             # Ok
             hsh_result[:body] = response.body
           else
             HrzLogger.error_msg "Request" + (b_name_svc.empty? ? '' : ' for service ') +  b_name_svc + " failed with HTTP code: #{response.code} - #{response.message}.  URL: #{b_url} Result: #{response.body}"
-            # Response header:
-            response.each_header { |key, value| HrzLogger.debug_msg "  #{key}: #{value}" }
             hsh_result[:q_ok] = false
+          end
+          if q_verbose_http_request_dat  ||  (! hsh_result[:q_ok])
+            # Response header:
+            response.each_header do |key, value|
+               HrzLogger.debug_msg "Response header  #{key}: #{value}"
+            end
           end
         end
       rescue => exc
         HrzLogger.error_msg (b_name_svc.empty? ? 'Requested remote service' : 'Remote Service ') +  b_name_svc + " is currently unavailable. http_request: '#{exc.message}'"
         hsh_result[:q_ok] = false
       end
-      HrzLogger.debug_msg "HrzHttp.http_request" + (b_name_svc.empty? ? '' : ' for service ') +  b_name_svc + " finished: ok=#{hsh_result[:q_ok].to_s}. It took #{Time.now - t_start} s  body: " + hsh_result[:body].inspect
+      HrzLogger.debug_msg "HrzHttp.http_request" + (b_name_svc.empty? ? '' : ' for service ') +  b_name_svc + " finished: ok=#{hsh_result[:q_ok].to_s}. It took #{Time.now - t_start} s"   if q_verbose_http_requests
       hsh_result
     end  # http_request
 

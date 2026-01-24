@@ -95,6 +95,7 @@ hu:
   field_verbose_parser: "Parser"
   field_verbose_tag_functions: "Tag funkciók"
   field_verbose_http_requests: "HTTP kérések"
+  field_verbose_http_request_dat: "... adatok"
   field_redirect_emails: "E-mailek átirányítása"
 
   help_debug_user_id: "Az alábbi beállítások csak akkor érvényesek, ha a bejelentkezett felhasználó azonosítója megegyezik a megadottal. Hagyja üresen az 'összes' értékhez."

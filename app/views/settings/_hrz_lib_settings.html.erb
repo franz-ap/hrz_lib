@@ -98,6 +98,15 @@
 
     <p>
       <label>
+        <%= l(:field_verbose_http_request_dat) %>
+        <%= check_box_tag 'settings[q_verbose_http_request_dat]',
+                          true,
+                          @settings['q_verbose_http_request_dat'] %>
+      </label>
+    </p>
+
+    <p>
+      <label>
         <%= l(:field_redirect_emails) %>
         <%= check_box_tag 'settings[q_redirect_emails]',
                           true,

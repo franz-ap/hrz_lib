@@ -67,6 +67,7 @@ module HrzLib
         q_verbose_parser:              settings_to_boolean(settings['q_verbose_parser']),
         q_verbose_tag_functions:       settings_to_boolean(settings['q_verbose_tag_functions']),
         q_verbose_http_requests:       settings_to_boolean(settings['q_verbose_http_requests']),
+        q_verbose_http_request_dat:    settings_to_boolean(settings['q_verbose_http_request_dat']),
         q_redirect_emails:             settings_to_boolean(settings['q_redirect_emails'])
       }
       @cache_time = Time.now
@@ -91,14 +92,18 @@ module HrzLib
 
 
     # Check if verbose logging is enabled for the current user and specific area
-    # @param user_id [Integer] Current user ID
-    # @param area    [Symbol]  Area to check (:main, :issue_helper, :custom_field_helper, :parser, :tag_functions, :http_requests)
+    # @param user_id [Integer, nil] Current user ID or nil
+    # @param area    [Symbol]  Area to check (:main, :issue_helper, :custom_field_helper, :parser, :tag_functions, :http_requests, :http_request_dat)
     # @return [Boolean] True if logging should be verbose.
+    # Example:
+    #  if SettingsHelper.verbose_log?(User.current&.id, :main)
+    #     ... debug action
+    #  end
     def self.verbose_log?(user_id, area)
       settings = get_settings
 
       # If debug_user_id is set and doesn't match, return false
-      return false if settings[:debug_user_id] > 0 && settings[:debug_user_id] != user_id
+      return false if settings[:debug_user_id] > 0  &&  (user_id.nil?  ||  settings[:debug_user_id] != user_id)
 
       # Check main switch
       return false unless settings[:q_verbose_log]
@@ -117,6 +122,8 @@ module HrzLib
           settings[:q_verbose_tag_functions]
         when :http_requests
           settings[:q_verbose_http_requests]
+        when :http_request_dat
+          settings[:q_verbose_http_request_dat]
         else
           false
       end # case

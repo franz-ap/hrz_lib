@@ -95,6 +95,7 @@ en:
   field_verbose_parser: "Parser"
   field_verbose_tag_functions: "Tag functions"
   field_verbose_http_requests: "HTTP requests"
+  field_verbose_http_request_dat: "... data"
   field_redirect_emails: "Redirect automatic e-mails"
 
   help_debug_user_id: "The below settings only apply if the currently logged in user's ID matches the given one. Leave empty for 'all'."

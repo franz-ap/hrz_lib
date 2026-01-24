@@ -22,7 +22,7 @@ Redmine::Plugin.register :hrz_lib do
   name        'HRZ Lib'
   author      'Franz Apeltauer, Claude'
   description 'Redmine utility/library plugin. Provides common functions to other plugins and a REST API for CustomField creation/modification.'
-  version     '0.6.52'
+  version     '0.6.53'
   url         'https://github.com/franz-ap/hrz_lib'
   author_url  ''
   requires_redmine version_or_higher: '6.1.0'
@@ -36,6 +36,7 @@ Redmine::Plugin.register :hrz_lib do
     'q_verbose_parser'              => false,
     'q_verbose_tag_functions'       => false,
     'q_verbose_http_requests'       => false,
+    'q_verbose_http_request_dat'    => false,
     'q_redirect_emails'             => false
   }, partial: 'settings/hrz_lib_settings'
 
