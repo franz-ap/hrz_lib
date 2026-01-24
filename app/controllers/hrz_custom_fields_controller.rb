@@ -237,7 +237,7 @@ class HrzCustomFieldsController < ApplicationController
       :is_computed,
       possible_values: [],
       project_ids: [],
-      trackers: [].
+      trackers: [],
       tracker_ids: [],
       role_ids: []
     )
