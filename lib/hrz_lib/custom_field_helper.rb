@@ -190,9 +190,9 @@ module HrzLib
           custom_field.possible_values = options[:possible_values]
         end
 
-        # Handle enumerations for enumeration field format
+        # Handle enumerations for enumeration field format ---------------------
         if field_format == 'enumeration'
-          if custom_field.respond_to?(:enumerations_attributes=)
+          if custom_field.respond_to?(:enumerations_attributes)
             # Redmine 4.x and later - use enumerations_attributes
             enumerations_attrs = {}
             if options[:enumerations]
@@ -219,7 +219,7 @@ module HrzLib
             end
             custom_field.enumerations_attributes = enumerations_attrs
             HrzLogger.info_msg "HRZ Lib create_custom_field: Set #{options[:enumerations].length} enumerations for field '#{name}'"  if q_verbose_cf
-          elsif custom_field.respond_to?(:custom_options_attributes=)
+          elsif custom_field.respond_to?(:custom_options_attributes)
             # Alternative method for custom options
             custom_options_attrs = {}
             if options[:enumerations]
@@ -253,7 +253,7 @@ module HrzLib
               custom_field.possible_values = options[:enumerations].map { |e| e[:name] }
             end
           end
-        end # if field_format == 'enumeration'
+        end # if field_format == 'enumeration' ---------------------------------
 
         # Set projects if not for all
     #    if !custom_field.is_for_all && options[:project_ids]
