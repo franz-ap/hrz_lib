@@ -210,7 +210,7 @@ module HrzLib
               options[:possible_values].each_with_index do |val, index|
                 enumerations_attrs[index.to_s] = {
                       name:     val,
-                      active:   (arr_possible_val_active[index].nil? : true : arr_possible_val_active[index]),
+                      active:   (arr_possible_val_active[index].nil? ? true : arr_possible_val_active[index]),
                       position: (index + 1)
                     }
               end
