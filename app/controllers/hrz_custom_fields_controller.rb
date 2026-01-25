@@ -257,6 +257,9 @@ class HrzCustomFieldsController < ApplicationController
       :formula,
       :is_computed,
       possible_values: [],
+      possible_val_keys: [],
+      possible_val_active: [],
+      enumerations: [:name, :id, :active, :position],
       project_ids: [],
       trackers: [:id, :name],  # Array of Hashes
       tracker_ids: [],

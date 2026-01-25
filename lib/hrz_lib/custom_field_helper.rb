@@ -18,11 +18,11 @@
 module HrzLib
   module CustomFieldHelper
 
-    # Creates a new custom field
+# Creates a new custom field
     #
     # @param name [String] The name of the custom field
     # @param field_format [String] The format type: 'string', 'text', 'int', 'float', 'date',
-    #   'bool', 'list', 'user', 'version', 'link', 'attachment'
+    #   'bool', 'list', 'user', 'version', 'link', 'attachment', 'enumeration'
     # @param customized_type [String] What the field applies to: 'issue', 'project', 'user',
     #   'time_entry', 'version', 'document', 'group'
     # @param options [Hash] Additional options for the custom field
@@ -37,6 +37,7 @@ module HrzLib
     # @option options [Integer] :min_length Minimum length for text fields
     # @option options [Integer] :max_length Maximum length for text fields
     # @option options [Array<String>] :possible_values Array of possible values for list fields
+    # @option options [Array<Hash>] :enumerations Array of enumeration hashes with :name and optionally :active (default: true) and :position. :id allowed, but ignored.
     # @option options [Array<Integer>] :project_ids Array of project IDs if is_for_all is false
     # @option options [Array<Integer>] :tracker_ids Array of tracker IDs (for issue custom fields)
     # @option options [Array<String>] :role_ids Array of role IDs that can see/edit the field
@@ -70,6 +71,18 @@ module HrzLib
     #     'issue',
     #     possible_values: ['Bug', 'Feature', 'Enhancement', 'Documentation'],
     #     multiple: true
+    #   )
+    #
+    # @example Create an enumeration field. a) enumerations passed in an Array of Hashes
+    #   field_id = HrzLib::CustomFieldHelper.create_custom_field(
+    #     'Status',
+    #     'enumeration',
+    #     'issue',
+    #     enumerations: [
+    #       { name: 'Active', position: 1 },
+    #       { name: 'Inactive', position: 2, active: false },
+    #       { name: 'Pending', position: 3 }
+    #     ]
     #   )
     #
     # @example Create a date field with validation
@@ -120,7 +133,7 @@ module HrzLib
       HrzLogger.debug_msg "HRZ Lib create_custom_field(name='#{name}', field_format='#{field_format}', customized_type='#{customized_type}', options=#{options.inspect}"  if q_verbose_cf
       begin
         # Validate field_format
-        valid_formats = %w[string text int float date bool list user version link attachment key_value]
+        valid_formats = %w[string text int float date bool list user version link attachment key_value enumeration]
         unless valid_formats.include?(field_format)
           HrzLogger.error_msg "HRZ Lib create_custom_field: Invalid field format '#{field_format}'. Valid formats: #{valid_formats.join(', ')}"
           return nil
@@ -176,6 +189,71 @@ module HrzLib
         if field_format == 'list' && options[:possible_values]
           custom_field.possible_values = options[:possible_values]
         end
+
+        # Handle enumerations for enumeration field format
+        if field_format == 'enumeration'
+          if custom_field.respond_to?(:enumerations_attributes=)
+            # Redmine 4.x and later - use enumerations_attributes
+            enumerations_attrs = {}
+            if options[:enumerations]
+              # a) from enumerations Array of Hashes
+              options[:enumerations].each_with_index do |enum, index|
+                enumerations_attrs[index.to_s] = {
+                      name:     enum[:name],
+                      active:   (enum.key?(:active) ? enum[:active] : true),
+                      position: enum[:position] || (index + 1)
+                    }
+              end
+            elsif options[:possible_values]
+              # b) from Array of possible_values. Optional: possible_val_active
+              arr_possible_val_active = options[:possible_val_active] || []
+              options[:possible_values].each_with_index do |val, index|
+                enumerations_attrs[index.to_s] = {
+                      name:     val,
+                      active:   (arr_possible_val_active[index].nil? : true : arr_possible_val_active[index]),
+                      position: (index + 1)
+                    }
+              end
+            else
+               HrzLogger.warning_msg "HRZ Lib create_custom_field '#{name}', type enumeration: Neither enumerations nor possible values given. Creating it without values."
+            end
+            custom_field.enumerations_attributes = enumerations_attrs
+            HrzLogger.info_msg "HRZ Lib create_custom_field: Set #{options[:enumerations].length} enumerations for field '#{name}'"  if q_verbose_cf
+          elsif custom_field.respond_to?(:custom_options_attributes=)
+            # Alternative method for custom options
+            custom_options_attrs = {}
+            if options[:enumerations]
+              # a) from enumerations Array of Hashes
+              options[:enumerations].each_with_index do |enum, index|
+                custom_options_attrs[index.to_s] = {
+                      value:    enum[:name],
+                      position: enum[:position] || (index + 1)
+                    }
+              end
+            elsif options[:possible_values]
+              # b) from Array of possible_values.
+              arr_possible_val_active = options[:possible_val_active] || []
+              options[:possible_values].each_with_index do |val, index|
+                custom_options_attrs[index.to_s] = {
+                      value:    val,
+                      position: (index + 1)
+                    }
+              end
+            else
+               HrzLogger.warning_msg "HRZ Lib create_custom_field '#{name}', type enumeration: Neither enumerations nor possible values given. Creating it without values."
+            end
+            custom_field.custom_options_attributes = custom_options_attrs
+            HrzLogger.info_msg "HRZ Lib create_custom_field: Set #{options[:enumerations].length} custom options for field '#{name}'"  if q_verbose_cf
+          else
+            HrzLogger.warning_msg "HRZ Lib create_custom_field: Enumeration format requested but enumerations_attributes not supported in this Redmine version. Falling back to possible_values if available."
+            if options[:possible_values]
+              custom_field.possible_values = options[:possible_values]
+            elsif options[:enumerations]
+              # Extract names from enumerations as fallback
+              custom_field.possible_values = options[:enumerations].map { |e| e[:name] }
+            end
+          end
+        end # if field_format == 'enumeration'
 
         # Set projects if not for all
     #    if !custom_field.is_for_all && options[:project_ids]
@@ -238,8 +316,6 @@ module HrzLib
         return nil
       end
     end  # create_custom_field
-
-
 
     # Updates an existing custom field
     #
