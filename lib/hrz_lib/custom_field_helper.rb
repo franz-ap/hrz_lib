@@ -218,7 +218,7 @@ module HrzLib
                HrzLogger.warning_msg "HRZ Lib create_custom_field '#{name}', type enumeration: Neither enumerations nor possible values given. Creating it without values."
             end
             custom_field.enumerations = enumerations_attrs
-            HrzLogger.info_msg "HRZ Lib create_custom_field: Set #{options[:enumerations].length} enumerations for field '#{name}'"  if q_verbose_cf
+            HrzLogger.info_msg "HRZ Lib create_custom_field: Set #{enumerations_attrs.length} enumerations for field '#{name}': #{enumerations_attrs.inspect}"  if q_verbose_cf
           elsif custom_field.respond_to?(:custom_options_attributes)
             # Alternative method for custom options
             custom_options_attrs = {}
@@ -489,6 +489,7 @@ module HrzLib
             possible_values     = custom_field.enumerations.map(&:name)
             possible_val_keys   = custom_field.enumerations.map(&:id)
             possible_val_active = custom_field.enumerations.map(&:active)
+            HrzLogger.info_msg "HRZ Lib get_custom_field #{custom_field.id} - '#{custom_field.name}' enumerations: #{custom_field.enumerations.inspect}"  if q_verbose_cf
           elsif custom_field.respond_to?(:custom_options)
             # Alternative method
             possible_values     = custom_field.custom_options.map(&:value)
