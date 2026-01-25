@@ -194,31 +194,29 @@ module HrzLib
         if field_format == 'enumeration'
           if custom_field.respond_to?(:enumerations)
             # Redmine 4.x and later - use enumerations_attributes
-            enumerations_attrs = {}
             if options[:enumerations]
               # a) from enumerations Array of Hashes
               options[:enumerations].each_with_index do |enum, index|
-                enumerations_attrs[index.to_s] = {
+                custom_field.enumerations.build(
                       name:     enum[:name],
                       active:   (enum.key?(:active) ? enum[:active] : true),
                       position: enum[:position] || (index + 1)
-                    }
+                    )
               end
             elsif options[:possible_values]
               # b) from Array of possible_values. Optional: possible_val_active
               arr_possible_val_active = options[:possible_val_active] || []
               options[:possible_values].each_with_index do |val, index|
-                enumerations_attrs[index.to_s] = {
+                custom_field.enumerations.build(
                       name:     val,
                       active:   (arr_possible_val_active[index].nil? ? true : arr_possible_val_active[index]),
                       position: (index + 1)
-                    }
+                    )
               end
             else
                HrzLogger.warning_msg "HRZ Lib create_custom_field '#{name}', type enumeration: Neither enumerations nor possible values given. Creating it without values."
             end
-            custom_field.enumerations = enumerations_attrs
-            HrzLogger.info_msg "HRZ Lib create_custom_field: Set #{enumerations_attrs.length} enumerations for field '#{name}': #{enumerations_attrs.inspect}"  if q_verbose_cf
+            HrzLogger.info_msg "HRZ Lib create_custom_field: Set #{custom_field.enumerations.length} enumerations for field '#{name}': #{custom_field.enumerations.inspect}"  if q_verbose_cf
           elsif custom_field.respond_to?(:custom_options_attributes)
             # Alternative method for custom options
             custom_options_attrs = {}
