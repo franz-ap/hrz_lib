@@ -440,6 +440,7 @@ module HrzLib
     #    Please be aware, that custom field names may not be unique across types.
     #    So, better use a)-c) if possible.
     def self.get_custom_field(custom_field_id)
+      q_verbose_cf = SettingsHelper.verbose_log?(User.current&.id, :custom_field_helper)
       begin
         custom_field = CustomField.find(custom_field_id)
         result = {
