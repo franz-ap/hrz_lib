@@ -192,7 +192,7 @@ module HrzLib
 
         # Handle enumerations for enumeration field format ---------------------
         if field_format == 'enumeration'
-          if custom_field.respond_to?(:enumerations_attributes)
+          if custom_field.respond_to?(:enumerations)
             # Redmine 4.x and later - use enumerations_attributes
             enumerations_attrs = {}
             if options[:enumerations]
@@ -217,7 +217,7 @@ module HrzLib
             else
                HrzLogger.warning_msg "HRZ Lib create_custom_field '#{name}', type enumeration: Neither enumerations nor possible values given. Creating it without values."
             end
-            custom_field.enumerations_attributes = enumerations_attrs
+            custom_field.enumerations = enumerations_attrs
             HrzLogger.info_msg "HRZ Lib create_custom_field: Set #{options[:enumerations].length} enumerations for field '#{name}'"  if q_verbose_cf
           elsif custom_field.respond_to?(:custom_options_attributes)
             # Alternative method for custom options
