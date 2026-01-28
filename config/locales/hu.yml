@@ -31,6 +31,7 @@ hu:
   label_action_new: "Új művelet"
   label_ai_model_new: "Új AI modell"
   label_todo_new: "Új ToDo"
+  label_manage_automation_actions: "Automatizálási műveletek kezelése"
 
   field_condition_id: "Feltétel ID"
   field_question: "Kérdés"
@@ -64,6 +65,7 @@ hu:
   field_todo_key: "Belső ToDo név"
   field_todo_name: "ToDo megjelenítési neve"
   field_sort_order: "Rendezési sorrend"
+  field_enabled: "Engedélyezve"
 
   help_question: "A feltétel verbális változata"
   help_formula: "A feltétel algebrai változata, általában <HRZ> címkékkel"
@@ -82,6 +84,14 @@ hu:
   help_json_post: "Jelölje meg azt a helyet, ahová a promptot be kell illeszteni, a MY_PROMPT jelzéssel."
   help_json_res_path: "A végeredmény megtalálásához az eredményadatokban. Példa: $.xydata.items[0].value"
   help_sort_order: "Listákban való megjelenítéshez"
+
+  # Project automation settings
+  text_automation_settings_info: "Válassza ki azokat az automatizálási műveleteket, amelyeket engedélyezni szeretne ennél a projektnél."
+  text_no_automation_actions: "Nincsenek elérhető automatizálási műveletek. Kérjük, először hozzon létre műveleteket a globális automatizálás adminisztrációban."
+  error_automation_update_failed: "Nem sikerült frissíteni az automatizálási beállításokat: %{error}"
+  
+  # Permissions
+  permission_manage_project_automation: "Projekt automatizálás kezelése"
 
   # Plugin settings
   label_hrz_lib_debug_settings: "Hibakeresési és naplózási beállítások"

@@ -31,6 +31,7 @@ de:
   label_action_new: "Neue Aktion"
   label_ai_model_new: "Neues KI-Modell"
   label_todo_new: "Neues ToDo"
+  label_manage_automation_actions: "Automatisierungs-Aktionen verwalten"
 
   field_condition_id: "Bedingungs-ID"
   field_question: "Frage"
@@ -64,6 +65,7 @@ de:
   field_todo_key: "Interner ToDo-Name"
   field_todo_name: "Anzeigename des ToDo"
   field_sort_order: "Sortierreihenfolge"
+  field_enabled: "Aktiviert"
 
   help_question: "Verbale Version der Bedingung"
   help_formula: "Algebraische Version der Bedingung, normalerweise mit <HRZ>-Tags"
@@ -82,6 +84,14 @@ de:
   help_json_post: "Markieren Sie die Stelle, an der die Eingabeaufforderung eingefügt werden soll, mit MY_PROMPT."
   help_json_res_path: "Um das Endergebnis in den Ergebnisdaten zu finden. Beispiel: $.xydata.items[0].value"
   help_sort_order: "Für die Anzeige in Listen"
+
+  # Project automation settings
+  text_automation_settings_info: "Wählen Sie die Automatisierungs-Aktionen aus, die für dieses Projekt aktiviert werden sollen."
+  text_no_automation_actions: "Keine Automatisierungs-Aktionen verfügbar. Bitte erstellen Sie zuerst Aktionen in der globalen Automation-Verwaltung."
+  error_automation_update_failed: "Fehler beim Aktualisieren der Automation-Einstellungen: %{error}"
+  
+  # Permissions
+  permission_manage_project_automation: "Projekt-Automatisierung verwalten"
 
   # Plugin settings
   label_hrz_lib_debug_settings: "Debug & Logging Einstellungen"

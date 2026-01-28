@@ -1,0 +1,102 @@
+<div class="automation-settings">
+  <h3><%= l(:label_hrz_automation) %></h3>
+  
+  <p class="info-text">
+    <%= l(:text_automation_settings_info) %>
+  </p>
+  
+  <%= form_tag(project_automation_path(@project), method: :put) do %>
+    <table class="list automation-actions">
+      <thead>
+        <tr>
+          <th style="width: 40px;"><%= l(:field_enabled) %></th>
+          <th><%= l(:field_action_title) %></th>
+          <th><%= l(:field_comment) %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @available_actions.any? %>
+          <% @available_actions.each do |action| %>
+            <tr class="<%= cycle('odd', 'even') %>">
+              <td class="checkbox">
+                <%= check_box_tag 'action_ids[]', 
+                                  action.id, 
+                                  @enabled_action_ids.include?(action.id),
+                                  id: "action_#{action.id}" %>
+              </td>
+              <td>
+                <%= label_tag "action_#{action.id}", action.b_title, class: 'action-title' %>
+              </td>
+              <td class="comments">
+                <%= simple_format_without_paragraph(h(action.b_comment)) if action.b_comment.present? %>
+              </td>
+            </tr>
+          <% end %>
+        <% else %>
+          <tr>
+            <td colspan="3" class="no-data">
+              <%= l(:text_no_automation_actions) %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    
+    <% if @available_actions.any? %>
+      <p class="buttons">
+        <%= submit_tag l(:button_save), class: 'button' %>
+      </p>
+    <% end %>
+  <% end %>
+  
+  <% if User.current.admin? %>
+    <p class="automation-admin-link">
+      <%= link_to l(:label_manage_automation_actions), 
+                  hrz_automation_path, 
+                  class: 'icon icon-settings' %>
+    </p>
+  <% end %>
+</div>
+
+<style>
+  .automation-settings .info-text {
+    margin-bottom: 1.5em;
+    color: #666;
+  }
+  
+  .automation-settings table.automation-actions {
+    width: 100%;
+  }
+  
+  .automation-settings table.automation-actions td.checkbox {
+    text-align: center;
+    vertical-align: middle;
+  }
+  
+  .automation-settings table.automation-actions td.comments {
+    color: #666;
+    font-size: 0.95em;
+  }
+  
+  .automation-settings .action-title {
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .automation-settings .no-data {
+    text-align: center;
+    padding: 2em;
+    color: #999;
+    font-style: italic;
+  }
+  
+  .automation-settings .buttons {
+    margin-top: 1em;
+  }
+  
+  .automation-settings .automation-admin-link {
+    margin-top: 2em;
+    padding-top: 1em;
+    border-top: 1px solid #e0e0e0;
+  }
+</style>

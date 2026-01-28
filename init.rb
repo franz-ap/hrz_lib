@@ -22,7 +22,7 @@ Redmine::Plugin.register :hrz_lib do
   name        'HRZ Lib'
   author      'Franz Apeltauer, Claude'
   description 'Redmine utility/library plugin. Provides common functions to other plugins and a REST API for CustomField creation/modification.'
-  version     '0.6.65'
+  version     '0.7.1'
   url         'https://github.com/franz-ap/hrz_lib'
   author_url  ''
   requires_redmine version_or_higher: '6.1.0'
@@ -45,6 +45,13 @@ Redmine::Plugin.register :hrz_lib do
        { controller: 'hrz_automation_settings', action: 'index' },
        caption: :label_hrz_automation,
        html: { class: 'icon icon-workflows' }
+
+  # Define project-level permission for automation settings
+  #project_module :hrz_automation do
+  #  permission :manage_project_automation,
+  #             { hrz_project_automation: [:show, :update] },
+  #             require: :member
+  #end
 end
 
 # Load library modules
@@ -54,6 +61,14 @@ require_relative 'lib/hrz_lib/hrz_tag_parser'
 require_relative 'lib/hrz_lib/hrz_tag_functions'
 require_relative 'lib/hrz_lib/hrz_auto_action'
 require_relative 'lib/hrz_lib/hrz_http'
+
+# Load automation models
+require_relative 'app/models/hrzlib_aut_action'
+require_relative 'app/models/hrzlib_aut_project_action'
+
+# Load patches and hooks
+require_relative 'lib/hrz_lib/project_patch'
+require_relative 'lib/hrz_lib/project_settings_hook'
 
 # Benchmark
 puts "Plugin 'HRZ Lib' loaded in #{((Time.now - t_start_hrz_lib) * 1000).round(2)} ms"

@@ -17,14 +17,19 @@
 
 
 class HrzlibAutAction < ActiveRecord::Base
-  self.primary_key = 'b_title'
+  #self.table_name = 'hrzlib_aut_actions'  # Valid, but unnecessary, because of correct class name.
 
+  has_many :project_actions, class_name: 'HrzlibAutProjectAction', foreign_key: 'aut_action_id', dependent: :destroy
+  has_many :projects, through: :project_actions
+
+  # Associations to conditions
   belongs_to :condition1, class_name: 'HrzlibAutCondition', foreign_key: 'j_cond1_id', primary_key: 'j_condition_id', optional: true
   belongs_to :condition2, class_name: 'HrzlibAutCondition', foreign_key: 'j_cond2_id', primary_key: 'j_condition_id', optional: true
   belongs_to :condition3, class_name: 'HrzlibAutCondition', foreign_key: 'j_cond3_id', primary_key: 'j_condition_id', optional: true
   belongs_to :condition4, class_name: 'HrzlibAutCondition', foreign_key: 'j_cond4_id', primary_key: 'j_condition_id', optional: true
   belongs_to :condition5, class_name: 'HrzlibAutCondition', foreign_key: 'j_cond5_id', primary_key: 'j_condition_id', optional: true
 
+  # Associations to steps
   belongs_to :step1, class_name: 'HrzlibAutStep', foreign_key: 'j_step1_id', primary_key: 'j_step_id', optional: true
   belongs_to :step2, class_name: 'HrzlibAutStep', foreign_key: 'j_step2_id', primary_key: 'j_step_id', optional: true
   belongs_to :step3, class_name: 'HrzlibAutStep', foreign_key: 'j_step3_id', primary_key: 'j_step_id', optional: true
@@ -34,11 +39,24 @@ class HrzlibAutAction < ActiveRecord::Base
   belongs_to :creator, class_name: 'User', foreign_key: 'created_by', optional: true
   belongs_to :updater, class_name: 'User', foreign_key: 'updated_by', optional: true
 
-  validates :b_title, presence: true, uniqueness: true, length: { maximum: 100 }
+  validates :b_title, presence: true, length: { maximum: 100 }
   validates :b_comment, length: { maximum: 4000 }
 
   before_create :set_created_by
   before_save :set_updated_by
+
+
+  # Check if this action is enabled for a specific project
+  def enabled_for_project?(project_id)
+    project_actions.exists?(project_id: project_id)
+  end
+
+
+  # Scope to get all actions enabled for a specific project
+  scope :for_project, ->(project_id) {
+    joins(:project_actions).where(hrzlib_aut_project_actions: { project_id: project_id })
+  }
+
 
   private
 

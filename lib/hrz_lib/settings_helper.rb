@@ -152,5 +152,19 @@ module HrzLib
       get_settings[key]
     end  # get
 
+
+    # Determines whether the Automation tab should be visible in project settings
+    #
+    # @return [Boolean] true if the tab should be shown, false otherwise
+    def self.project_automation_tab_enabled?
+      #
+      # Only if module enabled in project:
+      #    # (needs context parameter in Hook)
+      #    # project = context[:project]
+      #    # return project&.module_enabled?(:hrz_automation)
+      return HrzlibAutAction.exists? &&
+             (User.current.admin? || User.current.allowed_to?(:manage_project_automation, nil, global: true))
+    end project_automation_tab_enabled?
+
   end  # module SettingsHelper
 end   # module HrzLib

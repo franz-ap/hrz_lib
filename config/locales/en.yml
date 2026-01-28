@@ -31,6 +31,7 @@ en:
   label_action_new: "New action"
   label_ai_model_new: "New AI model"
   label_todo_new: "New todo"
+  label_manage_automation_actions: "Manage automation actions"
 
   field_condition_id: "Condition ID"
   field_question: "Question"
@@ -64,6 +65,7 @@ en:
   field_todo_key: "Internal ToDo name"
   field_todo_name: "Display name of ToDo"
   field_sort_order: "Sort order"
+  field_enabled: "Enabled"
 
   help_question: "Verbal version of the condition"
   help_formula: "Algebraic version of the condition, usually with <HRZ> tags"
@@ -82,6 +84,14 @@ en:
   help_json_post: "Mark the place where the prompt has to be inserted with MY_PROMPT."
   help_json_res_path: "To find the final result in the result data. Example: $.xydata.items[0].value"
   help_sort_order: "For displaying in lists"
+
+  # Project automation settings
+  text_automation_settings_info: "Select the automation actions that should be enabled for this project."
+  text_no_automation_actions: "No automation actions available. Please create actions in the global automation administration first."
+  error_automation_update_failed: "Failed to update automation settings: %{error}"
+  
+  # Permissions
+  permission_manage_project_automation: "Manage project automation"
 
   # Plugin settings
   label_hrz_lib_debug_settings: "Debug & Logging Settings"
