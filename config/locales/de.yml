@@ -14,7 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.                    #
 #-------------------------------------------------------------------------------------eohdr-#
 de:
-  label_hrz_automation: "HRZ Automation"
+  label_hrz_automation: "Automation"
   label_conditions: "Bedingungen"
   label_steps: "Schritte"
   label_actions: "Aktionen"
@@ -89,7 +89,7 @@ de:
   text_automation_settings_info: "Wählen Sie die Automatisierungs-Aktionen aus, die für dieses Projekt aktiviert werden sollen."
   text_no_automation_actions: "Keine Automatisierungs-Aktionen verfügbar. Bitte erstellen Sie zuerst Aktionen in der globalen Automation-Verwaltung."
   error_automation_update_failed: "Fehler beim Aktualisieren der Automation-Einstellungen: %{error}"
-  
+
   # Permissions
   permission_manage_project_automation: "Projekt-Automatisierung verwalten"
 

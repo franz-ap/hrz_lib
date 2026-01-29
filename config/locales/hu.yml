@@ -14,7 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.                    #
 #-------------------------------------------------------------------------------------eohdr-#
 hu:
-  label_hrz_automation: "HRZ Automatizálás"
+  label_hrz_automation: "Automatizálás"
   label_conditions: "Feltételek"
   label_steps: "Lépések"
   label_actions: "Műveletek"
@@ -89,7 +89,7 @@ hu:
   text_automation_settings_info: "Válassza ki azokat az automatizálási műveleteket, amelyeket engedélyezni szeretne ennél a projektnél."
   text_no_automation_actions: "Nincsenek elérhető automatizálási műveletek. Kérjük, először hozzon létre műveleteket a globális automatizálás adminisztrációban."
   error_automation_update_failed: "Nem sikerült frissíteni az automatizálási beállításokat: %{error}"
-  
+
   # Permissions
   permission_manage_project_automation: "Projekt automatizálás kezelése"
 
