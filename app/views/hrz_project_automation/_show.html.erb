@@ -16,7 +16,7 @@
 <%# Purpose: Partial for project automation settings tab in project settings %>
 <%
   # Load data for this partial (since it's rendered by ProjectsController)
-  available_actions = HrzlibAutAction.order(:b_title)
+  available_actions  = HrzlibAutAction.order(:b_title)
   enabled_action_ids = @project.project_actions.pluck(:aut_action_id)
 %>
 <div class="automation-settings">
@@ -31,8 +31,8 @@
       <thead>
         <tr>
           <th style="width: 40px;"><%= l(:field_enabled) %></th>
-          <th><%= l(:field_action_title) %></th>
-          <th><%= l(:field_comment) %></th>
+          <th class="action-title"><%= l(:field_action_title) %></th>
+          <th class="comments"><%= l(:field_comment) %></th>
         </tr>
       </thead>
       <tbody>
@@ -45,8 +45,8 @@
                                   enabled_action_ids.include?(action.id),
                                   id: "action_#{action.id}" %>
               </td>
-              <td>
-                <%= label_tag "action_#{action.id}", action.b_title, class: 'action-title' %>
+              <td class="action-title">
+                <%= label_tag "action_#{action.id}", (action.b_title + " (#{action.id})"), class: 'action-title' %>
               </td>
               <td class="comments">
                 <%= simple_format_without_paragraph(h(action.b_comment)) if action.b_comment.present? %>
@@ -62,14 +62,14 @@
         <% end %>
       </tbody>
     </table>
-    
+
     <% if available_actions.any? %>
       <p class="buttons">
         <%= submit_tag l(:button_save), class: 'button' %>
       </p>
     <% end %>
   <% end %>
-  
+
   <% if User.current.admin? %>
     <p class="automation-admin-link">
       <%= link_to l(:label_manage_automation_actions),
@@ -84,37 +84,43 @@
     margin-bottom: 1.5em;
     color: #666;
   }
-  
+
   .automation-settings table.automation-actions {
     width: 100%;
   }
-  
+
   .automation-settings table.automation-actions td.checkbox {
     text-align: center;
     vertical-align: middle;
   }
-  
+
   .automation-settings table.automation-actions td.comments {
+    text-align: left;
     color: #666;
     font-size: 0.95em;
   }
-  
-  .automation-settings .action-title {
+
+  .automation-settings th.action-title, th.comments {
+    text-align: left;
+  }
+
+  .automation-settings td.action-title {
     font-weight: bold;
+    text-align: left;
     cursor: pointer;
   }
-  
+
   .automation-settings .no-data {
     text-align: center;
     padding: 2em;
     color: #999;
     font-style: italic;
   }
-  
+
   .automation-settings .buttons {
     margin-top: 1em;
   }
-  
+
   .automation-settings .automation-admin-link {
     margin-top: 2em;
     padding-top: 1em;
