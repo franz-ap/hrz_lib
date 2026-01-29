@@ -1,11 +1,32 @@
+<%# ------------------------------------------------------------------------------------------- %>
+<%#  Redmine utility/library plugin. Provides common functions to other plugins + REST API.     %>
+<%#  Copyright (C) 2026 Franz Apeltauer                                                         %>
+<%#                                                                                             %>
+<%#  This program is free software: you can redistribute it and/or modify it under the terms    %>
+<%#  of the GNU Affero General Public License as published by the Free Software Foundation,     %>
+<%#  either version 3 of the License, or (at your option) any later version.                    %>
+<%#                                                                                             %>
+<%#  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;  %>
+<%#  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  %>
+<%#  See the GNU Affero General Public License for more details.                                %>
+<%#                                                                                             %>
+<%#  You should have received a copy of the GNU Affero General Public License                   %>
+<%#  along with this program.  If not, see <https://www.gnu.org/licenses/>.                     %>
+<%# -------------------------------------------------------------------------------------eohdr- %>
+<%# Purpose: Partial for project automation settings tab in project settings %>
+<%
+  # Load data for this partial (since it's rendered by ProjectsController)
+  available_actions = HrzlibAutAction.order(:b_title)
+  enabled_action_ids = @project.project_actions.pluck(:aut_action_id)
+%>
 <div class="automation-settings">
   <h3><%= l(:label_hrz_automation) %></h3>
-  
+
   <p class="info-text">
     <%= l(:text_automation_settings_info) %>
   </p>
-  
-  <%= form_tag(project_automation_path(@project), method: :put) do %>
+
+  <%= form_tag(project_project_automation_path(@project), method: :patch) do %>
     <table class="list automation-actions">
       <thead>
         <tr>
@@ -15,13 +36,13 @@
         </tr>
       </thead>
       <tbody>
-        <% if @available_actions.any? %>
-          <% @available_actions.each do |action| %>
+        <% if available_actions.any? %>
+          <% available_actions.each do |action| %>
             <tr class="<%= cycle('odd', 'even') %>">
               <td class="checkbox">
-                <%= check_box_tag 'action_ids[]', 
-                                  action.id, 
-                                  @enabled_action_ids.include?(action.id),
+                <%= check_box_tag 'action_ids[]',
+                                  action.id,
+                                  enabled_action_ids.include?(action.id),
                                   id: "action_#{action.id}" %>
               </td>
               <td>
@@ -42,7 +63,7 @@
       </tbody>
     </table>
     
-    <% if @available_actions.any? %>
+    <% if available_actions.any? %>
       <p class="buttons">
         <%= submit_tag l(:button_save), class: 'button' %>
       </p>
@@ -51,8 +72,8 @@
   
   <% if User.current.admin? %>
     <p class="automation-admin-link">
-      <%= link_to l(:label_manage_automation_actions), 
-                  hrz_automation_path, 
+      <%= link_to l(:label_manage_automation_actions),
+                  hrz_automation_settings_path,
                   class: 'icon icon-settings' %>
     </p>
   <% end %>

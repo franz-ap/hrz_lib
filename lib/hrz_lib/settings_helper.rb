@@ -149,7 +149,7 @@ module HrzLib
       #return HrzlibAutAction.exists? &&
       #       (User.current.admin? || User.current.allowed_to?(:manage_project_automation, nil, global: true))
       true
-    end project_automation_tab_enabled?
+    end  # project_automation_tab_enabled?
 
   end  # module SettingsHelper
 end   # module HrzLib

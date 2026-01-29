@@ -13,21 +13,31 @@
 # You should have received a copy of the GNU Affero General Public License                  #
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.                    #
 #-------------------------------------------------------------------------------------eohdr-#
-# Purpose: Hook to integrate automation settings into project settings.
+# Purpose: Patch ProjectsHelper to add automation tab to project settings.
 
 module HrzLib
-  class ProjectSettingsHook < Redmine::Hook::ViewListener
-    # Add the automation tab to project settings
-    def project_settings_tabs(context = {})
-      # Only show the tab if enabled via SettingsHelper
-      return nil unless HrzLib::SettingsHelper.project_automation_tab_enabled?
+  module ProjectsHelperPatch
+    # Extends project_settings_tabs to add the Automation tab.
+    # @return [Array<Hash>] Array of tab definitions
+    def project_settings_tabs
+      tabs = super
 
-      {
-        name: 'automation',
-        action: :show,
-        partial: 'hrz_project_automation/show',
-        label: :label_hrz_automation
-      }
+      # Only add tab if enabled
+      if HrzLib::SettingsHelper.project_automation_tab_enabled?
+        tabs << {
+          name: 'automation',
+          action: :edit_project,
+          partial: 'hrz_project_automation/show',
+          label: :label_hrz_automation
+        }
+      end
+
+      tabs
     end
   end
+end
+
+# Apply the patch using prepend (Rails 6+ recommended approach)
+Rails.application.config.after_initialize do
+  ProjectsHelper.prepend(HrzLib::ProjectsHelperPatch)
 end

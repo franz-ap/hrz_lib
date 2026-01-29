@@ -17,13 +17,18 @@
 
 class HrzProjectAutomationController < ApplicationController
   before_action :find_project
-  before_action :authorize
+  before_action :authorize_edit_project
 
+  # Displays the automation settings for a project.
+  # @return [void] Renders the show view with available and enabled actions.
   def show
     @available_actions  = HrzlibAutAction.order(:b_title)
     @enabled_action_ids = @project.project_actions.pluck(:aut_action_id)
   end
 
+  # Updates the automation action assignments for a project.
+  # Removes all existing assignments and creates new ones based on selected actions.
+  # @return [void] Redirects to project settings with success or error flash.
   def update
     # Get the selected action IDs from the form
     selected_action_ids = (params[:action_ids] || []).reject(&:blank?).map(&:to_i)
@@ -52,9 +57,18 @@ class HrzProjectAutomationController < ApplicationController
 
   private
 
+  # Finds the project from request parameters.
+  # @return [void] Sets @project or renders 404.
   def find_project
     @project = Project.find(params[:project_id] || params[:id])
   rescue ActiveRecord::RecordNotFound
     render_404
+  end
+
+  # Checks that the user is allowed to edit the project.
+  # Uses :edit_project permission since this is a project settings tab.
+  # @return [void] Denies access if user lacks permission.
+  def authorize_edit_project
+    deny_access unless User.current.allowed_to?(:edit_project, @project)
   end
 end

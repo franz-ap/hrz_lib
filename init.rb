@@ -22,7 +22,7 @@ Redmine::Plugin.register :hrz_lib do
   name        'HRZ Lib'
   author      'Franz Apeltauer, Claude'
   description 'Redmine utility/library plugin. Provides common functions to other plugins and a REST API for CustomField creation/modification.'
-  version     '0.7.7'
+  version     '0.7.8'
   url         'https://github.com/franz-ap/hrz_lib'
   author_url  ''
   requires_redmine version_or_higher: '6.1.0'
@@ -67,9 +67,9 @@ require_relative 'lib/hrz_lib/hrz_http'
 require_relative 'app/models/hrzlib_aut_action'
 require_relative 'app/models/hrzlib_aut_project_action'
 
-# Load patches and hooks
+# Load patches
 require_relative 'lib/hrz_lib/project_patch'
-require_relative 'lib/hrz_lib/hooks/project_settings_hook'
+require_relative 'lib/hrz_lib/projects_helper_patch'
 
 # Benchmark
 puts "Plugin 'HRZ Lib' loaded in #{((Time.now - t_start_hrz_lib) * 1000).round(2)} ms"
