@@ -35,10 +35,10 @@ module HrzLib
     def self.call_dispatcher(b_function, params = [])
       # Im Dry-Run-Modus: Dummy-Wert zurückgeben ohne Funktion auszuführen
       if TagStringHelper.dry_run_mode?
-        HrzLogger.logger.debug_msg "Dry-run: call_dispatcher #{b_function}(#{params.inspect})"
+        HrzLogger.debug_msg "Dry-run: call_dispatcher #{b_function}(#{params.inspect})"
         return "1"  # Standard-Dummy-Wert für Dry-Run
       end
-      HrzLogger.logger.debug_msg "call_dispatcher ('#{b_function}, #{params})"
+      HrzLogger.debug_msg "call_dispatcher ('#{b_function}, #{params})"
 
       case b_function
         when 'get_param'
@@ -50,13 +50,13 @@ module HrzLib
         when 'set_param'
           hrz_strfunc_set_param(params)
         when 'show_info'
-          HrzLogger.logger.info_msg (params.join(' '))
+          HrzLogger.info_msg (params.join(' '))
           ""
         when 'show_warning'
-          HrzLogger.logger.warning_msg (params.join(' '))
+          HrzLogger.warning_msg (params.join(' '))
           ""
         when 'show_error'
-          HrzLogger.logger.error_msg (params.join(' '))
+          HrzLogger.error_msg (params.join(' '))
           ""
         when 'prep_clear_all'
           HrzAutoAction.tkt_prep_clear_assignee_watchers()   # That's all for now.
@@ -74,14 +74,14 @@ module HrzLib
         when 'usr_id', 'user_id'
           hrz_strfunc_usr_id()
         else
-          HrzLogger.logger.warning_msg "Unknown HRZ function: #{b_function}"
+          HrzLogger.warning_msg "Unknown HRZ function: #{b_function}"
           raise HrzError.new("Unknown function: #{b_function}", { function: b_function })
       end  # case
     rescue HrzError
       # Pass HrzErrors on
       raise
     rescue StandardError => e
-      HrzLogger.logger.error_msg "Error in HRZ function #{b_function}: #{e.message}\n#{e.backtrace.join("\n")}"
+      HrzLogger.error_msg "Error in HRZ function #{b_function}: #{e.message}\n#{e.backtrace.join("\n")}"
       raise HrzError.new("Error in function #{b_function}: #{e.message}",
                         { function: b_function, params: params, cause: e })
     end  # call_dispatcher
@@ -300,7 +300,7 @@ module HrzLib
         else
           b_keys = [ b_key_main, (b_key_sub unless b_key_sub.nil? || b_key_sub.empty?) ].compact.join(".")
           b_msg  = "Unknown/unimplemented conversion '#{b_conv}' in HRZ get_param(#{b_keys})."
-          HrzLogger.logger.warning_msg b_msg
+          HrzLogger.warning_msg b_msg
           raise HrzError.new(b_msg, { function: 'get_param', arr_args: arr_args })
         end # case
       end
@@ -368,7 +368,7 @@ module HrzLib
       set_context_value(b_key_main, b_key_sub, b_value);
       # Debug info:
       b_keys = [ b_key_main, (b_key_sub unless b_key_sub.nil? || b_key_sub.empty?) ].compact.join(".")
-      HrzLogger.logger.debug_msg "set_param(#{b_keys} := #{b_value})"
+      HrzLogger.debug_msg "set_param(#{b_keys} := #{b_value})"
 
       # set_param never returns a text, only this empty string:
       ""
@@ -402,14 +402,14 @@ module HrzLib
       begin
         if usr_id.nil?
           usr = User.current
-          HrzLogger.logger.debug_msg "hrz_strfunc_usr_name(usr_id=nil) --> Current user: #{User.current.inspect}"
+          HrzLogger.debug_msg "hrz_strfunc_usr_name(usr_id=nil) --> Current user: #{User.current.inspect}"
         elsif usr_id == 0   # By definition: 0 will return ""
           usr = nil
         else
           usr = User.find(usr_id.to_i)
         end
       rescue StandardError => e
-        HrzLogger.logger.debug_msg "hrz_strfunc_usr_name(usr_id=#{usr_id.nil? ? 'nil' : usr_id.to_s}, attrib=#{b_attrib}): #{e.message}"
+        HrzLogger.debug_msg "hrz_strfunc_usr_name(usr_id=#{usr_id.nil? ? 'nil' : usr_id.to_s}, attrib=#{b_attrib}): #{e.message}"
         usr = nil
       end
       if usr
@@ -426,7 +426,7 @@ module HrzLib
              b_ret = usr.lastname
            else
              b_ret = "?#{b_attrib}?"
-             HrzLogger.logger.debug_msg "hrz_strfunc_usr_name(attrib=#{b_attrib}) is not implemented yet."
+             HrzLogger.debug_msg "hrz_strfunc_usr_name(attrib=#{b_attrib}) is not implemented yet."
          end # case
       else
         b_ret = ''
