@@ -20,8 +20,8 @@ module HrzLib
     # Add the automation tab to project settings
     def project_settings_tabs(context = {})
       # Only show the tab if enabled via SettingsHelper
-      return nil unless SettingsHelper.project_automation_tab_enabled?
-      
+      return nil unless HrzLib::SettingsHelper.project_automation_tab_enabled?
+
       {
         name: 'automation',
         action: :show,
