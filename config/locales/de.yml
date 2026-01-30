@@ -14,7 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.                    #
 #-------------------------------------------------------------------------------------eohdr-#
 de:
-  label_hrz_automation: "Automation"
+  label_hrz_automation: "Automatisierung"
   label_conditions: "Bedingungen"
   label_steps: "Schritte"
   label_actions: "Aktionen"
