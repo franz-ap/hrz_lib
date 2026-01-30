@@ -22,8 +22,8 @@ module HrzLib
     def project_settings_tabs
       tabs = super
 
-      # Only add tab if enabled
-      if HrzLib::SettingsHelper.project_automation_tab_enabled?
+      # Only add tab if enabled (pass @project from the controller context)
+      if HrzLib::SettingsHelper.project_automation_tab_enabled?(@project)
         tabs << {
           name: 'automation',
           action: :edit_project,

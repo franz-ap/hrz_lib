@@ -42,6 +42,7 @@ module HrzLib
       #HrzLogger.logger.info_msg "SettingsHelper.reload_settings: " + settings.inspect
 
       @settings_cache = {
+        j_base_workflow_id:            settings['j_base_workflow_id'].to_s.presence&.to_i,
         debug_user_id:                                     settings['debug_user_id'].to_i,
         q_verbose_log:                 settings_to_boolean(settings['q_verbose_log']),
         q_verbose_issue_helper:        settings_to_boolean(settings['q_verbose_issue_helper']),
@@ -136,19 +137,50 @@ module HrzLib
 
 
 
-    # Determines whether the Automation tab should be visible in project settings
+    # Determines whether the Automation tab should be visible in project settings.
+    # The tab is enabled if:
+    #   1. The Redmine Custom Workflows plugin is installed              and
+    #   2. A base workflow is configured in the hrz_lib plugin settings  and
+    #   3. This base workflow is activated in the given project.
     #
+    # @param project [Project] The project to check
     # @return [Boolean] true if the tab should be shown, false otherwise
-    def self.project_automation_tab_enabled?
-      HrzLogger.debug_msg 'settings_helper.project_automation_tab_enabled?'
-      #
+    def self.project_automation_tab_enabled?(project)
+      #HrzLogger.debug_msg 'settings_helper.project_automation_tab_enabled?'
       # Only if module enabled in project:
       #    # (needs context parameter in Hook)
       #    # project = context[:project]
       #    # return project&.module_enabled?(:hrz_automation)
       #return HrzlibAutAction.exists? &&
       #       (User.current.admin? || User.current.allowed_to?(:manage_project_automation, nil, global: true))
-      true
+
+      # Must have a valid project
+      return false if project.nil?
+
+      # Custom Workflows plugin must be installed
+      return false unless Redmine::Plugin.registered_plugins.key?(:redmine_custom_workflows)
+
+      # A base workflow must be configured in hrz_lib settings
+      settings = get_settings
+      workflow_id = settings[:j_base_workflow_id]
+      return false if workflow_id.nil? || workflow_id <= 0
+
+      # Check if the base workflow is activated in the given project.
+      # Use direct SQL to avoid dependency on CustomWorkflow model and handle missing table gracefully.
+      begin
+        if ! ActiveRecord::Base.connection.table_exists?('custom_workflows_projects')
+          HrzLogger.debug_msg 'settings_helper.project_automation_tab_enabled?: Database table "custom_workflows_projects" not found even though "Redmine Custom Workflow plugin" seems to be installed. Probably something has changed in this new(?) version. Investigate ... Automation disabled for now.'
+          return false
+        end
+
+        ActiveRecord::Base.connection.select_value(
+          "SELECT 1 FROM custom_workflows_projects " \
+          "WHERE project_id = #{project.id.to_i} AND custom_workflow_id = #{workflow_id.to_i} LIMIT 1"
+        ).present?
+      rescue StandardError => e
+        HrzLogger.debug_msg "settings_helper.project_automation_tab_enabled? error: #{e.message}"
+        false
+      end
     end  # project_automation_tab_enabled?
 
   end  # module SettingsHelper
