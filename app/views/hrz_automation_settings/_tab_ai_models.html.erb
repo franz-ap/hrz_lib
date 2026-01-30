@@ -27,18 +27,20 @@
 <table class="list">
   <thead>
     <tr>
-      <th><%= l(:field_model_id) %></th>
-      <th><%= l(:field_model_name) %></th>
-      <th><%= l(:field_url) %></th>
+      <th style="text-align: left;"><%= l(:field_model_id) %></th>
+      <th style="text-align: left;"><%= l(:field_short_name) %></th>
+      <th style="text-align: left;"><%= l(:field_model_name) %></th>
+      <th style="text-align: left;"><%= l(:field_url) %></th>
       <th></th>
     </tr>
   </thead>
   <tbody>
     <% @ai_models.each do |model| %>
     <tr>
-      <td><%= model.j_key %> (<%= model.b_key %>)</td>
-      <td><%= @available_models.key(model.j_key) %></td>
-      <td><%= truncate(model.b_url, length: 50) %></td>
+      <td style="text-align: left;"><%= model.j_key %></td>
+      <td style="text-align: left;"><%= model.b_key %></td>
+      <td style="text-align: left;"><%= @available_models.key(model.j_key) %></td>
+      <td style="text-align: left;"><%= truncate(model.b_url, length: 50) %></td>
       <td class="buttons">
         <%= link_to l(:button_edit), 'javascript:void(0)',
             onclick: "showEditForm('aimodel', #{model.j_key})",
@@ -51,7 +53,7 @@
       </td>
     </tr>
     <tr id="edit_aimodel_<%= model.j_key %>" style="display:none;">
-      <td colspan="4" style="text-align: left;">
+      <td colspan="5" style="text-align: left;">
         <%= render partial: 'ai_model_form', locals: {
           ai_model: model,
           available_models: @available_models,

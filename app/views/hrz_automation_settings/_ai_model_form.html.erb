@@ -17,21 +17,15 @@
   <div class="box">
     <p>
       <%= f.label :j_key, l(:field_model_id) %>
-      <%= f.select :j_key, 
-          options_for_select(available_models.to_a, ai_model.j_key), 
-          { include_blank: true }, 
+      <%= f.select :j_key,
+          options_for_select(available_models.to_a, ai_model.j_key),
+          { include_blank: true },
           { required: true, readonly: (method == :patch) } %>
       <em class="info"><%= l(:help_model_id) %></em>
     </p>
     <p>
       <%= f.label :b_key, l(:field_short_name) %>
       <%= f.text_field :b_key, size: 30, readonly: true %>
-      <em class="info"><%= l(:help_auto_filled) %></em>
-    </p>
-    <p>
-      <%= label_tag :b_name, l(:field_model_name) %>
-      <%= text_field_tag :b_name_display, available_models.key(ai_model.j_key),
-          size: 80, readonly: true, disabled: true %>
       <em class="info"><%= l(:help_auto_filled) %></em>
     </p>
     <p>
