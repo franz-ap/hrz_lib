@@ -37,7 +37,7 @@
     <% @ai_models.each do |model| %>
     <tr>
       <td><%= model.j_key %> (<%= model.b_key %>)</td>
-      <td><%= model.b_name %></td>
+      <td><%= @available_models.key(model.j_key) %></td>
       <td><%= truncate(model.b_url, length: 50) %></td>
       <td class="buttons">
         <%= link_to l(:button_edit), 'javascript:void(0)',

@@ -23,7 +23,6 @@ class HrzlibAiModel < ActiveRecord::Base
   belongs_to :updater, class_name: 'User', foreign_key: 'updated_by', optional: true
 
   validates :j_key, presence: true, uniqueness: true
-  validates :b_name, presence: true, length: { maximum: 100 }
   validates :b_url, length: { maximum: 1000 }
   validates :b_api_key, length: { maximum: 100 }
   validates :b_json_post, length: { maximum: 4000 }

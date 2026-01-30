@@ -249,7 +249,7 @@ class HrzAutomationSettingsController < ApplicationController
 
   def ai_model_params
     params.require(:hrzlib_ai_model).permit(
-      :j_key, :b_name, :b_url, :b_api_key, :b_json_post, :b_json_res_path
+      :j_key, :b_url, :b_api_key, :b_json_post, :b_json_res_path
     )
   end
 

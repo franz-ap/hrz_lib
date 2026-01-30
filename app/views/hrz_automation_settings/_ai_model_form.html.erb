@@ -29,9 +29,9 @@
       <em class="info"><%= l(:help_auto_filled) %></em>
     </p>
     <p>
-      <%= f.label :b_name, l(:field_model_name) %>
-      <%= f.text_field :b_name, size: 80, readonly: true,
-          value: (available_models.key(ai_model.j_key) || ai_model.b_name) %>
+      <%= label_tag :b_name, l(:field_model_name) %>
+      <%= text_field_tag :b_name_display, available_models.key(ai_model.j_key),
+          size: 80, readonly: true, disabled: true %>
       <em class="info"><%= l(:help_auto_filled) %></em>
     </p>
     <p>
