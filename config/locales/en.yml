@@ -80,7 +80,6 @@ en:
   help_on_ticket_update: "Perform this action when updating a ticket?"
   help_conditions_all: "The action will only be performed if ALL given conditions are met (AND)"
   help_model_id: "Possible values are from the 'AI Model' ProjectCustomField. Please add values to this field, if you want to use them here."
-  help_auto_filled: "Automatically filled when model ID gets modified"
   help_json_post: "Mark the place where the prompt has to be inserted with MY_PROMPT."
   help_json_res_path: "To find the final result in the result data. Example: $.xydata.items[0].value"
   help_sort_order: "For displaying in lists"

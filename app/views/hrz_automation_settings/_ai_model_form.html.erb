@@ -13,12 +13,16 @@
 <%#  You should have received a copy of the GNU Affero General Public License                   %>
 <%#  along with this program.  If not, see <https://www.gnu.org/licenses/>.                     %>
 <%# -------------------------------------------------------------------------------------eohdr- %>
+<%# Filter out already used model IDs, but keep the current one for edit mode %>
+<% used_keys = HrzlibAiModel.pluck(:j_key) - [ai_model.j_key].compact %>
+<% filtered_models = available_models.reject { |_name, key| used_keys.include?(key) } %>
+
 <%= form_for ai_model, url: url, method: method, html: { class: 'tabular' } do |f| %>
   <div class="box">
     <p>
       <%= f.label :j_key, l(:field_model_id) %>
       <%= f.select :j_key,
-          options_for_select(available_models.map { |name, key| ["#{key}: #{name}", key] }, ai_model.j_key),
+          options_for_select(filtered_models.map { |name, key| ["#{key}: #{name}", key] }, ai_model.j_key),
           { include_blank: true },
           { required: true, readonly: (method == :patch) } %>
       <em class="info"><%= l(:help_model_id) %></em>
@@ -26,7 +30,6 @@
     <p>
       <%= f.label :b_key, l(:field_short_name) %>
       <%= f.text_field :b_key, size: 30 %>
-      <%#  em class="info"><%= l(:help_auto_filled) %></em>   %>
     </p>
     <p>
       <%= f.label :b_url, l(:field_url) %>

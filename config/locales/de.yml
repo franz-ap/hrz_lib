@@ -80,7 +80,6 @@ de:
   help_on_ticket_update: "Diese Aktion beim Aktualisieren eines Tickets ausführen?"
   help_conditions_all: "Die Aktion wird nur ausgeführt, wenn ALLE angegebenen Bedingungen erfüllt sind (UND)"
   help_model_id: "Die möglichen Werte kommen aus dem Projekt-CustomField 'AI Model'. Zusätzliche Werte bitte zuerst dort eintragen."
-  help_auto_filled: "Wird automatisch ausgefüllt, wenn die Modell-ID geändert wird"
   help_json_post: "Markieren Sie die Stelle, an der die Eingabeaufforderung eingefügt werden soll, mit MY_PROMPT."
   help_json_res_path: "Um das Endergebnis in den Ergebnisdaten zu finden. Beispiel: $.xydata.items[0].value"
   help_sort_order: "Für die Anzeige in Listen"

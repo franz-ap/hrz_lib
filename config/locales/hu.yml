@@ -80,7 +80,6 @@ hu:
   help_on_ticket_update: "Hajtsa végre ezt a műveletet jegy frissítésekor?"
   help_conditions_all: "A művelet csak akkor kerül végrehajtásra, ha MINDEN megadott feltétel teljesül (ÉS)"
   help_model_id: "A lehetséges értékek a projekt egyedi mezőjéből, az „AI Model”-ből származnak. Kérjük, először oda vigye fel a további értékeket."
-  help_auto_filled: "Automatikusan kitöltődik, amikor a modell ID módosul"
   help_json_post: "Jelölje meg azt a helyet, ahová a promptot be kell illeszteni, a MY_PROMPT jelzéssel."
   help_json_res_path: "A végeredmény megtalálásához az eredményadatokban. Példa: $.xydata.items[0].value"
   help_sort_order: "Listákban való megjelenítéshez"
