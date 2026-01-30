@@ -18,15 +18,15 @@
     <p>
       <%= f.label :j_key, l(:field_model_id) %>
       <%= f.select :j_key,
-          options_for_select(available_models.to_a, ai_model.j_key),
+          options_for_select(available_models.map { |name, key| ["#{key}: #{name}", key] }, ai_model.j_key),
           { include_blank: true },
           { required: true, readonly: (method == :patch) } %>
       <em class="info"><%= l(:help_model_id) %></em>
     </p>
     <p>
       <%= f.label :b_key, l(:field_short_name) %>
-      <%= f.text_field :b_key, size: 30, readonly: true %>
-      <em class="info"><%= l(:help_auto_filled) %></em>
+      <%= f.text_field :b_key, size: 30 %>
+      <%#  em class="info"><%= l(:help_auto_filled) %></em>   %>
     </p>
     <p>
       <%= f.label :b_url, l(:field_url) %>
