@@ -49,7 +49,7 @@ de:
   field_key_once: "Schlüssel für 'einmal'-Prüfung"
   field_cleanup: "Bereinigung"
   field_action_title: "Aktions-Titel"
-  field_on_new: "Bei Neu"
+  field_on_new: "Wenn neu"
   field_on_update: "Bei Änderung"
   field_on_new_ticket: "Bei neuem Ticket"
   field_on_ticket_update: "Bei Ticketänderung"
