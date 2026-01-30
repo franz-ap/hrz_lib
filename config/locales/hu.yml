@@ -93,7 +93,13 @@ hu:
   # Permissions
   permission_manage_project_automation: "Projekt automatizálás kezelése"
 
-  # Plugin settings
+  # Plugin settings - Automation
+  field_base_workflow: "Alap munkafolyamat"
+  help_base_workflow: "Ha ez az automatizálási alap munkafolyamat aktiválva van egy projektben, akkor az 'Automatizálás' fül engedélyezve lesz a projekt beállításaiban."
+  text_automation_disabled_no_plugin: "Automatizálás letiltva, mert a '%{plugin}' bővítmény nincs telepítve."
+  label_none_parenthesis: "(nincs)"
+
+  # Plugin settings - Debug
   label_hrz_lib_debug_settings: "Hibakeresési és naplózási beállítások"
   label_verbose_areas: "Hibakeresési és részletes naplózási területek"
   label_all_users: "Minden felhasználó"

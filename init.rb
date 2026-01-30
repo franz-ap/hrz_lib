@@ -22,13 +22,14 @@ Redmine::Plugin.register :hrz_lib do
   name        'HRZ Lib'
   author      'Franz Apeltauer, Claude'
   description 'Redmine utility/library plugin. Provides common functions to other plugins and a REST API for CustomField creation/modification.'
-  version     '0.7.11'
+  version     '0.7.16'
   url         'https://github.com/franz-ap/hrz_lib'
   author_url  ''
   requires_redmine version_or_higher: '6.1.0'
 
   # Plugin settings configuration
   settings default: {
+    'j_base_workflow_id'            => '',
     'debug_user_id'                 => '',
     'q_verbose_log'                 => false,
     'q_verbose_issue_helper'        => false,

@@ -93,7 +93,13 @@ en:
   # Permissions
   permission_manage_project_automation: "Manage project automation"
 
-  # Plugin settings
+  # Plugin settings - Automation
+  field_base_workflow: "Base workflow"
+  help_base_workflow: "If this automation base workflow is activated in a project, the 'Automation' tab will be enabled in the project settings."
+  text_automation_disabled_no_plugin: "Automation disabled because plugin '%{plugin}' is not installed."
+  label_none_parenthesis: "(none)"
+
+  # Plugin settings - Debug
   label_hrz_lib_debug_settings: "Debug & Logging Settings"
   label_verbose_areas: "Debug & Verbose logging areas"
   label_all_users: "All users"

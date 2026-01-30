@@ -17,6 +17,31 @@
 <%# Location: app/views/settings/_hrz_lib_settings.html.erb                                     %>
 
 <div class="box">
+  <h3><%= l(:label_hrz_automation) %></h3>
+
+  <% q_custom_workflows_installed = Redmine::Plugin.registered_plugins.key?(:redmine_custom_workflows) %>
+
+  <% if q_custom_workflows_installed %>
+    <p>
+      <label><%= l(:field_base_workflow) %></label>
+      <%= select_tag 'settings[j_base_workflow_id]',
+                     options_for_select(
+                       [[l(:label_none_parenthesis), '']] +
+                       CustomWorkflow.order(:name).map { |w| [w.name, w.id.to_s] },
+                       @settings['j_base_workflow_id'].to_s
+                     ),
+                     style: 'width: 300px;' %>
+      <br/>
+      <em class="info"><%= l(:help_base_workflow) %></em>
+    </p>
+  <% else %>
+    <p class="nodata">
+      <%= l(:text_automation_disabled_no_plugin, plugin: 'Redmine Custom Workflows') %>
+    </p>
+  <% end %>
+</div>
+
+<div class="box">
   <h3><%= l(:label_hrz_lib_debug_settings) %></h3>
 
   <%# Clear the settings cache whenever we display this settings page. Settings might have changed right before. %>

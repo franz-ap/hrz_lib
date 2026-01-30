@@ -93,7 +93,13 @@ de:
   # Permissions
   permission_manage_project_automation: "Projekt-Automatisierung verwalten"
 
-  # Plugin settings
+  # Plugin settings - Automation
+  field_base_workflow: "Basis-Workflow"
+  help_base_workflow: "Wenn dieser Automatisierungs-Basis-Workflow in einem Projekt aktiviert ist, dann wird zusätzlich der Reiter 'Automatisierung' in den Projekteinstellungen freigeschaltet."
+  text_automation_disabled_no_plugin: "Automatisierung deaktiviert, weil Plugin '%{plugin}' nicht installiert ist."
+  label_none_parenthesis: "(keiner)"
+
+  # Plugin settings - Debug
   label_hrz_lib_debug_settings: "Debug & Logging Einstellungen"
   label_verbose_areas: "Bereiche für Debug & ausführliche Protokollierung"
   label_all_users: "Alle Benutzer"
