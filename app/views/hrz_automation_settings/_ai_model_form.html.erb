@@ -30,7 +30,9 @@
     </p>
     <p>
       <%= f.label :b_name, l(:field_model_name) %>
-      <%= f.text_field :b_name, size: 80, required: true %>
+      <%= f.text_field :b_name, size: 80, readonly: true,
+          value: (available_models.key(ai_model.j_key) || ai_model.b_name) %>
+      <em class="info"><%= l(:help_auto_filled) %></em>
     </p>
     <p>
       <%= f.label :b_url, l(:field_url) %>
