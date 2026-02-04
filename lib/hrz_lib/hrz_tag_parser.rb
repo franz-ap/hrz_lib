@@ -29,28 +29,29 @@ module HrzLib
   # Logger wrapper, enabling standalone tests without Rails.
   class HrzLogger
     def initialize
-       #@q_debug_enabled = false  # Default: Debug off
+       @q_debug_enabled  = true  # Default: Debug on (because we have also additional, fine-grained debug flags.).
        @q_verbose_parser = false
     end
 
 
-    # Enable or disable debug output.
+    # Enable or disable debug output. Generally. Main switch.
+    # Note: we have also additional, fine-grained debug flags. See SettingsHelper.
     # @param q_enabled [Boolean] Debug output enabled from now on (true) or not (false).
     def self.debug_enable(q_enabled)
-       #@q_debug_enabled = q_enabled
+       @q_debug_enabled = q_enabled
     end  # debug_enable
 
 
     # Is debug output enabled?
     def self.debug_enabled?
-      true #@q_debug_enabled
+      @q_debug_enabled
     end  # debug_enabled?
 
 
     # Issue a general debug message.
     # @param b_msg [String] The debug message.
     def self.debug_msg(b_msg)
-      #return unless @q_debug_enabled
+      return unless @q_debug_enabled
       puts '[DEBUG] ' + B_ANSI_YELLOW_BGCOLOR_STD + b_msg + B_ANSI_RESET_COLOR
       HrzTagFunctions.context_array_push('hrz_msgs', 'debug', b_msg)
     end  # debug_msg
