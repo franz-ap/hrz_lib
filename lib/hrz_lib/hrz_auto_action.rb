@@ -211,13 +211,14 @@ module HrzLib
     # @param hsh_opt  [Hash]  Information about the task.
     def self.todo_mk_issue_from_templ(hsh_opt)
       if hsh_opt[:issue_template_id]
-        q_related     = hsh_opt[:q_related]
-        q_child       = hsh_opt[:q_child]
-        q_only_1x     = hsh_opt[:q_only_1x]
-        b_key_1x      = hsh_opt[:b_key_1x]
-        project_id    = hsh_opt[:project_id]
-        project_id    = HrzTagFunctions.get_context_value('tkt_new', 'project_id')  if project_id.nil?
-        issue_main_id = HrzTagFunctions.get_context_value('tkt_new', 'issue_id')
+        q_related        = hsh_opt[:q_related]
+        q_child          = hsh_opt[:q_child]
+        q_only_1x        = hsh_opt[:q_only_1x]
+        q_use_templ_auth = false                  # In case we want this as an option in future.
+        b_key_1x         = hsh_opt[:b_key_1x]
+        project_id       = hsh_opt[:project_id]
+        project_id       = HrzTagFunctions.get_context_value('tkt_new', 'project_id')  if project_id.nil?
+        issue_main_id    = HrzTagFunctions.get_context_value('tkt_new', 'issue_id')
         if q_only_1x && (b_key_1x.nil? || b_key_1x.empty?)
           HrzLogger.logger.debug_msg "todo_mk_issue_from_templ: Ignoring q_only_1x, because b_key_1x is empty."
           q_only_1x = false
@@ -246,6 +247,7 @@ module HrzLib
             arr_watcher_ids = HrzTagFunctions.get_context_value('tkt_prep', 'arr_watcher_ids')
             new_options     = template_issue_data[:options]
             new_options[:parent_issue_id] = issue_main_id   if q_child
+            new_options.delete(:author_id)                  unless q_use_templ_auth  # Usually the current user is taken as author
             new_issue_id = HrzLib::IssueHelper.mk_issue(
                             project_id,
                             template_issue_data[:b_subject] + b_suf,
