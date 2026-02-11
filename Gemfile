@@ -16,3 +16,4 @@
 # Purpose: Gemfile for hrz_lib Redmine plugin. Lists required, additional gems.
 
 gem 'parslet', '~> 2.0'
+gem 'jsonpath'
