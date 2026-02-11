@@ -35,10 +35,39 @@
       <%= f.label :b_url, l(:field_url) %>
       <%= f.text_field :b_url, size: 140 %>
     </p>
+
+    <p>
+      <%= f.label :b_hdr_name_api_key, l(:field_hdr_name_api_key) %>
+      <%= f.text_field :b_hdr_name_api_key, size: 30 %>
+      <em class="info"><%= l(:help_hdr_name_api_key) %></em>
+    </p>
     <p>
       <%= f.label :b_api_key, l(:field_api_key) %>
       <%= f.text_field :b_api_key, size: 80, type: 'password' %>
     </p>
+
+    <p>
+      <%= f.label :b_hdr_name_aux1, l(:field_hdr_name_aux1) %>
+      <%= f.text_field :b_hdr_name_aux1, size: 30 %>
+      <em class="info"><%= l(:help_hdr_name_aux) %></em>
+    </p>
+    <p>
+      <%= f.label :b_hdr_val_aux1, l(:field_hdr_val_aux1) %>
+      <%= f.text_field :b_hdr_val_aux1, size: 100 %>
+      <em class="info"><%= l(:help_hdr_val_aux) %></em>
+    </p>
+
+    <p>
+      <%= f.label :b_hdr_name_aux2, l(:field_hdr_name_aux2) %>
+      <%= f.text_field :b_hdr_name_aux2, size: 30 %>
+      <em class="info"><%= l(:help_hdr_name_aux) %></em>
+    </p>
+    <p>
+      <%= f.label :b_hdr_val_aux2, l(:field_hdr_val_aux2) %>
+      <%= f.text_field :b_hdr_val_aux2, size: 100 %>
+      <em class="info"><%= l(:help_hdr_val_aux) %></em>
+    </p>
+
     <p>
       <%= f.label :b_json_post, l(:field_json_post) %>
       <%= f.text_area :b_json_post, rows: 5, cols: 80 %>

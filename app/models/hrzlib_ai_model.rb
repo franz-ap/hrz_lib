@@ -27,6 +27,11 @@ class HrzlibAiModel < ActiveRecord::Base
   validates :b_api_key, length: { maximum: 100 }
   validates :b_json_post, length: { maximum: 4000 }
   validates :b_json_res_path, length: { maximum: 100 }
+  validates :b_hdr_name_api_key, length: { maximum: 30 }
+  validates :b_hdr_name_aux1, length: { maximum: 30 }
+  validates :b_hdr_val_aux1, length: { maximum: 100 }
+  validates :b_hdr_name_aux2, length: { maximum: 30 }
+  validates :b_hdr_val_aux2, length: { maximum: 100 }
 
   before_create :set_created_by
   before_save :set_updated_by

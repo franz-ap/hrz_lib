@@ -62,6 +62,11 @@ hu:
   field_api_key: "API kulcs"
   field_json_post: "POST üzenet, JSON formátum"
   field_json_res_path: "JSON útvonal"
+  field_hdr_name_api_key: "API kulcs neve"
+  field_hdr_name_aux1: "További HTTP fejléc kulcs 1"
+  field_hdr_val_aux1: "Hozzárendelt érték 1"
+  field_hdr_name_aux2: "További HTTP fejléc kulcs 2"
+  field_hdr_val_aux2: "Hozzárendelt érték 2"
   field_todo_key: "Belső ToDo név"
   field_todo_name: "ToDo megjelenítési neve"
   field_sort_order: "Rendezési sorrend"
@@ -82,6 +87,9 @@ hu:
   help_model_id: "A lehetséges értékek a projekt egyedi mezőjéből, az „AI Model”-ből származnak. Kérjük, először oda vigye fel a további értékeket."
   help_json_post: "Jelölje meg azt a helyet, ahová a promptot be kell illeszteni, a MY_PROMPT jelzéssel."
   help_json_res_path: "A végeredmény megtalálásához az eredményadatokban. Példa: $.xydata.items[0].value"
+  help_hdr_name_api_key: "Az API kulcs neve a HTTP fejlécben. Példák: Authorization, api-key"
+  help_hdr_name_aux: "Egy további kulcs neve a HTTP fejlécben. Általában nem szükséges."
+  help_hdr_val_aux: "Ennek a HTTP fejléc kulcsnak az értéke. Általában nem szükséges."
   help_sort_order: "Listákban való megjelenítéshez"
 
   # Project automation settings

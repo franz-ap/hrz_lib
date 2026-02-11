@@ -62,6 +62,11 @@ de:
   field_api_key: "API-Schlüssel"
   field_json_post: "POST-Nachricht, JSON-Format"
   field_json_res_path: "JSON-Pfad"
+  field_hdr_name_api_key: "API Key Name"
+  field_hdr_name_aux1: "Zusätzlicher HTTP-Header Key 1"
+  field_hdr_val_aux1: "Zugehöriger Wert 1"
+  field_hdr_name_aux2: "Zusätzlicher HTTP-Header Key 2"
+  field_hdr_val_aux2: "Zugehöriger Wert 2"
   field_todo_key: "Interner ToDo-Name"
   field_todo_name: "Anzeigename des ToDo"
   field_sort_order: "Sortierreihenfolge"
@@ -82,6 +87,9 @@ de:
   help_model_id: "Die möglichen Werte kommen aus dem Projekt-CustomField 'AI Model'. Zusätzliche Werte bitte zuerst dort eintragen."
   help_json_post: "Markieren Sie die Stelle, an der der Frage-Text eingefügt werden soll, mit MY_PROMPT."
   help_json_res_path: "Um das Endergebnis in den Ergebnisdaten zu finden. Beispiel: $.xydata.items[0].value"
+  help_hdr_name_api_key: "Name des API-Keys im HTTP-Header. Beispiele: Authorization, api-key"
+  help_hdr_name_aux: "Name eines weiteren Schlüssels im HTTP-Header. Normalerweise nicht notwendig."
+  help_hdr_val_aux: "Wert zu diesem HTTP-Header-Schlüssel. Normalerweise nicht notwendig."
   help_sort_order: "Für die Anzeige in Listen"
 
   # Project automation settings
