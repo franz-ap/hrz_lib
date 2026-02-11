@@ -44,9 +44,10 @@ RedmineApp::Application.routes.draw do
   delete 'hrz_automation_settings/actions/:id', to: 'hrz_automation_settings#destroy_action'
 
   # AI Models
-  post   'hrz_automation_settings/ai_models',     to: 'hrz_automation_settings#create_ai_model'
-  patch  'hrz_automation_settings/ai_models/:id', to: 'hrz_automation_settings#update_ai_model'
-  delete 'hrz_automation_settings/ai_models/:id', to: 'hrz_automation_settings#destroy_ai_model'
+  post   'hrz_automation_settings/ai_models',          to: 'hrz_automation_settings#create_ai_model'
+  patch  'hrz_automation_settings/ai_models/:id',      to: 'hrz_automation_settings#update_ai_model'
+  delete 'hrz_automation_settings/ai_models/:id',      to: 'hrz_automation_settings#destroy_ai_model'
+  get    'hrz_automation_settings/ai_models/:id/test', to: 'hrz_automation_settings#test_ai_model', as: 'test_ai_model'
 
   # Todos
   post   'hrz_automation_settings/todos',     to: 'hrz_automation_settings#create_todo'

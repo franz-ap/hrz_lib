@@ -92,6 +92,23 @@ en:
   help_hdr_val_aux: "Value for this HTTP header key. Usually not necessary."
   help_sort_order: "For displaying in lists"
 
+  # AI Model Test
+  label_ai_model_test: "AI Model Test"
+  label_request_details: "Request Details"
+  label_response_details: "Response Details"
+  label_result_extraction: "Result Extraction"
+  label_request_header: "Request Header"
+  label_post_data: "POST Data"
+  label_response_code: "Response Code"
+  label_response_header: "Response Header"
+  label_response_body: "Response Body"
+  label_extracted_result: "Extracted Result"
+  button_test: "Test"
+  text_ai_test_success: "Test successful"
+  text_ai_test_failed: "Test failed"
+  text_no_data: "No data"
+  text_not_configured: "not configured"
+
   # Project automation settings
   text_automation_settings_info: "Select the automation actions that should be enabled for this project."
   text_no_automation_actions: "No automation actions available. Please create actions in the global automation administration first."

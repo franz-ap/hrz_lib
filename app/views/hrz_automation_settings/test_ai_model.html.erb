@@ -1,0 +1,98 @@
+<%# ------------------------------------------------------------------------------------------- %>
+<%#  Redmine utility/library plugin. Provides common functions to other plugins + REST API.     %>
+<%#  Copyright (C) 2026 Franz Apeltauer                                                         %>
+<%#                                                                                             %>
+<%#  This program is free software: you can redistribute it and/or modify it under the terms    %>
+<%#  of the GNU Affero General Public License as published by the Free Software Foundation,     %>
+<%#  either version 3 of the License, or (at your option) any later version.                    %>
+<%#                                                                                             %>
+<%#  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;  %>
+<%#  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  %>
+<%#  See the GNU Affero General Public License for more details.                                %>
+<%#                                                                                             %>
+<%#  You should have received a copy of the GNU Affero General Public License                   %>
+<%#  along with this program.  If not, see <https://www.gnu.org/licenses/>.                     %>
+<%# -------------------------------------------------------------------------------------eohdr- %>
+<%# Purpose: Display AI model test results with all debug details %>
+
+<h2><%= l(:label_ai_model_test) %>: <%= @ai_model.b_key || @ai_model.j_key %></h2>
+
+<div class="box">
+  <% if @test_result[:q_ok] %>
+    <p class="flash notice"><%= l(:text_ai_test_success) %></p>
+  <% else %>
+    <p class="flash error"><%= l(:text_ai_test_failed) %>: <%= @test_result[:error] %></p>
+  <% end %>
+
+  <h3><%= l(:label_request_details) %></h3>
+  <table class="list">
+    <tr>
+      <th style="width: 200px;"><%= l(:field_url) %></th>
+      <td><code><%= @test_result[:url] %></code></td>
+    </tr>
+    <tr>
+      <th><%= l(:label_request_header) %></th>
+      <td>
+        <% @test_result[:request_header].each do |hdr| %>
+          <% if hdr[:key] == @ai_model.b_hdr_name_api_key %>
+            <code><%= hdr[:key] %>: <%= hdr[:val].to_s[0..10] %>...</code><br>
+          <% else %>
+            <code><%= hdr[:key] %>: <%= hdr[:val] %></code><br>
+          <% end %>
+        <% end %>
+      </td>
+    </tr>
+    <tr>
+      <th><%= l(:label_post_data) %></th>
+      <td><pre style="white-space: pre-wrap; word-wrap: break-word; max-height: 200px; overflow-y: auto;"><%= @test_result[:post_data] %></pre></td>
+    </tr>
+  </table>
+
+  <h3><%= l(:label_response_details) %></h3>
+  <table class="list">
+    <tr>
+      <th style="width: 200px;"><%= l(:label_response_code) %></th>
+      <td><code><%= @test_result[:response_code] %> <%= @test_result[:response_message] %></code></td>
+    </tr>
+    <tr>
+      <th><%= l(:label_response_header) %></th>
+      <td>
+        <% if @test_result[:response_header] %>
+          <div style="max-height: 150px; overflow-y: auto;">
+            <% @test_result[:response_header].each_header do |key, value| %>
+              <code><%= key %>: <%= value %></code><br>
+            <% end %>
+          </div>
+        <% else %>
+          <em><%= l(:text_no_data) %></em>
+        <% end %>
+      </td>
+    </tr>
+    <tr>
+      <th><%= l(:label_response_body) %></th>
+      <td><pre style="white-space: pre-wrap; word-wrap: break-word; max-height: 300px; overflow-y: auto;"><%= @test_result[:response_body] %></pre></td>
+    </tr>
+  </table>
+
+  <h3><%= l(:label_result_extraction) %></h3>
+  <table class="list">
+    <tr>
+      <th style="width: 200px;"><%= l(:field_json_res_path) %></th>
+      <td><code><%= @test_result[:json_path] || '(' + l(:text_not_configured) + ')' %></code></td>
+    </tr>
+    <tr>
+      <th><%= l(:label_extracted_result) %></th>
+      <td>
+        <% if @test_result[:json_path_result] %>
+          <pre style="white-space: pre-wrap; word-wrap: break-word; max-height: 200px; overflow-y: auto;"><%= @test_result[:json_path_result] %></pre>
+        <% else %>
+          <em><%= l(:text_no_data) %></em>
+        <% end %>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<p>
+  <%= link_to l(:button_back), hrz_automation_settings_path(tab: 'ai_models'), class: 'icon icon-back' %>
+</p>

@@ -225,6 +225,13 @@ class HrzAutomationSettingsController < ApplicationController
     redirect_to hrz_automation_settings_path(tab: 'ai_models')
   end
 
+  # Test an AI model with a sample query and display all debug details.
+  # Opens in a new browser window.
+  def test_ai_model
+    @ai_model = HrzlibAiModel.find(params[:id])
+    @test_result = HrzLib::AiHelper.ai_query_test(@ai_model.j_key)
+  end
+
   private
 
   def condition_params
@@ -249,7 +256,8 @@ class HrzAutomationSettingsController < ApplicationController
 
   def ai_model_params
     params.require(:hrzlib_ai_model).permit(
-      :j_key, :b_key, :b_url, :b_api_key, :b_json_post, :b_json_res_path
+      :j_key, :b_key, :b_url, :b_api_key, :b_json_post, :b_json_res_path,
+      :b_hdr_name_api_key, :b_hdr_name_aux1, :b_hdr_val_aux1, :b_hdr_name_aux2, :b_hdr_val_aux2
     )
   end
 

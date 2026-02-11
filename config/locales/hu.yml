@@ -92,6 +92,23 @@ hu:
   help_hdr_val_aux: "Ennek a HTTP fejléc kulcsnak az értéke. Általában nem szükséges."
   help_sort_order: "Listákban való megjelenítéshez"
 
+  # AI Model Test
+  label_ai_model_test: "AI Modell Teszt"
+  label_request_details: "Kérés részletei"
+  label_response_details: "Válasz részletei"
+  label_result_extraction: "Eredmény kinyerése"
+  label_request_header: "Kérés fejléce"
+  label_post_data: "POST adatok"
+  label_response_code: "Válasz kód"
+  label_response_header: "Válasz fejléce"
+  label_response_body: "Válasz törzse"
+  label_extracted_result: "Kinyert eredmény"
+  button_test: "Teszt"
+  text_ai_test_success: "Teszt sikeres"
+  text_ai_test_failed: "Teszt sikertelen"
+  text_no_data: "Nincs adat"
+  text_not_configured: "nincs beállítva"
+
   # Project automation settings
   text_automation_settings_info: "Válassza ki azokat az automatizálási műveleteket, amelyeket engedélyezni szeretne ennél a projektnél."
   text_no_automation_actions: "Nincsenek elérhető automatizálási műveletek. Kérjük, először hozzon létre műveleteket a globális automatizálás adminisztrációban."
