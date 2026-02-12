@@ -32,6 +32,7 @@ class HrzlibAiModel < ActiveRecord::Base
   validates :b_hdr_val_aux1, length: { maximum: 100 }
   validates :b_hdr_name_aux2, length: { maximum: 30 }
   validates :b_hdr_val_aux2, length: { maximum: 100 }
+  validates :b_comment, length: { maximum: 4000 }
 
   before_create :set_created_by
   before_save :set_updated_by
