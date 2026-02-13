@@ -55,6 +55,10 @@
       <td><code><%= @test_result[:response_code] %> <%= @test_result[:response_message] %></code></td>
     </tr>
     <tr>
+      <th><%= l(:label_response_time) %></th>
+      <td><code><%= @test_result[:t_answer_s] ? '%.3f s' % @test_result[:t_answer_s] : l(:text_no_data) %></code></td>
+    </tr>
+    <tr>
       <th><%= l(:label_response_header) %></th>
       <td>
         <% if @test_result[:response_header] %>

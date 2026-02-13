@@ -100,6 +100,7 @@ hu:
   label_request_header: "Kérés fejléce"
   label_post_data: "POST adatok"
   label_response_code: "Válasz kód"
+  label_response_time: "Válaszidő"
   label_response_header: "Válasz fejléce"
   label_response_body: "Válasz törzse"
   label_extracted_result: "Kinyert eredmény"

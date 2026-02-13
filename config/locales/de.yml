@@ -100,6 +100,7 @@ de:
   label_request_header: "Request-Header"
   label_post_data: "POST-Daten"
   label_response_code: "Response-Code"
+  label_response_time: "Antwortzeit"
   label_response_header: "Response-Header"
   label_response_body: "Response-Body"
   label_extracted_result: "Extrahiertes Ergebnis"
