@@ -34,6 +34,7 @@
 require_relative '../../../lib/hrz_lib/issue_helper'
 require_relative '../../../lib/hrz_lib/hrz_tag_parser'
 require_relative '../../../lib/hrz_lib/hrz_auto_action'
+require_relative '../../../lib/hrz_lib/ai_helper'
 
 
 # Globale Variable für Fehler-Zähler
@@ -68,6 +69,7 @@ def run_tests
   #test_case("Test 0a: special dev/debug test", '<HRZ prep_clear_all><HRZ prep_add_asgn_watch 7163 set_assignee:falxse>', 'x')
   #test_case("Test 0b: special dev/debug test", 'U:<HRZ usr_name>, Rm-ID:<HRZ usr_id>', 'x')
   #test_case("Test 0c: special dev/debug test", '<HRZ if> <HRZ tkt_new cf_id_105 vfy="G1 Initiator Division"> == "CB" <HRZ then> <HRZ prep_add_asgn_watch 9249 set_assignee:false vfy:"[Role-CB]Information-Security"> <HRZ endif>', 'x')
+  #test_case("Test 0d: AI test", 'x<HRZ ai_query default +>"Was ist laut Hitchhiker\'s guide to the galaxy der Sinn des Lebens? Antworte nur mit einer Zahl."</HRZ ai_query>y', 'x42y')
 
 
 

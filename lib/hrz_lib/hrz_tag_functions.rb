@@ -73,6 +73,8 @@ module HrzLib
           hrz_strfunc_usr_name(params)
         when 'usr_id', 'user_id'
           hrz_strfunc_usr_id()
+        when 'ai_query'
+          hrz_strfunc_ai_query(params)
         else
           HrzLogger.warning_msg "Unknown HRZ function: #{b_function}"
           raise HrzError.new("Unknown function: #{b_function}", { function: b_function })
@@ -444,6 +446,19 @@ module HrzLib
     def self.hrz_strfunc_usr_id
       User.current&.id.to_s  rescue "0"
     end  # hrz_strfunc_usr_id
+
+
+
+    # Runs an AI query and returns the answer.
+    # Example:
+    #   <HRZ ai_query default "What is the meaning of life?">
+    # @return [String] ......... AI's answer
+    def self.hrz_strfunc_ai_query(arr_args)
+      hsh_param  = analyze_named_params(['ai_model', 'query'], arr_args, 'ai_query', 2)
+      ai_model   = 72  # TODO hsh_param[:ai_model]    TODO: if numeric: take as it is, if text, try to find the model.
+      b_query    = hsh_param[:query]
+      HrzLib::AiHelper.ai_query(ai_model, b_query)
+    end  # hrz_strfunc_ai_query
 
 
 

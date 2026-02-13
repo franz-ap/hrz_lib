@@ -205,6 +205,7 @@ module HrzLib
     rule(:func_comment)              { (str('comment')  | str("C")).as(:func)         }
     rule(:func_usr_name)             { (str('usr_name') | str('user_name')).as(:func) }
     rule(:func_usr_id)               { (str('usr_id')   | str('user_id')).as(:func)   }
+    rule(:func_ai_query)             { str('ai_query').as(:func) }
 
     rule(:func_if)     { str('if')                      >> space? }
     rule(:func_then)   { str('then')                    >> space? }
@@ -216,7 +217,7 @@ module HrzLib
       (func_get_param | func_tkt_old | func_tkt_new | func_set_param |
        func_show_info | func_show_warning | func_show_error |
        func_prep_clear_all | func_prep_add_asgn_watch |
-       func_comment | func_usr_name | func_usr_id |
+       func_comment | func_usr_name | func_usr_id | func_ai_query |
        func_on_error
       ) >> space?
     }
@@ -279,7 +280,7 @@ module HrzLib
 
     # Boolean Expression Parser
     # Constants
-    rule(:bool_true) { (str('true') | str('TRUE')).as(:bool_const)    >> space? }
+    rule(:bool_true)  { (str('true')  | str('TRUE')).as(:bool_const)  >> space? }
     rule(:bool_false) { (str('false') | str('FALSE')).as(:bool_const) >> space? }
 
     # Operators
@@ -639,7 +640,11 @@ module HrzLib
     # @return [String] Processed string
     # @raise [HrzError] In case of errors, that were not caught by a surrounding on_error tag.
     def self.str_hrz(input_text, q_dry_run: false)
-      q_verbose_parser = SettingsHelper.verbose_log?(User.current&.id, :parser)
+      if defined?(SettingsHelper)
+        q_verbose_parser = SettingsHelper.verbose_log?(User.current&.id, :parser)
+      else
+        q_verbose_parser = true    # Probably running in standalone/test mode.
+      end
       HrzLogger.parser_debug_enable(q_verbose_parser)
       HrzLogger.parser_debug_msg "HRZ Tag str_hrz#{q_dry_run ? '/dry' : ''}: #{input_text}"  if q_verbose_parser
 
@@ -661,12 +666,12 @@ module HrzLib
         if parse_tree.nil?
           HrzLogger.parser_debug_msg "HRZ Tag str_hrz: No parse result for input '#{input_text}'!"  if q_verbose_parser
         else
-          HrzLogger.parser_debug_msg "HRZ Tag str_hrz parse_tree: #{parse_tree}"                    if q_verbose_parser
+          HrzLogger.parser_debug_msg "HRZ Tag str_hrz parse_tree:     #{parse_tree}"                if q_verbose_parser
         end
 
         # Pre-transform: evaluate only "if tags" (to avoid transformation of then/else blocks where conditions do not match).
         processed_tree = evaluate_if_tags_in_tree(parse_tree)
-        HrzLogger.parser_debug_msg "HRZ Tag str_hrz processed_tree: #{processed_tree}"              if q_verbose_parser
+        HrzLogger.parser_debug_msg   "HRZ Tag str_hrz processed_tree: #{processed_tree}"            if q_verbose_parser
 
         # Main transformation
         result = transform.apply(processed_tree)
