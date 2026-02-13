@@ -85,6 +85,7 @@
     <p>
       <%= f.submit method == :post ? l(:button_create) : l(:button_save) %>
       <% if method == :patch %>
+        <%= f.submit l(:button_save_continue), name: 'continue' %>
         <%= link_to l(:button_test), test_ai_model_path(ai_model.j_key), target: '_blank', class: 'icon icon-checked' %>
         <%= link_to l(:button_cancel), 'javascript:void(0)', onclick: "hideEditForm('aimodel', #{ai_model.j_key})" %>
       <% else %>

@@ -104,6 +104,7 @@ de:
   label_response_body: "Response-Body"
   label_extracted_result: "Extrahiertes Ergebnis"
   button_test: "Testen"
+  button_save_continue: "Speichern, weiter"
   text_ai_test_success: "Test erfolgreich"
   text_ai_test_failed: "Test fehlgeschlagen"
   text_no_data: "Keine Daten"

@@ -104,6 +104,7 @@ en:
   label_response_body: "Response Body"
   label_extracted_result: "Extracted Result"
   button_test: "Test"
+  button_save_continue: "Save, continue"
   text_ai_test_success: "Test successful"
   text_ai_test_failed: "Test failed"
   text_no_data: "No data"

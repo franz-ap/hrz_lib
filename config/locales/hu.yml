@@ -104,6 +104,7 @@ hu:
   label_response_body: "Válasz törzse"
   label_extracted_result: "Kinyert eredmény"
   button_test: "Teszt"
+  button_save_continue: "Mentés, folytatás"
   text_ai_test_success: "Teszt sikeres"
   text_ai_test_failed: "Teszt sikertelen"
   text_no_data: "Nincs adat"

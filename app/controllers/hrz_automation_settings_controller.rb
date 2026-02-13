@@ -161,11 +161,18 @@ class HrzAutomationSettingsController < ApplicationController
     end
   end
 
+  # Update an existing AI model.
+  # If the 'continue' parameter is present, redirects back to the same page
+  # with the edit form open. Otherwise redirects to the AI models tab.
   def update_ai_model
     @ai_model = HrzlibAiModel.find(params[:id])
     if @ai_model.update(ai_model_params)
       flash[:notice] = l(:notice_successful_update)
-      redirect_to hrz_automation_settings_path(tab: 'ai_models')
+      if params[:continue].present?
+        redirect_to hrz_automation_settings_path(tab: 'ai_models', edit_ai_model: @ai_model.j_key)
+      else
+        redirect_to hrz_automation_settings_path(tab: 'ai_models')
+      end
     else
       @ai_models = HrzlibAiModel.all.order(:j_key)
       @available_models = fetch_available_ai_models

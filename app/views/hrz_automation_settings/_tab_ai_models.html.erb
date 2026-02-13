@@ -92,4 +92,13 @@ function showEditForm(type, id) {
 function hideEditForm(type, id) {
   document.getElementById('edit_' + type + '_' + id).style.display = 'none';
 }
+
+// Auto-open edit form if edit_ai_model parameter is present in URL
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var editId = params.get('edit_ai_model');
+  if (editId) {
+    showEditForm('aimodel', editId);
+  }
+})();
 </script>

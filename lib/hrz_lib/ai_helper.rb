@@ -42,6 +42,8 @@ module HrzLib
       result[:json_path_result]
     end  # ai_query
 
+
+
     # Test an AI model with a sample query and return all debug details.
     # Used for testing AI model configuration in the admin interface.
     #
@@ -51,6 +53,8 @@ module HrzLib
     def self.ai_query_test(j_ai_id, b_query = 'What is the name of Austria\'s capital?')
       execute_ai_request(j_ai_id, b_query, 'AI model test')
     end  # ai_query_test
+
+
 
     # Internal method that executes an AI request and returns all details.
     # Used by both ai_query and ai_query_test.
@@ -72,16 +76,16 @@ module HrzLib
     #   :json_path_result [String]  Result extracted using JSON path
     def self.execute_ai_request(j_ai_id, b_query, b_name_qry = '')
       result = {
-        q_ok: false,
-        error: nil,
-        url: nil,
-        request_header: [],
-        post_data: nil,
-        response_code: nil,
+        q_ok:             false,
+        error:            nil,
+        url:              nil,
+        request_header:   [],
+        post_data:        nil,
+        response_code:    nil,
         response_message: nil,
-        response_header: nil,
-        response_body: nil,
-        json_path: nil,
+        response_header:  nil,
+        response_body:    nil,
+        json_path:        nil,
         json_path_result: nil
       }
 
@@ -132,10 +136,10 @@ module HrzLib
         b_name_svc
       )
 
-      result[:response_code] = hsh_res[:response_code]
+      result[:response_code]    = hsh_res[:response_code]
       result[:response_message] = hsh_res[:response_message]
-      result[:response_header] = hsh_res[:response_header]
-      result[:response_body] = hsh_res[:body]
+      result[:response_header]  = hsh_res[:response_header]
+      result[:response_body]    = hsh_res[:body]
 
       unless hsh_res[:q_ok]
         result[:error] = "HTTP request failed: #{hsh_res[:response_code]} #{hsh_res[:response_message]}"
@@ -159,7 +163,8 @@ module HrzLib
       end
 
       result
-    end  # execute_ai_request
+    end  #                execute_ai_request
+
     private_class_method :execute_ai_request
 
   end  # class AiHelper
