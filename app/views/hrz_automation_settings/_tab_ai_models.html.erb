@@ -31,6 +31,7 @@
       <th style="text-align: left;"><%= l(:field_short_name) %></th>
       <th style="text-align: left;"><%= l(:field_model_name) %></th>
       <th style="text-align: left;"><%= l(:field_url) %></th>
+      <th style="text-align: left;"><%= l(:field_comment) %></th>
       <th></th>
     </tr>
   </thead>
@@ -41,6 +42,7 @@
       <td style="text-align: left;"><%= model.b_key %></td>
       <td style="text-align: left;"><%= @available_models.key(model.j_key) %></td>
       <td style="text-align: left;"><%= truncate(model.b_url, length: 50) %></td>
+      <td style="text-align: left;"><%= model.b_comment %></td>
       <td class="buttons">
         <%= link_to l(:button_edit), 'javascript:void(0)',
             onclick: "showEditForm('aimodel', #{model.j_key})",
@@ -53,7 +55,7 @@
       </td>
     </tr>
     <tr id="edit_aimodel_<%= model.j_key %>" style="display:none;">
-      <td colspan="5" style="text-align: left;">
+      <td colspan="6" style="text-align: left;">
         <%= render partial: 'ai_model_form', locals: {
           ai_model: model,
           available_models: @available_models,
