@@ -64,17 +64,15 @@
     <p>
       <%= f.label :b_hdr_name_aux2, l(:field_hdr_name_aux2) %>
       <%= f.text_field :b_hdr_name_aux2, size: 30 %>
-      <em class="info"><%= l(:help_hdr_name_aux) %></em>
     </p>
     <p>
       <%= f.label :b_hdr_val_aux2, l(:field_hdr_val_aux2) %>
       <%= f.text_field :b_hdr_val_aux2, size: 100 %>
-      <em class="info"><%= l(:help_hdr_val_aux) %></em>
     </p>
 
     <p>
       <%= f.label :b_json_post, l(:field_json_post) %>
-      <%= f.text_area :b_json_post, rows: 5, cols: 80 %>
+      <%= f.text_area :b_json_post, rows: 2, cols: 80 %>
       <em class="info"><%= l(:help_json_post) %></em>
     </p>
     <p>
@@ -86,8 +84,9 @@
       <%= f.submit method == :post ? l(:button_create) : l(:button_save) %>
       <% if method == :patch %>
         <%= f.submit l(:button_save_continue), name: 'continue' %>
-        <%= link_to l(:button_test), test_ai_model_path(ai_model.j_key), target: '_blank', class: 'icon icon-checked' %>
         <%= link_to l(:button_cancel), 'javascript:void(0)', onclick: "hideEditForm('aimodel', #{ai_model.j_key})" %>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <%= link_to l(:button_test), test_ai_model_path(ai_model.j_key), target: '_blank', class: 'icon icon-checked' %>
       <% else %>
         <%= link_to l(:button_cancel), 'javascript:void(0)', onclick: "hideNewForm('aimodel')" %>
       <% end %>
