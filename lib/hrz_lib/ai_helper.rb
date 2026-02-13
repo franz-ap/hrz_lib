@@ -52,7 +52,7 @@ module HrzLib
     # @return [Hash] Hash containing all debug details (see execute_ai_request for details).
     def self.ai_query_test(j_ai_id, b_query = 'What is the name of Austria\'s capital?')
       HrzLib::HrzLogger.clear_messages
-      execute_ai_request(j_ai_id, b_query, 'AI model test')
+      result = execute_ai_request(j_ai_id, b_query, 'AI model test')
       # Append all error messages, that we may have seen along the way:
       result[:error] = HrzLib::HrzLogger.retrieve_msgs('error',       result[:error])
       result[:error] = HrzLib::HrzLogger.retrieve_msgs('error_abort', result[:error])
