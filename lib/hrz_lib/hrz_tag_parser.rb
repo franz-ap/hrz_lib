@@ -119,11 +119,11 @@ module HrzLib
 
     # Retrieve messages, that were collected so far.
     # @param b_category      [Symbol, String]    Message category to be retrieved: 'debug', 'info', 'warning', 'error', 'error_abort'
-    # @param b_previous_msgs [String]            Previous message(s), where you want the retrieved messages appended. Pass nil or '' for none.
-    # @param b_delim         [String]            Delimiter string between messages
+    # @param b_previous_msgs [String,  optional] Previous message(s), where you want the retrieved messages appended. Pass nil or '' for none.
+    # @param b_delim         [String,  optional] Delimiter string between messages. Default: ' '
     # @param l_max           [Integer, optional] Maximum length of result string. nil means: no limit.
     # @return                [String]            Result string
-    def self.retrieve_msgs(b_category, b_previous_msgs, b_delim, l_max=nil)
+    def self.retrieve_msgs(b_category, b_previous_msgs=nil, b_delim=' ', l_max=nil)
       arr_res = []
       arr_res << b_previous_msgs   unless b_previous_msgs.nil? || b_previous_msgs.empty?
       arr_coll = HrzTagFunctions.get_context_value('hrz_msgs', b_category, nil)
@@ -145,6 +145,16 @@ module HrzLib
       arr_coll = []   if ! arr_coll.is_a?(Array)
       arr_coll
     end  # retrieve_msgs_arr
+
+
+    # Clear all debug, info, warning and error messages
+    def self.clear_messages
+      HrzTagFunctions.set_context_value('hrz_msgs', 'debug',       [])
+      HrzTagFunctions.set_context_value('hrz_msgs', 'info',        [])
+      HrzTagFunctions.set_context_value('hrz_msgs', 'warning',     [])
+      HrzTagFunctions.set_context_value('hrz_msgs', 'error',       [])
+      HrzTagFunctions.set_context_value('hrz_msgs', 'error_abort', [])
+    end  # clear_messages
 
 
     # Rails compatible interface

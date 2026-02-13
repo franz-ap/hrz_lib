@@ -32,15 +32,16 @@ module HrzLib
     # @param b_name_svc  [String]      "Human readable name" of service to be called. For messages. Optional.
     # @param arr_resp_ok [Array of Integer] HTTP response codes, that should be taken as ok, if the standard 200 is not enough.
     # @return [Hash]:
-    #   :q_ok [Boolean] .... true:  Success, HTTP request done. The result body is in :body
-    #                        false: Error, problems or there was no URL, i.e. nothing to do. :body is empty or at least unusable. Error messages were already issued.
-    #   :body [String] ..... The body of the HTTP response.
+    #   :q_ok [Boolean] ..... true:  Success, HTTP request done. The result body is in :body
+    #                         false: Error, problems or there was no URL, i.e. nothing to do. :body is empty or at least unusable. Error messages were already issued.
+    #   :body [String] ...... The body of the HTTP response.
     #  Auxiliary information, e.g. for debugging. Not needed for standard use. Can be ignored.
-    #   :request_header .... The HTTP request header, that was used for the request.
-    #   :post_data ......... POST data, that was sent in the request.
-    #   :response_header ... The HTTP header in the response.
-    #   :response_code ..... HTTP code in the response: 200 = ok, ...
-    #   :response_message .. HTTP response message, i.e. the 'translation' of the HTTP code into text.
+    #   :t_answer_s [Float] . The time to get the answer back [s].
+    #   :request_header ..... The HTTP request header, that was used for the request.
+    #   :post_data .......... POST data, that was sent in the request.
+    #   :response_header .... The HTTP header in the response.
+    #   :response_code ...... HTTP code in the response: 200 = ok, ...
+    #   :response_message ... HTTP response message, i.e. the 'translation' of the HTTP code into text.
     #
     # Examples:
     #   a) aux_hdr Array
@@ -123,7 +124,9 @@ module HrzLib
             HrzLogger.debug_msg "HrzHttp.http_request: Unsupported object type  #{aux_hdr.class.name} of aux_hdr. Ignoring it."
           end
           # Send the request
+          t_start  = Time.now
           response = http.request(request)
+          hsh_result[:t_answer_s]       = Time.now - t_start  # How long did it take to get the answer [s]?
           hsh_result[:response_code]    = response.code
           hsh_result[:response_message] = response.message
           hsh_result[:response_header]  = response.header

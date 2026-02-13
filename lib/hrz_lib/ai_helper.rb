@@ -51,7 +51,12 @@ module HrzLib
     # @param b_query [String]  Test query string for the AI. Optional, defaults to a simple test question.
     # @return [Hash] Hash containing all debug details (see execute_ai_request for details).
     def self.ai_query_test(j_ai_id, b_query = 'What is the name of Austria\'s capital?')
+      HrzLib::HrzLogger.clear_messages
       execute_ai_request(j_ai_id, b_query, 'AI model test')
+      # Append all error messages, that we may have seen along the way:
+      result[:error] = HrzLib::HrzLogger.retrieve_msgs('error',       result[:error])
+      result[:error] = HrzLib::HrzLogger.retrieve_msgs('error_abort', result[:error])
+      HrzLib::HrzLogger.clear_messages
     end  # ai_query_test
 
 
@@ -74,6 +79,7 @@ module HrzLib
     #   :response_body    [String]  Raw response body
     #   :json_path        [String]  Configured JSON path for result extraction
     #   :json_path_result [String]  Result extracted using JSON path
+    #   :t_answer_s       [Float]   The time to get the answer back [s].
     def self.execute_ai_request(j_ai_id, b_query, b_name_qry = '')
       result = {
         q_ok:             false,
@@ -86,7 +92,8 @@ module HrzLib
         response_header:  nil,
         response_body:    nil,
         json_path:        nil,
-        json_path_result: nil
+        json_path_result: nil,
+        t_answer_s:       nil
       }
 
       # Load AI model configuration from database
@@ -140,6 +147,7 @@ module HrzLib
       result[:response_message] = hsh_res[:response_message]
       result[:response_header]  = hsh_res[:response_header]
       result[:response_body]    = hsh_res[:body]
+      result[:t_answer_s]       = hsh_res[:t_answer_s]
 
       unless hsh_res[:q_ok]
         result[:error] = "HTTP request failed: #{hsh_res[:response_code]} #{hsh_res[:response_message]}"
