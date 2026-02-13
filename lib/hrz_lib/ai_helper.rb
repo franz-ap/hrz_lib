@@ -57,6 +57,7 @@ module HrzLib
       result[:error] = HrzLib::HrzLogger.retrieve_msgs('error',       result[:error])
       result[:error] = HrzLib::HrzLogger.retrieve_msgs('error_abort', result[:error])
       HrzLib::HrzLogger.clear_messages
+      result
     end  # ai_query_test
 
 
