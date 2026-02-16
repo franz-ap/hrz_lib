@@ -236,7 +236,7 @@ class HrzAutomationSettingsController < ApplicationController
   # Opens in a new browser window.
   def test_ai_model
     @ai_model = HrzlibAiModel.find(params[:id])
-    @test_result = HrzLib::AiHelper.ai_query_test(@ai_model.j_key)
+    @test_result = HrzLib::AiHelper.ai_query_with_details(@ai_model.j_key, 'What is the name of Austria\'s capital?', 'AI model test', true, true)
   end
 
   private

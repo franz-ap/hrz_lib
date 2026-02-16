@@ -87,8 +87,8 @@
     <tr>
       <th><%= l(:label_extracted_result) %></th>
       <td>
-        <% if @test_result[:json_path_result] %>
-          <pre style="white-space: pre-wrap; word-wrap: break-word; max-height: 200px; overflow-y: auto;"><%= @test_result[:json_path_result] %></pre>
+        <% if @test_result[:b_answer] %>
+          <pre style="white-space: pre-wrap; word-wrap: break-word; max-height: 200px; overflow-y: auto;"><%= @test_result[:b_answer] %></pre>
         <% else %>
           <em><%= l(:text_no_data) %></em>
         <% end %>

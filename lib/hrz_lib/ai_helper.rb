@@ -39,31 +39,48 @@ module HrzLib
         return nil
       end
 
-      result[:json_path_result]
+      result[:b_answer]
     end  # ai_query
 
 
 
-    # Test an AI model with a sample query and return all debug details.
+    # Like ai_query above: Perform an AI query using a configured AI model.
+    # Returns a lot of details, not just the result string.
     # Used for testing AI model configuration in the admin interface.
     #
-    # @param j_ai_id [Integer] ID of the AI model to be tested (hrzlib_ai_models.j_key in the database).
-    # @param b_query [String]  Test query string for the AI. Optional, defaults to a simple test question.
+    # @param j_ai_id      [Integer] ID of the AI model to be tested (hrzlib_ai_models.j_key in the database).
+    # @param b_query      [String]  Test query string for the AI. Optional, defaults to a simple test question.
+    # @param b_name_qry   [String]  A short, "human readable name" that explains the reason for this query.
+    #                               Used for log messages. Optional.
+    # @param q_c_msgs_bef [Boolean] Clear collected messages before performing the AI query? true=yes, false=no.
+    # @param q_r_c_msgs   [Boolean] Retrieve and then clear the messages, that were collected on the way?
+    #                               true=yes, provide additional hash elements: :debug, :info, :warning, :error
+    #                               false=no
+    #
     # @return [Hash] Hash containing all debug details (see execute_ai_request for details).
-    def self.ai_query_test(j_ai_id, b_query = 'What is the name of Austria\'s capital?')
-      HrzLib::HrzLogger.clear_messages
-      result = execute_ai_request(j_ai_id, b_query, 'AI model test')
-      # Append all error messages, that we may have seen along the way:
-      result[:error] = HrzLib::HrzLogger.retrieve_msgs('error',       result[:error])
-      result[:error] = HrzLib::HrzLogger.retrieve_msgs('error_abort', result[:error])
-      HrzLib::HrzLogger.clear_messages
+    def self.ai_query_with_details(j_ai_id,
+                                   b_query,
+                                   b_name_qry   = '',
+                                   q_c_msgs_bef = false,
+                                   q_r_c_msgs   = false)
+      HrzLib::HrzLogger.clear_messages     if q_r_c_msgs
+      result = execute_ai_request(j_ai_id, b_query, b_name_qry)
+      if q_r_c_msgs
+        # Append all debug/info/warning/error messages, that we may have seen along the way:
+        result[:debug]   = HrzLib::HrzLogger.retrieve_msgs('debug',       result[:debug])
+        result[:info]    = HrzLib::HrzLogger.retrieve_msgs('info',        result[:info] )
+        result[:warning] = HrzLib::HrzLogger.retrieve_msgs('error',       result[:error])
+        result[:error]   = HrzLib::HrzLogger.retrieve_msgs('error',       result[:error])
+        result[:error]   = HrzLib::HrzLogger.retrieve_msgs('error_abort', result[:error])
+        HrzLib::HrzLogger.clear_messages
+      end
       result
-    end  # ai_query_test
+    end  # ai_query_with_details
 
 
 
     # Internal method that executes an AI request and returns all details.
-    # Used by both ai_query and ai_query_test.
+    # Used by both ai_query and ai_query_with_details.
     #
     # @param j_ai_id    [Integer] ID of the AI model (hrzlib_ai_models.j_key in the database).
     # @param b_query    [String]  Query string for the AI.
@@ -79,7 +96,7 @@ module HrzLib
     #   :response_header  [Object]  HTTP response headers
     #   :response_body    [String]  Raw response body
     #   :json_path        [String]  Configured JSON path for result extraction
-    #   :json_path_result [String]  Result extracted using JSON path
+    #   :b_answer         [String]  Result extracted using JSON path
     #   :t_answer_s       [Float]   The time to get the answer back [s].
     def self.execute_ai_request(j_ai_id, b_query, b_name_qry = '')
       result = {
@@ -93,7 +110,7 @@ module HrzLib
         response_header:  nil,
         response_body:    nil,
         json_path:        nil,
-        json_path_result: nil,
+        b_answer:         nil,
         t_answer_s:       nil
       }
 
@@ -159,10 +176,10 @@ module HrzLib
       begin
         data = JSON.parse(hsh_res[:body])
         if ai_model.b_json_res_path.present?
-          result[:json_path_result] = JsonPath.on(data, ai_model.b_json_res_path).first.to_s
+          result[:b_answer] = JsonPath.on(data, ai_model.b_json_res_path).first.to_s
         else
           # No path configured, return entire response
-          result[:json_path_result] = hsh_res[:body]
+          result[:b_answer] = hsh_res[:body]
         end
         result[:q_ok] = true
       rescue JSON::ParserError => e
