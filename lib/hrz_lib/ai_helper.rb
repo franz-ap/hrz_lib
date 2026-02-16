@@ -123,12 +123,35 @@ module HrzLib
         result[:error] = "AI model with ID #{j_ai_id} not found."
         return result
       end
+      if ai_model.b_url.start_with?('-->')
+        # Redirection (handle only a single one). Example: "Default" points to another AI model.
+        j_ai2_id = ai_model.b_url[3..].to_i
+        ai_model = HrzlibAiModel.find_by(j_key: j_ai2_id)
+        if ai_model.nil?
+          result[:error] = "AI model with ID #{j_ai2_id} not found (redirected from AI model with ID #{j_ai_id})."
+          return result
+        end
+      end
+
 
       result[:url]              = ai_model.b_url
       result[:json_path]        = ai_model.b_json_res_path
       result[:b_ai_model_cf]    = HrzlibAiModel.model_name_for_key(j_ai_id)
       result[:b_ai_model_short] = ai_model.b_key
       result[:b_ai_model_short] = result[:b_ai_model_cf]    if result[:b_ai_model_short].nil? || result[:b_ai_model_short].empty?
+
+      # "Special" URL values
+      if ai_model.b_url == 'none'
+        # Do nothing.
+        result[:q_ok] = true
+        return result
+      end
+      if ai_model.b_url == 'demo'
+        # Return a demo text, without really involving an AI.
+        result[:q_ok] = true
+        result[:b_answer] = 'Demo: ' + b_query[0..100]
+        return result
+      end
 
       # Build HTTP headers
       aux_hdr = []
