@@ -19,6 +19,9 @@
 class HrzlibAiModel < ActiveRecord::Base
   self.primary_key = 'j_key'
 
+  # Name of the Custom Field that defines the available AI models.
+  AI_MODEL_CF_NAME = 'AI Model'
+
   belongs_to :creator, class_name: 'User', foreign_key: 'created_by', optional: true
   belongs_to :updater, class_name: 'User', foreign_key: 'updated_by', optional: true
 
@@ -38,6 +41,29 @@ class HrzlibAiModel < ActiveRecord::Base
   before_save :set_updated_by
   # REMOVED auto_fill_b_key from before_save to avoid issues during migration
 
+  # Returns a Hash of available AI models from the ProjectCustomField.
+  # Format: { "display_name" => key_integer, ... }
+  # Used by the controller for dropdown population and by AiHelper for model name lookup.
+  # @return [Hash] Available AI models as { name => key }, or {} on error.
+  def self.fetch_available_models
+    field = HrzLib::CustomFieldHelper.get_custom_field(ProjectCustomField.find_by(name: AI_MODEL_CF_NAME)&.id)
+    if field && field[:possible_val_keys] && field[:possible_values]
+      field[:possible_values].zip(field[:possible_val_keys]).to_h
+    else
+      {}
+    end
+  rescue => e
+    Rails.logger.error "Error fetching AI models: #{e.message}"
+    {}
+  end
+
+  # Returns the Custom Field display name for a given AI model key.
+  # @param j_key [Integer] The AI model key (j_key).
+  # @return [String, nil] The display name, or nil if not found.
+  def self.model_name_for_key(j_key)
+    fetch_available_models.key(j_key)
+  end
+
   private
 
   def set_created_by
@@ -53,11 +79,9 @@ class HrzlibAiModel < ActiveRecord::Base
     return unless j_key.present?
 
     begin
-      field = HrzLib::CustomFieldHelper.get_custom_field(IssueCustomField.find_by(name: 'AI Model')&.id)
-      if field && field[:possible_val_keys] && field[:possible_values]
-        idx = field[:possible_val_keys].index(j_key)
-        self.b_key = field[:possible_values][idx] if idx
-      end
+      models = self.class.fetch_available_models
+      name = models.key(j_key)
+      self.b_key = name if name
     rescue => e
       Rails.logger.error "Error auto-filling b_key: #{e.message}"
     end

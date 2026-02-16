@@ -273,17 +273,9 @@ class HrzAutomationSettingsController < ApplicationController
     params.require(:hrzlib_aut_todo).permit(:b_key, :b_name, :j_sort)
   end
 
+  # Delegates to HrzlibAiModel.fetch_available_models.
+  # @return [Hash] Available AI models as { name => key }.
   def fetch_available_ai_models
-    begin
-      field = HrzLib::CustomFieldHelper.get_custom_field(ProjectCustomField.find_by(name: 'AI Model')&.id)
-      if field && field[:possible_val_keys] && field[:possible_values]
-        field[:possible_values].zip(field[:possible_val_keys]).to_h
-      else
-        {}
-      end
-    rescue => e
-      Rails.logger.error "Error fetching AI models: #{e.message}"
-      {}
-    end
+    HrzlibAiModel.fetch_available_models
   end
 end  # class HrzAutomationSettingsController

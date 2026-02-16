@@ -124,8 +124,11 @@ module HrzLib
         return result
       end
 
-      result[:url] = ai_model.b_url
-      result[:json_path] = ai_model.b_json_res_path
+      result[:url]              = ai_model.b_url
+      result[:json_path]        = ai_model.b_json_res_path
+      result[:b_ai_model_cf]    = HrzlibAiModel.model_name_for_key(j_ai_id)
+      result[:b_ai_model_short] = ai_model.b_key
+      result[:b_ai_model_short] = result[:b_ai_model_cf]    if result[:b_ai_model_short].nil? || result[:b_ai_model_short].empty?
 
       # Build HTTP headers
       aux_hdr = []
@@ -152,16 +155,8 @@ module HrzLib
       #       ever wanted to get the escaped content without surrounding quotes.
       result[:post_data] = b_post_data
 
-      # AI model name
-      b_ai_model = ai_model.b_key
-      result[:b_ai_model_short] = b_ai_model
-
       # Service name for logging
-      if b_ai_model.nil? || b_ai_model.empty?
-        b_name_svc = b_name_qry.present? ? "AI query '#{b_name_qry}'" : 'AI query'
-      else
-        b_name_svc = b_name_qry.present? ? "AI query '#{b_ai_model} #{b_name_qry}'" : "#{b_ai_model} AI query"
-      end
+      b_name_svc = b_name_qry.present? ? "AI query '#{result[:b_ai_model_short]} #{b_name_qry}'" : "#{result[:b_ai_model_short]} AI query"
 
       # Perform HTTP request
       hsh_res = HrzLib::HrzHttp.http_request(
