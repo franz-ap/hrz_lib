@@ -98,6 +98,9 @@ module HrzLib
     #   :json_path        [String]  Configured JSON path for result extraction
     #   :b_answer         [String]  Result extracted using JSON path
     #   :t_answer_s       [Float]   The time to get the answer back [s].
+    #   :b_ai_model_cf    [String]  The AI model's (long) name, from the Custom Field.
+    #   :b_ai_model_short [String]  The AI model's short name/key, from the database column
+    #                               hrzlib_ai_models.b_key
     def self.execute_ai_request(j_ai_id, b_query, b_name_qry = '')
       result = {
         q_ok:             false,
@@ -149,8 +152,16 @@ module HrzLib
       #       ever wanted to get the escaped content without surrounding quotes.
       result[:post_data] = b_post_data
 
+      # AI model name
+      b_ai_model = ai_model.b_key
+      result[:b_ai_model_short] = b_ai_model
+
       # Service name for logging
-      b_name_svc = b_name_qry.present? ? "AI query '#{b_name_qry}'" : 'AI query'
+      if b_ai_model.nil? || b_ai_model.empty?
+        b_name_svc = b_name_qry.present? ? "AI query '#{b_name_qry}'" : 'AI query'
+      else
+        b_name_svc = b_name_qry.present? ? "AI query '#{b_ai_model} #{b_name_qry}'" : "#{b_ai_model} AI query"
+      end
 
       # Perform HTTP request
       hsh_res = HrzLib::HrzHttp.http_request(
