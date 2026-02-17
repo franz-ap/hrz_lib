@@ -124,7 +124,7 @@ module HrzLib
         return result
       end
       if ai_model.b_url.start_with?('-->')
-        # Redirection (handle only a single one). Example: "Default" points to another AI model.
+        # Redirection (handle only a single one, intentionally). Example: "Default" points to another AI model.
         j_ai2_id = ai_model.b_url[3..].to_i
         ai_model = HrzlibAiModel.find_by(j_key: j_ai2_id)
         if ai_model.nil?
