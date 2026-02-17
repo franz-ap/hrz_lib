@@ -15,7 +15,7 @@
 <%# -------------------------------------------------------------------------------------eohdr- %>
 <%# Purpose: Display AI model test results with all debug details %>
 
-<h2><%= l(:label_ai_model_test) %>: <%=  '"' + @test_result[:b_ai_model_cf] + '"' +  ((@ai_model.b_key.nil? || @ai_model.empty?) ? '' : ' / "' + @ai_model.b_key + '"') + ' (ID ' + @ai_model.j_key + ')' %></h2>
+<h2><%= l(:label_ai_model_test) %>: <%=  '"' + @test_result[:b_ai_model_cf] + '"' +  ((@ai_model.b_key.nil? || @ai_model.b_key.empty?) ? '' : ' / "' + @ai_model.b_key + '"') + ' (ID ' + @ai_model.j_key.to_s + ')' %></h2>
 
 <div class="box">
   <% if @test_result[:q_ok] %>
