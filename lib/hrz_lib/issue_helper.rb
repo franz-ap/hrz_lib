@@ -1788,5 +1788,130 @@ module HrzLib
       end
     end  # get_group_members
 
+
+
+    # Copies an existing issue to a new issue, optionally overriding certain attributes.
+    # Uses get_issue to read the source issue and mk_issue to create the copy.
+    #
+    # @param issue_id [Integer] The ID of the source issue to copy
+    # @param overrides [Hash] Attributes to override in the copy
+    # @option overrides [Integer] :target_version_id New target version ID
+    # @option overrides [Integer] :parent_issue_id New parent issue ID
+    # @option overrides [String] :project_id New project identifier
+    # @option overrides [Integer] :status_id New status ID
+    # @option overrides [Integer] :tracker_id New tracker ID
+    # @option overrides [Integer] :priority_id New priority ID
+    # @option overrides [String] :subject New subject (overrides b_subject)
+    # @option overrides [String] :description New description (overrides b_desc)
+    # @option overrides [Integer] :assigned_to_id New assignee user ID
+    #
+    # @return [Integer, nil] The ID of the newly created copy, or nil if copy failed
+    #
+    # @example Simple copy with different version
+    #   new_id = HrzLib::IssueHelper.copy_issue(42, target_version_id: 5)
+    #
+    # @example Copy with new parent and version
+    #   new_id = HrzLib::IssueHelper.copy_issue(42, target_version_id: 5, parent_issue_id: 100)
+    #
+    def self.copy_issue(issue_id, overrides = {})
+      begin
+        # Read the source issue without resolving HRZ tags (preserve original content)
+        issue_data = get_issue(issue_id, false)
+        return nil if issue_data.nil?
+
+        # Apply overrides to options
+        options = issue_data[:options]
+        options[:target_version_id] = overrides[:target_version_id] if overrides.key?(:target_version_id)
+        options[:parent_issue_id]   = overrides[:parent_issue_id]   if overrides.key?(:parent_issue_id)
+        options[:status_id]         = overrides[:status_id]         if overrides.key?(:status_id)
+        options[:tracker_id]        = overrides[:tracker_id]        if overrides.key?(:tracker_id)
+        options[:priority_id]       = overrides[:priority_id]       if overrides.key?(:priority_id)
+
+        # Apply top-level overrides
+        project_id = overrides[:project_id] || issue_data[:project_id]
+        subject    = overrides[:subject]    || issue_data[:b_subject]
+        desc       = overrides[:description] || issue_data[:b_desc]
+        assignee   = overrides.key?(:assigned_to_id) ? overrides[:assigned_to_id] : issue_data[:j_assignee]
+
+        # Create the copy
+        new_id = mk_issue(project_id, subject, desc, assignee, issue_data[:arr_watcher_ids], options)
+
+        if new_id
+          HrzLogger.info_msg "HRZ Lib copy_issue: Successfully copied issue ##{issue_id} to new issue ##{new_id}"
+        else
+          HrzLogger.error_msg "HRZ Lib copy_issue: Failed to copy issue ##{issue_id}"
+        end
+
+        return new_id
+
+      rescue => e
+        HrzLogger.error_msg "HRZ Lib copy_issue: Error copying issue ##{issue_id}: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
+        return nil
+      end
+    end  # copy_issue
+
+
+
+    # Copies an issue and all its descendants (children and grandchildren) recursively.
+    # Creates copies with new version and re-links parent relationships.
+    #
+    # @param issue_id [Integer] The ID of the top-level issue to copy
+    # @param overrides [Hash] Attributes to override (applied to all copies)
+    # @option overrides [Integer] :target_version_id New target version ID (applied to all levels)
+    # @option overrides [Integer] :parent_issue_id New parent issue ID (only for top-level)
+    #
+    # @return [Integer, nil] The ID of the newly created top-level copy, or nil if copy failed
+    #
+    # @example Copy issue tree with new version
+    #   new_root_id = HrzLib::IssueHelper.copy_issue_tree(42, target_version_id: 5)
+    #
+    def self.copy_issue_tree(issue_id, overrides = {})
+      begin
+        source_issue = Issue.find(issue_id)
+
+        # Copy the top-level issue
+        new_root_id = copy_issue(issue_id, overrides)
+        return nil if new_root_id.nil?
+
+        # Recursively copy children
+        copy_children_recursive(source_issue, new_root_id, overrides)
+
+        return new_root_id
+
+      rescue ActiveRecord::RecordNotFound => e
+        HrzLogger.error_msg "HRZ Lib copy_issue_tree: Issue ##{issue_id} not found: #{e.message}"
+        return nil
+      rescue => e
+        HrzLogger.error_msg "HRZ Lib copy_issue_tree: Error copying issue tree ##{issue_id}: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
+        return nil
+      end
+    end  # copy_issue_tree
+
+
+
+    # Recursively copies all children of a source issue under a new parent.
+    # This is a helper method used by copy_issue_tree.
+    #
+    # @param source_parent [Issue] The source parent issue whose children to copy
+    # @param new_parent_id [Integer] The ID of the new parent issue
+    # @param overrides [Hash] Attributes to override (target_version_id is propagated)
+    # @return [void]
+    def self.copy_children_recursive(source_parent, new_parent_id, overrides)
+      source_parent.children.each do |child|
+        child_overrides = {
+          parent_issue_id: new_parent_id
+        }
+        child_overrides[:target_version_id] = overrides[:target_version_id] if overrides.key?(:target_version_id)
+
+        new_child_id = copy_issue(child.id, child_overrides)
+        next if new_child_id.nil?
+
+        # Recurse into grandchildren (and deeper)
+        copy_children_recursive(child, new_child_id, overrides) if child.children.any?
+      end
+    end  # copy_children_recursive
+
   end  # module IssueHelper
 end  # module HrzLib
