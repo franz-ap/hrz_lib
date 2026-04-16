@@ -34,23 +34,23 @@ module HrzLib
     # Creates a new Redmine issue with the specified parameters
     #
     # @param project_id [Integer, String] The ID or identifier of the project
-    # @param b_subject [String] The title/subject of the new issue
-    # @param b_desc [String] The description text of the issue
-    # @param j_assignee [Integer, nil] The Redmine user ID of the assignee (nil = no assignee)
+    # @param b_subject [String]           The title/subject of the new issue
+    # @param b_desc [String]              The description text of the issue
+    # @param j_assignee [Integer, nil]    The Redmine user ID of the assignee (nil = no assignee)
     # @param arr_watcher_ids [Array<Integer>, nil] Array of Redmine user IDs to be added as watchers (default: [])
     # @param options [Hash] Additional options for the issue
-    # @option options [Integer] :tracker_id The tracker ID (required if project has multiple trackers)
-    # @option options [Integer] :status_id The status ID (default: uses project's default status)
-    # @option options [Integer] :priority_id The priority ID (default: uses default priority)
-    # @option options [Integer] :category_id The category ID
-    # @option options [Integer] :target_version_id The target version ID
+    # @option options [Integer]      :tracker_id The tracker ID (required if project has multiple trackers)
+    # @option options [Integer]      :status_id The status ID (default: uses project's default status)
+    # @option options [Integer]      :priority_id The priority ID (default: uses default priority)
+    # @option options [Integer]      :category_id The category ID
+    # @option options [Integer]      :target_version_id The target version ID
     # @option options [Date, String] :start_date The start date
     # @option options [Date, String] :due_date The due date
-    # @option options [Integer] :estimated_hours Estimated time in hours
-    # @option options [Integer] :done_ratio Completion percentage (0-100)
-    # @option options [Integer] :parent_issue_id Parent issue ID for subtasks
-    # @option options [Hash] :custom_fields Custom field values, e.g., {1 => 'value1', 2 => 'value2'}
-    # @option options [Integer] :author_id The author user ID (default: User.current)
+    # @option options [Integer]      :estimated_hours Estimated time in hours
+    # @option options [Integer]      :done_ratio Completion percentage (0-100)
+    # @option options [Integer]      :parent_issue_id Parent issue ID for subtasks
+    # @option options [Hash]         :custom_fields Custom field values, e.g., {1 => 'value1', 2 => 'value2'}
+    # @option options [Integer]      :author_id The author user ID (default: User.current)
     # @option options [DateTime, Time, String] :creation_date The creation timestamp to set on the issue
     #   (default: current time, set automatically by Redmine). Use this to backdate issues or import
     #   issues with their original creation date preserved.
@@ -531,13 +531,19 @@ module HrzLib
 
 
     # Reads an existing Redmine issue and returns it as a hash compatible with mk_issue
-    # @param issue_id      [Integer]           The ID of the issue to read
-    # @param q_resolve_hrz [Boolean, optional] Resolve <HRZ> tags in strings? true=yes, false=no, return strings verbatim.
+    # @param issue_id               [Integer]           The ID of the issue to read
+    # @param q_resolve_hrz          [Boolean, optional] Resolve <HRZ> tags in strings? true=yes, false=no, return strings verbatim.
+    # @param q_provide_creation_date [Boolean, optional] Include the issue's creation timestamp?
+    #   * true  ... options[:creation_date] is populated with issue.created_on (a Time object).
+    #               Passing the returned options hash directly to mk_issue will recreate the issue
+    #               with the original creation date.
+    #   * false ... (default) :creation_date is not included in options; mk_issue will use the
+    #               current time when creating new issues. The standard behaviour in Redmine.
     # @return [Hash, nil] Hash containing issue data compatible with mk_issue parameters, or nil on error
     #   The returned hash contains:
     #   - :project_id      [String]         - Project identifier
-    #   - :b_subject       [String]         - Issue subject (processed through TagStringHelper.str_hrz)
-    #   - :b_desc          [String]         - Issue description (processed through TagStringHelper.str_hrz)
+    #   - :b_subject       [String]         - Issue subject     (processed through TagStringHelper.str_hrz, if q_resolve_hrz says so).
+    #   - :b_desc          [String]         - Issue description (processed through TagStringHelper.str_hrz, if q_resolve_hrz says so).
     #   - :j_assignee      [Integer, nil]   - Assigned user ID
     #   - :arr_watcher_ids [Array<Integer>] - Array of watcher user IDs
     #   - :options         [Hash]           - Hash with additional options:
@@ -551,8 +557,9 @@ module HrzLib
     #     - :estimated_hours   [Float, nil]
     #     - :done_ratio        [Integer]
     #     - :parent_issue_id   [Integer, nil]
-    #     - :custom_fields     [Hash] - Custom field values (all processed through TagStringHelper.str_hrz)
+    #     - :custom_fields     [Hash]        - Custom field values (all processed through TagStringHelper.str_hrz, if q_resolve_hrz says so).
     #     - :author_id         [Integer]
+    #     - :creation_date     [Time]        - Only present when q_provide_creation_date is true.
     #
     # @example Read an issue and create a copy
     #   issue_data = HrzLib::IssueHelper.get_issue(42)
@@ -582,7 +589,20 @@ module HrzLib
     #     )
     #   end
     #
-    def self.get_issue(issue_id, q_resolve_hrz=true)
+    # @example Preserve original creation date when copying
+    #   issue_data = HrzLib::IssueHelper.get_issue(42, true, true)
+    #   if issue_data
+    #     new_issue_id = HrzLib::IssueHelper.mk_issue(
+    #       issue_data[:project_id],
+    #       issue_data[:b_subject],
+    #       issue_data[:b_desc],
+    #       issue_data[:j_assignee],
+    #       issue_data[:arr_watcher_ids],
+    #       issue_data[:options]   # contains :creation_date => original created_on
+    #     )
+    #   end
+    #
+    def self.get_issue(issue_id, q_resolve_hrz=true, q_provide_creation_date=false)
       return nil  if issue_id.nil?
       begin
         # Find the issue
@@ -628,6 +648,9 @@ module HrzLib
           parent_issue_id: issue.parent_issue_id,
           author_id: issue.author_id
         }
+
+        # Optionally include the original creation timestamp so that mk_issue can preserve it
+        options[:creation_date] = issue.created_on  if q_provide_creation_date
 
         # Add custom fields to options if any exist
         options[:custom_fields] = custom_fields unless custom_fields.empty?
@@ -1803,30 +1826,34 @@ module HrzLib
     # Copies an existing issue to a new issue, optionally overriding certain attributes.
     # Uses get_issue to read the source issue and mk_issue to create the copy.
     #
-    # @param issue_id [Integer] The ID of the source issue to copy
-    # @param overrides [Hash] Attributes to override in the copy
+    # @param issue_id   [Integer] The ID of the source issue to copy
+    # @param overrides  [Hash]    Attributes to override in the copy
     # @option overrides [Integer] :target_version_id New target version ID
     # @option overrides [Integer] :parent_issue_id New parent issue ID
-    # @option overrides [String] :project_id New project identifier
+    # @option overrides [String]  :project_id New project identifier
     # @option overrides [Integer] :status_id New status ID
     # @option overrides [Integer] :tracker_id New tracker ID
     # @option overrides [Integer] :priority_id New priority ID
-    # @option overrides [String] :subject New subject (overrides b_subject)
-    # @option overrides [String] :description New description (overrides b_desc)
+    # @option overrides [String]  :subject New subject (overrides b_subject)
+    # @option overrides [String]  :description New description (overrides b_desc)
     # @option overrides [Integer] :assigned_to_id New assignee user ID
+    # @param q_copy_creation_date [Boolean] Copy the original creation date to the new issue?
+    #   * true  ... The new issue gets the same created_on timestamp as the source issue.
+    #   * false ... (default) The new issue gets the current time as its creation date.
     #
     # @return [Integer, nil] The ID of the newly created copy, or nil if copy failed
     #
     # @example Simple copy with different version
     #   new_id = HrzLib::IssueHelper.copy_issue(42, target_version_id: 5)
     #
-    # @example Copy with new parent and version
-    #   new_id = HrzLib::IssueHelper.copy_issue(42, target_version_id: 5, parent_issue_id: 100)
+    # @example Copy with new parent and version, preserving creation date
+    #   new_id = HrzLib::IssueHelper.copy_issue(42, {target_version_id: 5, parent_issue_id: 100}, true)
     #
-    def self.copy_issue(issue_id, overrides = {})
+    def self.copy_issue(issue_id, overrides = {}, q_copy_creation_date = false)
       begin
-        # Read the source issue without resolving HRZ tags (preserve original content)
-        issue_data = get_issue(issue_id, false)
+        # Read the source issue without resolving HRZ tags (preserve original content).
+        # Pass q_copy_creation_date so get_issue populates options[:creation_date] when needed.
+        issue_data = get_issue(issue_id, false, q_copy_creation_date)
         return nil if issue_data.nil?
 
         # Apply overrides to options
@@ -1866,26 +1893,32 @@ module HrzLib
     # Copies an issue and all its descendants (children and grandchildren) recursively.
     # Creates copies with new version and re-links parent relationships.
     #
-    # @param issue_id [Integer] The ID of the top-level issue to copy
-    # @param overrides [Hash] Attributes to override (applied to all copies)
+    # @param issue_id   [Integer] The ID of the top-level issue to copy
+    # @param overrides  [Hash]    Attributes to override (applied to all copies)
     # @option overrides [Integer] :target_version_id New target version ID (applied to all levels)
     # @option overrides [Integer] :parent_issue_id New parent issue ID (only for top-level)
+    # @param q_copy_creation_date [Boolean] Copy the original creation date to every new issue?
+    #   * true  ... Every copied issue gets the same created_on timestamp as its source.
+    #   * false ... (default) Every copied issue gets the current time as its creation date.
     #
     # @return [Integer, nil] The ID of the newly created top-level copy, or nil if copy failed
     #
     # @example Copy issue tree with new version
     #   new_root_id = HrzLib::IssueHelper.copy_issue_tree(42, target_version_id: 5)
     #
-    def self.copy_issue_tree(issue_id, overrides = {})
+    # @example Copy issue tree preserving all creation dates
+    #   new_root_id = HrzLib::IssueHelper.copy_issue_tree(42, {target_version_id: 5}, true)
+    #
+    def self.copy_issue_tree(issue_id, overrides = {}, q_copy_creation_date = false)
       begin
         source_issue = Issue.find(issue_id)
 
         # Copy the top-level issue
-        new_root_id = copy_issue(issue_id, overrides)
+        new_root_id = copy_issue(issue_id, overrides, q_copy_creation_date)
         return nil if new_root_id.nil?
 
         # Recursively copy children
-        copy_children_recursive(source_issue, new_root_id, overrides)
+        copy_children_recursive(source_issue, new_root_id, overrides, q_copy_creation_date)
 
         return new_root_id
 
@@ -1904,22 +1937,25 @@ module HrzLib
     # Recursively copies all children of a source issue under a new parent.
     # This is a helper method used by copy_issue_tree.
     #
-    # @param source_parent [Issue] The source parent issue whose children to copy
-    # @param new_parent_id [Integer] The ID of the new parent issue
-    # @param overrides [Hash] Attributes to override (target_version_id is propagated)
+    # @param source_parent        [Issue]   The source parent issue whose children to copy
+    # @param new_parent_id        [Integer] The ID of the new parent issue
+    # @param overrides            [Hash]    Attributes to override (target_version_id is propagated)
+    # @param q_copy_creation_date [Boolean] Copy the original creation date to every new issue?
+    #   * true  ... Every copied issue gets the same created_on timestamp as its source.
+    #   * false ... Every copied issue gets the current time as its creation date.
     # @return [void]
-    def self.copy_children_recursive(source_parent, new_parent_id, overrides)
+    def self.copy_children_recursive(source_parent, new_parent_id, overrides, q_copy_creation_date = false)
       source_parent.children.each do |child|
         child_overrides = {
           parent_issue_id: new_parent_id
         }
         child_overrides[:target_version_id] = overrides[:target_version_id] if overrides.key?(:target_version_id)
 
-        new_child_id = copy_issue(child.id, child_overrides)
+        new_child_id = copy_issue(child.id, child_overrides, q_copy_creation_date)
         next if new_child_id.nil?
 
         # Recurse into grandchildren (and deeper)
-        copy_children_recursive(child, new_child_id, overrides) if child.children.any?
+        copy_children_recursive(child, new_child_id, overrides, q_copy_creation_date) if child.children.any?
       end
     end  # copy_children_recursive
 
