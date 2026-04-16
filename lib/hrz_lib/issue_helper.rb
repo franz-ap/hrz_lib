@@ -18,12 +18,15 @@
 module HrzLib
   module IssueHelper
     def initialize
-       @q_verbose = false  # Default: off
+       #@q_verbose = false  # Default: off
+       @q_verbose  = SettingsHelper.verbose_log?(User.current&.id, :issue_helper)
     end
 
 
 
     # Enable or disable verbose output: Info about success, not only when something went wrong.
+    # Use this method to change the verbose output flag after the initialization,
+    # e.g. if you want to override the settings on the plugin configuration page.
     # @param q_enabled [Boolean] Debug output enabled from now on (true) or not (false).
     def self.verbose_output(q_enabled)
        @q_verbose = q_enabled
