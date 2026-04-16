@@ -51,6 +51,9 @@ module HrzLib
     # @option options [Integer] :parent_issue_id Parent issue ID for subtasks
     # @option options [Hash] :custom_fields Custom field values, e.g., {1 => 'value1', 2 => 'value2'}
     # @option options [Integer] :author_id The author user ID (default: User.current)
+    # @option options [DateTime, Time, String] :creation_date The creation timestamp to set on the issue
+    #   (default: current time, set automatically by Redmine). Use this to backdate issues or import
+    #   issues with their original creation date preserved.
     #
     # @return [Integer, nil] The ID of the newly created issue, or nil if creation failed
     #
@@ -73,6 +76,7 @@ module HrzLib
     #     { tracker_id: 2,
     #       priority_id: 4,
     #       due_date: '2025-12-31',
+    #       creation_date: '2024-01-15 09:30:00',
     #       custom_fields: {1 => 'High',
     #                       2 => 'External'
     #     }
@@ -119,6 +123,12 @@ module HrzLib
 
         # Save the issue
         if issue.save
+          # Override created_on if a specific creation_date was provided.
+          # update_column bypasses ActiveRecord callbacks so Redmine does not overwrite the value.
+          if options[:creation_date]
+            issue.update_column(:created_on, options[:creation_date])
+          end
+
           # Add watchers if specified
           if arr_watcher_ids && arr_watcher_ids.is_a?(Array) && !arr_watcher_ids.empty?
             arr_watcher_ids.each do |user_id|
