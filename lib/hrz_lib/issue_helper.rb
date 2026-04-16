@@ -18,7 +18,7 @@
 module HrzLib
   module IssueHelper
     def initialize
-       @q_verbose = nil  # = "To be set in init_part_2"
+      @q_verbose = nil  # = "To be set in init_part_2"
     end  # initialize
 
 
@@ -26,9 +26,12 @@ module HrzLib
     # Additional initialization, that will be checked upon every IssueHelper call.
     # (We cannot use SettingsHelper in the above initialize mehtod, because that would be too early. It would return niĺ.)
     def self.init_part_2
-       if @q_verbose.nil?
-          @q_verbose = SettingsHelper.verbose_log?(User.current&.id, :issue_helper)
-       end
+      if @q_verbose.nil?
+        @q_verbose = SettingsHelper.verbose_log?(User.current&.id, :issue_helper)
+        puts "+++++ IssueHelper.init_part_2: @q_verbose = nil  -->  #{@q_verbose.to_s} +++++"
+      else
+        puts "+++++ IssueHelper.init_part_2: @q_verbose = #{@q_verbose.to_s} +++++"
+      end
     end  # init_part_2
 
 
@@ -39,8 +42,8 @@ module HrzLib
     # @param q_enabled [Boolean] Debug output enabled from now on (true) or not (false).
     #                            Pass nil to return to the plugin configuration setting.
     def self.verbose_output(q_enabled)
-       @q_verbose = q_enabled
-       init_part_2
+      @q_verbose = q_enabled
+      init_part_2
     end  # verbose_output
 
 
