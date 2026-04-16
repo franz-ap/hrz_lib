@@ -18,19 +18,29 @@
 module HrzLib
   module IssueHelper
     def initialize
-       #@q_verbose = false  # Default: off
-       @q_verbose  = SettingsHelper.verbose_log?(User.current&.id, :issue_helper)
-       puts "++++++++++++++++++++++++++++ IssueHelper.initialize: @q_verbose = #{@q_verbose.to_s} ++++++++++++++++++++++++++++++++"
-    end
+       @q_verbose = nil  # = "To be set in init_part_2"
+    end  # initialize
+
+
+
+    # Additional initialization, that will be checked upon every IssueHelper call.
+    # (We cannot use SettingsHelper in the above initialize mehtod, because that would be too early. It would return niĺ.)
+    def init_part_2
+       if @q_verbose.nil?
+          @q_verbose = SettingsHelper.verbose_log?(User.current&.id, :issue_helper)
+       end
+    end  # init_part_2
 
 
 
     # Enable or disable verbose output: Info about success, not only when something went wrong.
-    # Use this method to change the verbose output flag after the initialization,
+    # Use this method to change the verbose output flag after the initialization (first call),
     # e.g. if you want to override the settings on the plugin configuration page.
     # @param q_enabled [Boolean] Debug output enabled from now on (true) or not (false).
+    #                            Pass nil to return to the plugin configuration setting.
     def self.verbose_output(q_enabled)
        @q_verbose = q_enabled
+       init_part_2
     end  # verbose_output
 
 
@@ -70,7 +80,7 @@ module HrzLib
     #     [3, 7, 12]
     #   )
     #
-    # @example With additional options
+    # @example Winit_part_2ith additional options
     #   issue_id = HrzLib::IssueHelper.mk_issue(
     #     'myproject',
     #     'New feature request',
@@ -88,9 +98,10 @@ module HrzLib
     #
     def self.mk_issue(project_id, b_subject, b_desc, j_assignee = nil, arr_watcher_ids = [], options = {})
       begin
+        init_part_2
+
         # Find the project
         project = Project.find(project_id)
-        puts "++++++++++++++++++++++++++++ IssueHelper.mk_issue ++++++++++++++++++++ verbose: #{SettingsHelper.verbose_log?(User.current&.id, :issue_helper).to_s} und @q_verbose = #{@q_verbose.to_s} ++++++++++++"
 
         # Create the issue
         issue = Issue.new
@@ -196,6 +207,8 @@ module HrzLib
     #
     def self.attach_file(issue_id, file_path, options = {})
       begin
+        init_part_2
+
         # Find the issue
         issue = Issue.find(issue_id)
 
@@ -303,6 +316,8 @@ module HrzLib
     #
     def self.create_relation(issue_from_id, issue_to_id, relation_type = 'relates', options = {})
       begin
+        init_part_2
+
         # Valid relation types in Redmine
         valid_types = %w[relates duplicates duplicated blocks blocked precedes follows copied_to copied_from]
 
@@ -406,6 +421,8 @@ module HrzLib
     #
     def self.update_issue(issue_id, attributes = {}, options = {})
       begin
+        init_part_2
+
         # Find the issue
         issue = Issue.find(issue_id)
 
@@ -489,6 +506,8 @@ module HrzLib
     #
     def self.add_comment(issue_id, comment, options = {})
       begin
+        init_part_2
+
         # Find the issue
         issue = Issue.find(issue_id)
 
@@ -611,6 +630,7 @@ module HrzLib
     #   end
     #
     def self.get_issue(issue_id, q_resolve_hrz=true, q_provide_creation_date=false)
+      init_part_2
       return nil  if issue_id.nil?
       begin
         # Find the issue
@@ -699,6 +719,7 @@ module HrzLib
     #                        false: No such note in this issue.
     #                        nil:   Issue not found or at least one parameter is nil/empty/invalid.
     def self.issue_has_text_note?(issue_id, b_txt_test, b_search_mode = '==')
+      init_part_2
       return nil  if issue_id.nil? || b_txt_test.nil? || b_txt_test.empty?
       begin
         # Find the issue
@@ -746,6 +767,7 @@ module HrzLib
     #   success = HrzLib::IssueHelper.add_watcher(42, 5)
     #
     def self.add_watcher(issue_id, user_id)
+      init_part_2
       begin
         issue = Issue.find(issue_id)
         user = User.find(user_id)
@@ -791,6 +813,7 @@ module HrzLib
     #   # => {success: 3, failed: [9]}
     #
     def self.add_watchers(issue_id, user_ids)
+      init_part_2
       return {success: 0, failed: []} if user_ids.nil? || user_ids.empty?
 
       success_count = 0
@@ -822,6 +845,7 @@ module HrzLib
     #   success = HrzLib::IssueHelper.remove_watcher(42, 5)
     #
     def self.remove_watcher(issue_id, user_id)
+      init_part_2
       begin
         issue = Issue.find(issue_id)
         user = User.find(user_id)
@@ -866,6 +890,7 @@ module HrzLib
     #   # => {success: 3, failed: []}
     #
     def self.remove_watchers(issue_id, user_ids)
+      init_part_2
       return {success: 0, failed: []} if user_ids.nil? || user_ids.empty?
 
       success_count = 0
@@ -898,6 +923,7 @@ module HrzLib
     #   # => [{id: 3, login: 'jdoe', name: 'John Doe'}, ...]
     #
     def self.get_watchers(issue_id)
+      init_part_2
       begin
         issue = Issue.find(issue_id)
 
@@ -935,6 +961,7 @@ module HrzLib
     #   is_watching = HrzLib::IssueHelper.is_watching?(42, 5)
     #
     def self.is_watching?(issue_id, user_id)
+      init_part_2
       begin
         issue = Issue.find(issue_id)
         user = User.find(user_id)
@@ -966,6 +993,7 @@ module HrzLib
     #   success = HrzLib::IssueHelper.set_watchers(42, [3, 5, 7])
     #
     def self.set_watchers(issue_id, user_ids)
+      init_part_2
       begin
         issue = Issue.find(issue_id)
 
@@ -1027,6 +1055,7 @@ module HrzLib
     #   end
     #
     def self.find_related_with_subject(j_issue_main_id, b_txt_find)
+      init_part_2
       begin
         # Find the main issue
         issue = Issue.find(j_issue_main_id)
@@ -1108,6 +1137,7 @@ module HrzLib
     #   has_match = HrzLib::IssueHelper.has_related_with_subject?(42, 'critical bug')
     #
     def self.has_related_with_subject?(j_issue_main_id, b_txt_find)
+      init_part_2
       begin
         # Find the main issue first to distinguish between "not found" and "no matches"
         Issue.find(j_issue_main_id)
@@ -1147,6 +1177,7 @@ module HrzLib
     #   end
     #
     def self.find_subtask_with_subject(j_issue_main_id, b_txt_find)
+      init_part_2
       begin
         # Find the parent issue
         issue = Issue.find(j_issue_main_id)
@@ -1210,6 +1241,7 @@ module HrzLib
     #   has_match = HrzLib::IssueHelper.has_subtask_with_subject?(42, 'code review completed')
     #
     def self.has_subtask_with_subject?(j_issue_main_id, b_txt_find)
+      init_part_2
       begin
         # Find the parent issue first to distinguish between "not found" and "no matches"
         Issue.find(j_issue_main_id)
@@ -1229,6 +1261,151 @@ module HrzLib
         return nil
       end
     end  # has_subtask_with_subject?
+
+
+
+    # ------------------------------------------------------------------------------------------------------------------------------
+    # Copy issues
+    # ------------------------------------------------------------------------------------------------------------------------------
+
+    # Copies an existing issue to a new issue, optionally overriding certain attributes.
+    # Uses get_issue to read the source issue and mk_issue to create the copy.
+    #
+    # @param issue_id   [Integer] The ID of the source issue to copy
+    # @param overrides  [Hash]    Attributes to override in the copy
+    # @option overrides [Integer] :target_version_id New target version ID
+    # @option overrides [Integer] :parent_issue_id New parent issue ID
+    # @option overrides [String]  :project_id New project identifier
+    # @option overrides [Integer] :status_id New status ID
+    # @option overrides [Integer] :tracker_id New tracker ID
+    # @option overrides [Integer] :priority_id New priority ID
+    # @option overrides [String]  :subject New subject (overrides b_subject)
+    # @option overrides [String]  :description New description (overrides b_desc)
+    # @option overrides [Integer] :assigned_to_id New assignee user ID
+    # @param q_copy_creation_date [Boolean] Copy the original creation date to the new issue?
+    #   * true  ... The new issue gets the same created_on timestamp as the source issue.
+    #   * false ... (default) The new issue gets the current time as its creation date.
+    #
+    # @return [Integer, nil] The ID of the newly created copy, or nil if copy failed
+    #
+    # @example Simple copy with different version
+    #   new_id = HrzLib::IssueHelper.copy_issue(42, target_version_id: 5)
+    #
+    # @example Copy with new parent and version, preserving creation date
+    #   new_id = HrzLib::IssueHelper.copy_issue(42, {target_version_id: 5, parent_issue_id: 100}, true)
+    #
+    def self.copy_issue(issue_id, overrides = {}, q_copy_creation_date = false)
+      init_part_2
+      begin
+        # Read the source issue without resolving HRZ tags (preserve original content).
+        # Pass q_copy_creation_date so get_issue populates options[:creation_date] when needed.
+        issue_data = get_issue(issue_id, false, q_copy_creation_date)
+        return nil if issue_data.nil?
+
+        # Apply overrides to options
+        options = issue_data[:options]
+        options[:target_version_id] = overrides[:target_version_id] if overrides.key?(:target_version_id)
+        options[:parent_issue_id]   = overrides[:parent_issue_id]   if overrides.key?(:parent_issue_id)
+        options[:status_id]         = overrides[:status_id]         if overrides.key?(:status_id)
+        options[:tracker_id]        = overrides[:tracker_id]        if overrides.key?(:tracker_id)
+        options[:priority_id]       = overrides[:priority_id]       if overrides.key?(:priority_id)
+
+        # Apply top-level overrides
+        project_id = overrides[:project_id] || issue_data[:project_id]
+        subject    = overrides[:subject]    || issue_data[:b_subject]
+        desc       = overrides[:description] || issue_data[:b_desc]
+        assignee   = overrides.key?(:assigned_to_id) ? overrides[:assigned_to_id] : issue_data[:j_assignee]
+
+        # Create the copy
+        new_id = mk_issue(project_id, subject, desc, assignee, issue_data[:arr_watcher_ids], options)
+
+        if new_id
+          HrzLogger.info_msg "HRZ Lib copy_issue: Successfully copied issue ##{issue_id} to new issue ##{new_id}"
+        else
+          HrzLogger.error_msg "HRZ Lib copy_issue: Failed to copy issue ##{issue_id}"
+        end
+
+        return new_id
+
+      rescue => e
+        HrzLogger.error_msg "HRZ Lib copy_issue: Error copying issue ##{issue_id}: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
+        return nil
+      end
+    end  # copy_issue
+
+
+
+    # Copies an issue and all its descendants (children and grandchildren) recursively.
+    # Creates copies with new version and re-links parent relationships.
+    #
+    # @param issue_id   [Integer] The ID of the top-level issue to copy
+    # @param overrides  [Hash]    Attributes to override (applied to all copies)
+    # @option overrides [Integer] :target_version_id New target version ID (applied to all levels)
+    # @option overrides [Integer] :parent_issue_id New parent issue ID (only for top-level)
+    # @param q_copy_creation_date [Boolean] Copy the original creation date to every new issue?
+    #   * true  ... Every copied issue gets the same created_on timestamp as its source.
+    #   * false ... (default) Every copied issue gets the current time as its creation date.
+    #
+    # @return [Integer, nil] The ID of the newly created top-level copy, or nil if copy failed
+    #
+    # @example Copy issue tree with new version
+    #   new_root_id = HrzLib::IssueHelper.copy_issue_tree(42, target_version_id: 5)
+    #
+    # @example Copy issue tree preserving all creation dates
+    #   new_root_id = HrzLib::IssueHelper.copy_issue_tree(42, {target_version_id: 5}, true)
+    #
+    def self.copy_issue_tree(issue_id, overrides = {}, q_copy_creation_date = false)
+      init_part_2
+      begin
+        source_issue = Issue.find(issue_id)
+
+        # Copy the top-level issue
+        new_root_id = copy_issue(issue_id, overrides, q_copy_creation_date)
+        return nil if new_root_id.nil?
+
+        # Recursively copy children
+        copy_children_recursive(source_issue, new_root_id, overrides, q_copy_creation_date)
+
+        return new_root_id
+
+      rescue ActiveRecord::RecordNotFound => e
+        HrzLogger.error_msg "HRZ Lib copy_issue_tree: Issue ##{issue_id} not found: #{e.message}"
+        return nil
+      rescue => e
+        HrzLogger.error_msg "HRZ Lib copy_issue_tree: Error copying issue tree ##{issue_id}: #{e.message}"
+        HrzLogger.error_msg e.backtrace.join("\n")
+        return nil
+      end
+    end  # copy_issue_tree
+
+
+
+    # Recursively copies all children of a source issue under a new parent.
+    # This is a helper method used by copy_issue_tree.
+    #
+    # @param source_parent        [Issue]   The source parent issue whose children to copy
+    # @param new_parent_id        [Integer] The ID of the new parent issue
+    # @param overrides            [Hash]    Attributes to override (target_version_id is propagated)
+    # @param q_copy_creation_date [Boolean] Copy the original creation date to every new issue?
+    #   * true  ... Every copied issue gets the same created_on timestamp as its source.
+    #   * false ... Every copied issue gets the current time as its creation date.
+    # @return [void]
+    def self.copy_children_recursive(source_parent, new_parent_id, overrides, q_copy_creation_date = false)
+      init_part_2
+      source_parent.children.each do |child|
+        child_overrides = {
+          parent_issue_id: new_parent_id
+        }
+        child_overrides[:target_version_id] = overrides[:target_version_id] if overrides.key?(:target_version_id)
+
+        new_child_id = copy_issue(child.id, child_overrides, q_copy_creation_date)
+        next if new_child_id.nil?
+
+        # Recurse into grandchildren (and deeper)
+        copy_children_recursive(child, new_child_id, overrides, q_copy_creation_date) if child.children.any?
+      end
+    end  # copy_children_recursive
 
 
 
@@ -1268,6 +1445,7 @@ module HrzLib
     #   )
     #
     def self.create_time_entry(issue_id, hours, options = {})
+      init_part_2
       begin
         issue = Issue.find(issue_id)
 
@@ -1344,6 +1522,7 @@ module HrzLib
     #   )
     #
     def self.update_time_entry(time_entry_id, attributes = {})
+      init_part_2
       begin
         time_entry = TimeEntry.find(time_entry_id)
 
@@ -1392,6 +1571,7 @@ module HrzLib
     #   success = HrzLib::IssueHelper.delete_time_entry(123)
     #
     def self.delete_time_entry(time_entry_id)
+      init_part_2
       begin
         time_entry = TimeEntry.find(time_entry_id)
 
@@ -1438,6 +1618,7 @@ module HrzLib
     #   )
     #
     def self.get_time_entries(issue_id, options = {})
+      init_part_2
       begin
         issue = Issue.find(issue_id)
 
@@ -1496,6 +1677,7 @@ module HrzLib
     #   total = HrzLib::IssueHelper.get_total_hours(42, user_id: 5)
     #
     def self.get_total_hours(issue_id, options = {})
+      init_part_2
       begin
         issue = Issue.find(issue_id)
 
@@ -1533,6 +1715,7 @@ module HrzLib
     #   # => [{id: 9, name: 'Development', is_default: true, active: true}, ...]
     #
     def self.get_time_entry_activities
+      init_part_2
       begin
         activities = TimeEntryActivity.all.map do |activity|
           {
@@ -1581,6 +1764,7 @@ module HrzLib
     #   end
     #
     def self.get_user_daily_hours(user_id, date = Date.today, options = {})
+      init_part_2
       begin
         user = User.find(user_id)
         date = Date.parse(date.to_s) unless date.is_a?(Date)
@@ -1674,6 +1858,7 @@ module HrzLib
     #   end
     #
     def self.get_user_hours_range(user_id, from_date, to_date = nil, options = {})
+      init_part_2
       begin
         user = User.find(user_id)
         from_date = Date.parse(from_date.to_s) unless from_date.is_a?(Date)
@@ -1773,6 +1958,7 @@ module HrzLib
     #   end
     #
     def self.get_group_members(principal_id)
+      init_part_2
       begin
         # Try to find as Principal first (can be User or Group)
         principal = Principal.find(principal_id)
@@ -1829,143 +2015,6 @@ module HrzLib
       end
     end  # get_group_members
 
-
-
-    # Copies an existing issue to a new issue, optionally overriding certain attributes.
-    # Uses get_issue to read the source issue and mk_issue to create the copy.
-    #
-    # @param issue_id   [Integer] The ID of the source issue to copy
-    # @param overrides  [Hash]    Attributes to override in the copy
-    # @option overrides [Integer] :target_version_id New target version ID
-    # @option overrides [Integer] :parent_issue_id New parent issue ID
-    # @option overrides [String]  :project_id New project identifier
-    # @option overrides [Integer] :status_id New status ID
-    # @option overrides [Integer] :tracker_id New tracker ID
-    # @option overrides [Integer] :priority_id New priority ID
-    # @option overrides [String]  :subject New subject (overrides b_subject)
-    # @option overrides [String]  :description New description (overrides b_desc)
-    # @option overrides [Integer] :assigned_to_id New assignee user ID
-    # @param q_copy_creation_date [Boolean] Copy the original creation date to the new issue?
-    #   * true  ... The new issue gets the same created_on timestamp as the source issue.
-    #   * false ... (default) The new issue gets the current time as its creation date.
-    #
-    # @return [Integer, nil] The ID of the newly created copy, or nil if copy failed
-    #
-    # @example Simple copy with different version
-    #   new_id = HrzLib::IssueHelper.copy_issue(42, target_version_id: 5)
-    #
-    # @example Copy with new parent and version, preserving creation date
-    #   new_id = HrzLib::IssueHelper.copy_issue(42, {target_version_id: 5, parent_issue_id: 100}, true)
-    #
-    def self.copy_issue(issue_id, overrides = {}, q_copy_creation_date = false)
-      begin
-        # Read the source issue without resolving HRZ tags (preserve original content).
-        # Pass q_copy_creation_date so get_issue populates options[:creation_date] when needed.
-        issue_data = get_issue(issue_id, false, q_copy_creation_date)
-        return nil if issue_data.nil?
-
-        # Apply overrides to options
-        options = issue_data[:options]
-        options[:target_version_id] = overrides[:target_version_id] if overrides.key?(:target_version_id)
-        options[:parent_issue_id]   = overrides[:parent_issue_id]   if overrides.key?(:parent_issue_id)
-        options[:status_id]         = overrides[:status_id]         if overrides.key?(:status_id)
-        options[:tracker_id]        = overrides[:tracker_id]        if overrides.key?(:tracker_id)
-        options[:priority_id]       = overrides[:priority_id]       if overrides.key?(:priority_id)
-
-        # Apply top-level overrides
-        project_id = overrides[:project_id] || issue_data[:project_id]
-        subject    = overrides[:subject]    || issue_data[:b_subject]
-        desc       = overrides[:description] || issue_data[:b_desc]
-        assignee   = overrides.key?(:assigned_to_id) ? overrides[:assigned_to_id] : issue_data[:j_assignee]
-
-        # Create the copy
-        new_id = mk_issue(project_id, subject, desc, assignee, issue_data[:arr_watcher_ids], options)
-
-        if new_id
-          HrzLogger.info_msg "HRZ Lib copy_issue: Successfully copied issue ##{issue_id} to new issue ##{new_id}"
-        else
-          HrzLogger.error_msg "HRZ Lib copy_issue: Failed to copy issue ##{issue_id}"
-        end
-
-        return new_id
-
-      rescue => e
-        HrzLogger.error_msg "HRZ Lib copy_issue: Error copying issue ##{issue_id}: #{e.message}"
-        HrzLogger.error_msg e.backtrace.join("\n")
-        return nil
-      end
-    end  # copy_issue
-
-
-
-    # Copies an issue and all its descendants (children and grandchildren) recursively.
-    # Creates copies with new version and re-links parent relationships.
-    #
-    # @param issue_id   [Integer] The ID of the top-level issue to copy
-    # @param overrides  [Hash]    Attributes to override (applied to all copies)
-    # @option overrides [Integer] :target_version_id New target version ID (applied to all levels)
-    # @option overrides [Integer] :parent_issue_id New parent issue ID (only for top-level)
-    # @param q_copy_creation_date [Boolean] Copy the original creation date to every new issue?
-    #   * true  ... Every copied issue gets the same created_on timestamp as its source.
-    #   * false ... (default) Every copied issue gets the current time as its creation date.
-    #
-    # @return [Integer, nil] The ID of the newly created top-level copy, or nil if copy failed
-    #
-    # @example Copy issue tree with new version
-    #   new_root_id = HrzLib::IssueHelper.copy_issue_tree(42, target_version_id: 5)
-    #
-    # @example Copy issue tree preserving all creation dates
-    #   new_root_id = HrzLib::IssueHelper.copy_issue_tree(42, {target_version_id: 5}, true)
-    #
-    def self.copy_issue_tree(issue_id, overrides = {}, q_copy_creation_date = false)
-      begin
-        source_issue = Issue.find(issue_id)
-
-        # Copy the top-level issue
-        new_root_id = copy_issue(issue_id, overrides, q_copy_creation_date)
-        return nil if new_root_id.nil?
-
-        # Recursively copy children
-        copy_children_recursive(source_issue, new_root_id, overrides, q_copy_creation_date)
-
-        return new_root_id
-
-      rescue ActiveRecord::RecordNotFound => e
-        HrzLogger.error_msg "HRZ Lib copy_issue_tree: Issue ##{issue_id} not found: #{e.message}"
-        return nil
-      rescue => e
-        HrzLogger.error_msg "HRZ Lib copy_issue_tree: Error copying issue tree ##{issue_id}: #{e.message}"
-        HrzLogger.error_msg e.backtrace.join("\n")
-        return nil
-      end
-    end  # copy_issue_tree
-
-
-
-    # Recursively copies all children of a source issue under a new parent.
-    # This is a helper method used by copy_issue_tree.
-    #
-    # @param source_parent        [Issue]   The source parent issue whose children to copy
-    # @param new_parent_id        [Integer] The ID of the new parent issue
-    # @param overrides            [Hash]    Attributes to override (target_version_id is propagated)
-    # @param q_copy_creation_date [Boolean] Copy the original creation date to every new issue?
-    #   * true  ... Every copied issue gets the same created_on timestamp as its source.
-    #   * false ... Every copied issue gets the current time as its creation date.
-    # @return [void]
-    def self.copy_children_recursive(source_parent, new_parent_id, overrides, q_copy_creation_date = false)
-      source_parent.children.each do |child|
-        child_overrides = {
-          parent_issue_id: new_parent_id
-        }
-        child_overrides[:target_version_id] = overrides[:target_version_id] if overrides.key?(:target_version_id)
-
-        new_child_id = copy_issue(child.id, child_overrides, q_copy_creation_date)
-        next if new_child_id.nil?
-
-        # Recurse into grandchildren (and deeper)
-        copy_children_recursive(child, new_child_id, overrides, q_copy_creation_date) if child.children.any?
-      end
-    end  # copy_children_recursive
 
   end  # module IssueHelper
 end  # module HrzLib
