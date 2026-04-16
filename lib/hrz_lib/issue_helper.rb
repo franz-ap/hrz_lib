@@ -126,7 +126,10 @@ module HrzLib
           # Override created_on if a specific creation_date was provided.
           # update_column bypasses ActiveRecord callbacks so Redmine does not overwrite the value.
           if options[:creation_date]
+            HrzLogger.debug_msg "HRZ Lib: mk_issue created issue ##{issue.id} and updated the creation_date to #{options[:creation_date].to_s}."
             issue.update_column(:created_on, options[:creation_date])
+          else
+            HrzLogger.debug_msg "HRZ Lib: mk_issue created issue ##{issue.id} and left the (current) creation_date unmodified."
           end
 
           # Add watchers if specified
