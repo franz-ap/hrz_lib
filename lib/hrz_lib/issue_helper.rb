@@ -25,7 +25,7 @@ module HrzLib
 
     # Additional initialization, that will be checked upon every IssueHelper call.
     # (We cannot use SettingsHelper in the above initialize mehtod, because that would be too early. It would return niĺ.)
-    def init_part_2
+    def self.init_part_2
        if @q_verbose.nil?
           @q_verbose = SettingsHelper.verbose_log?(User.current&.id, :issue_helper)
        end
