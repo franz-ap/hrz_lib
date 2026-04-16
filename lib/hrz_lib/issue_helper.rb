@@ -90,6 +90,7 @@ module HrzLib
       begin
         # Find the project
         project = Project.find(project_id)
+        puts "++++++++++++++++++++++++++++ IssueHelper.mk_issue ++++++++++++++++++++++++++++++++"
 
         # Create the issue
         issue = Issue.new
