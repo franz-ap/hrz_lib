@@ -20,6 +20,7 @@ module HrzLib
     def initialize
        #@q_verbose = false  # Default: off
        @q_verbose  = SettingsHelper.verbose_log?(User.current&.id, :issue_helper)
+       puts "++++++++++++++++++++++++++++ IssueHelper.initialize: @q_verbose = #{@q_verbose.to_s} ++++++++++++++++++++++++++++++++"
     end
 
 
