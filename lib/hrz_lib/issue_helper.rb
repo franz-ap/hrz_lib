@@ -90,7 +90,7 @@ module HrzLib
       begin
         # Find the project
         project = Project.find(project_id)
-        puts "++++++++++++++++++++++++++++ IssueHelper.mk_issue ++++++++++++++++++++++++++++++++"
+        puts "++++++++++++++++++++++++++++ IssueHelper.mk_issue ++++++++++++++++++++ verbose: #{SettingsHelper.verbose_log?(User.current&.id, :issue_helper).to_s} ++++++++++++"
 
         # Create the issue
         issue = Issue.new
