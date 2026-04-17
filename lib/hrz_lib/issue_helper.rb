@@ -28,9 +28,9 @@ module HrzLib
     def self.init_part_2
       if @q_verbose.nil?
         @q_verbose = SettingsHelper.verbose_log?(User.current&.id, :issue_helper)
-        puts "+++++ IssueHelper.init_part_2: @q_verbose = nil  -->  #{@q_verbose.to_s} +++++"
-      else
-        puts "+++++ IssueHelper.init_part_2: @q_verbose = #{@q_verbose.to_s} +++++"
+        #puts "+++++ IssueHelper.init_part_2: @q_verbose = nil  -->  #{@q_verbose.to_s} +++++"
+      #else
+        #puts "+++++ IssueHelper.init_part_2: @q_verbose = #{@q_verbose.to_s} +++++"
       end
     end  # init_part_2
 
@@ -83,7 +83,7 @@ module HrzLib
     #     [3, 7, 12]
     #   )
     #
-    # @example Winit_part_2ith additional options
+    # @example With additional options
     #   issue_id = HrzLib::IssueHelper.mk_issue(
     #     'myproject',
     #     'New feature request',
@@ -108,11 +108,11 @@ module HrzLib
 
         # Create the issue
         issue = Issue.new
-        issue.project = project
-        issue.subject = b_subject
-        issue.description = b_desc
+        issue.project        = project
+        issue.subject        = b_subject
+        issue.description    = b_desc
         issue.assigned_to_id = j_assignee
-        issue.author = options[:author_id] ? User.find(options[:author_id]) : User.current
+        issue.author         = options[:author_id] ? User.find(options[:author_id]) : User.current
 
         # Set tracker (required field)
         if options[:tracker_id]
@@ -123,15 +123,15 @@ module HrzLib
         end
 
         # Set optional fields
-        issue.status_id = options[:status_id] if options[:status_id]
-        issue.priority_id = options[:priority_id] if options[:priority_id]
-        issue.category_id = options[:category_id] if options[:category_id]
+        issue.status_id        = options[:status_id]         if options[:status_id]
+        issue.priority_id      = options[:priority_id]       if options[:priority_id]
+        issue.category_id      = options[:category_id]       if options[:category_id]
         issue.fixed_version_id = options[:target_version_id] if options[:target_version_id]
-        issue.start_date = options[:start_date] if options[:start_date]
-        issue.due_date = options[:due_date] if options[:due_date]
-        issue.estimated_hours = options[:estimated_hours] if options[:estimated_hours]
-        issue.done_ratio = options[:done_ratio] if options[:done_ratio]
-        issue.parent_issue_id = options[:parent_issue_id] if options[:parent_issue_id]
+        issue.start_date       = options[:start_date]        if options[:start_date]
+        issue.due_date         = options[:due_date]          if options[:due_date]
+        issue.estimated_hours  = options[:estimated_hours]   if options[:estimated_hours]
+        issue.done_ratio       = options[:done_ratio]        if options[:done_ratio]
+        issue.parent_issue_id  = options[:parent_issue_id]   if options[:parent_issue_id]
 
         # Set custom fields if provided
         if options[:custom_fields] && options[:custom_fields].is_a?(Hash)
