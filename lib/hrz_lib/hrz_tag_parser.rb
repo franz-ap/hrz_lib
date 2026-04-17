@@ -28,10 +28,9 @@ module HrzLib
 
   # Logger wrapper, enabling standalone tests without Rails.
   class HrzLogger
-    def initialize
-       @q_debug_enabled  = true  # Default: Debug on (because we have also additional, fine-grained debug flags.).
-       @q_verbose_parser = false
-    end
+    # Class-level instance variable defaults (class methods use these, not instance variables from initialize)
+    @q_debug_enabled  = true  # Default: Debug on (because we have also additional, fine-grained debug flags.).
+    @q_verbose_parser = false
 
 
     # Enable or disable debug output. Generally. Main switch.

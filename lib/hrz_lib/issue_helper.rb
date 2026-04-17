@@ -29,8 +29,6 @@ module HrzLib
       if @q_verbose.nil?
         @q_verbose = SettingsHelper.verbose_log?(User.current&.id, :issue_helper)
         #puts "+++++ IssueHelper.init_part_2: @q_verbose = nil  -->  #{@q_verbose.to_s} +++++"
-      #else
-        #puts "+++++ IssueHelper.init_part_2: @q_verbose = #{@q_verbose.to_s} +++++"
       end
     end  # init_part_2
 
@@ -145,10 +143,10 @@ module HrzLib
           # Override created_on if a specific creation_date was provided.
           # update_column bypasses ActiveRecord callbacks so Redmine does not overwrite the value.
           if options[:creation_date]
-            HrzLogger.debug_msg "HRZ Lib: mk_issue created issue ##{issue.id} and updated the creation_date to #{options[:creation_date].to_s}."
-            issue.update_column(:created_on, options[:creation_date])
-          else
-            HrzLogger.debug_msg "HRZ Lib: mk_issue created issue ##{issue.id} and left the (current) creation_date unmodified."
+            #HrzLogger.debug_msg "HRZ Lib: mk_issue created issue ##{issue.id} and updated the creation_date to #{options[:creation_date].to_s}."
+            Issue.where(id: issue.id).update_all(created_on: options[:creation_date])
+          #else
+            #HrzLogger.debug_msg "HRZ Lib: mk_issue created issue ##{issue.id} and left the (current) creation_date unmodified."
           end
 
           # Add watchers if specified
