@@ -379,22 +379,22 @@ module HrzLib
     #
     # @param issue_id [Integer] The ID of the issue to update
     # @param attributes [Hash] Hash of attributes to update
-    # @option attributes [String] :subject New subject/title
-    # @option attributes [String] :description New description
-    # @option attributes [Integer] :assigned_to_id New assignee user ID (nil to clear)
-    # @option attributes [Integer] :tracker_id New tracker ID
-    # @option attributes [Integer] :status_id New status ID
-    # @option attributes [Integer] :priority_id New priority ID
-    # @option attributes [Integer] :category_id New category ID
-    # @option attributes [Integer] :fixed_version_id New target version ID
+    # @option attributes [String]       :subject New subject/title
+    # @option attributes [String]       :description New description
+    # @option attributes [Integer]      :assigned_to_id New assignee user ID (nil to clear)
+    # @option attributes [Integer]      :tracker_id New tracker ID
+    # @option attributes [Integer]      :status_id New status ID
+    # @option attributes [Integer]      :priority_id New priority ID
+    # @option attributes [Integer]      :category_id New category ID
+    # @option attributes [Integer]      :fixed_version_id New target version ID
     # @option attributes [Date, String] :start_date New start date
     # @option attributes [Date, String] :due_date New due date
-    # @option attributes [Integer] :estimated_hours New estimated hours
-    # @option attributes [Integer] :done_ratio New completion percentage (0-100)
-    # @option attributes [Integer] :parent_issue_id New parent issue ID
+    # @option attributes [Integer]      :estimated_hours New estimated hours
+    # @option attributes [Integer]      :done_ratio New completion percentage (0-100)
+    # @option attributes [Integer]      :parent_issue_id New parent issue ID
     # @option attributes [Hash] :custom_fields Custom field values to update
     # @param options [Hash] Additional options
-    # @option options [String] :notes Journal notes/comment to add with the update
+    # @option options [String]  :notes Journal notes/comment to add with the update
     # @option options [Boolean] :private_notes Whether the notes should be private (default: false)
     # @option options [Integer] :author_id User ID performing the update (default: User.current)
     #

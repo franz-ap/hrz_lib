@@ -24,6 +24,8 @@ module HrzLib
   B_ANSI_RESET_COLOR           = "\e[0m"
   B_ANSI_YELLOW_BGCOLOR_STD    = "\e[43m"
   B_ANSI_YELLOW_BGCOLOR_BRIGHT = "\e[103m"
+  B_ANSI_GREEN_BGCOLOR_STD     = "\e[42m"
+  B_ANSI_GREEN_BGCOLOR_BRIGHT  = "\e[102m"
   B_ANSI_WHITE_ON_RED_BGCOLOR  = "\e[37;41m"
 
   # Logger wrapper, enabling standalone tests without Rails.
@@ -87,7 +89,7 @@ module HrzLib
     # Issue a general info message.
     # @param b_msg [String] The info message.
     def self.info_msg(b_msg)
-      puts "[INFO] #{b_msg}"
+      puts '[INFO] ' + B_ANSI_GREEN_BGCOLOR_STD + b_msg + B_ANSI_RESET_COLOR
       HrzTagFunctions.context_array_push('hrz_msgs', 'info', b_msg)
     end  # info_msg
 
