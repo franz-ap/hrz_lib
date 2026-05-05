@@ -41,22 +41,22 @@
       <td><%= checked_image(action.jq_on_ticket_update == 1) %></td>
       <td class="buttons">
         <%= link_to l(:button_edit), 'javascript:void(0)',
-            onclick: "showEditForm('action', '#{j action.b_title}')",
+            onclick: "showEditForm('action', #{action.id})",
             class: 'icon icon-edit' %>
         <%= link_to l(:button_delete),
-            { action: 'destroy_action', id: action.b_title },
+            { action: 'destroy_action', id: action.id },
             method: :delete,
             data: { confirm: l(:text_are_you_sure) },
             class: 'icon icon-del' %>
       </td>
     </tr>
-    <tr id="edit_action_<%= action.b_title.gsub(/[^a-zA-Z0-9]/, '_') %>" style="display:none;">
+    <tr id="edit_action_<%= action.id %>" style="display:none;">
       <td colspan="4" style="text-align: left;">
         <%= render partial: 'action_form', locals: {
           action: action,
           conditions: @conditions,
           steps: @steps,
-          url: { action: 'update_action', id: action.b_title },
+          url: { action: 'update_action', id: action.id },
           method: :patch
         } %>
       </td>
@@ -87,11 +87,9 @@ function hideNewForm(type) {
   document.getElementById('new_' + type + '_form').style.display = 'none';
 }
 function showEditForm(type, id) {
-  var cleanId = id.replace(/[^a-zA-Z0-9]/g, '_');
-  document.getElementById('edit_' + type + '_' + cleanId).style.display = '';
+  document.getElementById('edit_' + type + '_' + id).style.display = '';
 }
 function hideEditForm(type, id) {
-  var cleanId = id.replace(/[^a-zA-Z0-9]/g, '_');
-  document.getElementById('edit_' + type + '_' + cleanId).style.display = 'none';
+  document.getElementById('edit_' + type + '_' + id).style.display = 'none';
 }
 </script>
