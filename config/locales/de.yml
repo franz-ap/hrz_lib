@@ -83,7 +83,7 @@ de:
   help_cleanup: "Nachbereitende Schritte, normalerweise mit <HRZ>-Tags, optional"
   help_on_new_ticket: "Diese Aktion beim Erstellen eines neuen Tickets ausführen? Nicht zu verwechseln mit einem eventuellen Ticket-Status-NAMEN 'New'."
   help_on_ticket_update: "Diese Aktion beim Aktualisieren eines Tickets ausführen?"
-  help_conditions_all: "Die Aktion wird nur ausgeführt, wenn ALLE angegebenen Bedingungen erfüllt sind (UND)"
+  help_conditions_all: "Diese Aktion, d.h. die unten stehenden Schritte, wird nur ausgeführt, wenn ALLE angegebenen Bedingungen erfüllt sind (UND)."
   help_model_id: "Die möglichen Werte kommen aus dem Projekt-CustomField 'AI Model'. Zusätzliche Werte bitte zuerst dort eintragen."
   help_url_special: "Spezialwerte: \"-->ID\" = Weiterleitung zu dieser KI-Modell-ID, \"none\" = Keine KI-Abfrage, leere Antwort, \"demo\" = Demo-Text ohne KI zurückgeben, z.B. für Entwicklung."
   help_json_post: "JSON-Format. Markieren Sie die Stelle, an der der Frage-Text eingefügt werden soll, mit MY_PROMPT."

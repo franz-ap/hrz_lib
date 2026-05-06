@@ -83,7 +83,7 @@ en:
   help_cleanup: "Things to do afterwards, usually including <HRZ> tags, optional"
   help_on_new_ticket: "Perform this action when creating a new ticket? Not to be confused with a possible ticket status NAME 'New'."
   help_on_ticket_update: "Perform this action when updating a ticket?"
-  help_conditions_all: "The action will only be performed if ALL given conditions are met (AND)"
+  help_conditions_all: "This action, i.e. the steps below,  will only be performed if ALL given conditions are met (AND)."
   help_model_id: "Possible values are from the 'AI Model' ProjectCustomField. Please add values to this field, if you want to use them here."
   help_url_special: "Special values: \"-->ID\" = Redirect to this AI model ID, \"none\" = No AI query, return empty answer, \"demo\" = Return demo text without involving AI, e.g. for developing."
   help_json_post: "JSON format. Mark the place where the prompt has to be inserted with MY_PROMPT."

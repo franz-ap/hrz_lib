@@ -83,7 +83,7 @@ hu:
   help_cleanup: "Utómunkálatok, általában <HRZ> címkékkel, opcionális"
   help_on_new_ticket: "Hajtsa végre ezt a műveletet új jegy létrehozásakor? Ne tévessze össze egy esetleges 'New' nevű jegystátusszal."
   help_on_ticket_update: "Hajtsa végre ezt a műveletet jegy frissítésekor?"
-  help_conditions_all: "A művelet csak akkor kerül végrehajtásra, ha MINDEN megadott feltétel teljesül (ÉS)"
+  help_conditions_all: "Ez a művelet, azaz az alábbi lépések, csak akkor kerül végrehajtásra, ha MINDEN megadott feltétel teljesül (ÉS)"
   help_model_id: "A lehetséges értékek a projekt egyedi mezőjéből, az „AI Model”-ből származnak. Kérjük, először oda vigye fel a további értékeket."
   help_url_special: "Speciális értékek: \"-->ID\" = Átirányítás erre az AI modell ID-re, \"none\" = Nincs AI lekérdezés, üres válasz, \"demo\" = Demo szöveg visszaadása AI nélkül, pl. fejlesztéshez."
   help_json_post: "JSON formátum. Jelölje meg azt a helyet, ahová a promptot be kell illeszteni, a MY_PROMPT jelzéssel."
