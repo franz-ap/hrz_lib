@@ -81,7 +81,7 @@ hu:
   help_only_once: "Ezt csak egyszer hajtsa végre, még akkor is, ha a feltételek később újra teljesülnek?"
   help_key_abbr: "Jegyeknél: hozzáfűződik a tárgyhoz."
   help_cleanup: "Utómunkálatok, általában <HRZ> címkékkel, opcionális"
-  help_on_new_ticket: "Hajtsa végre ezt a műveletet új jegy létrehozásakor?"
+  help_on_new_ticket: "Hajtsa végre ezt a műveletet új jegy létrehozásakor? Ne tévessze össze egy esetleges 'New' nevű jegystátusszal."
   help_on_ticket_update: "Hajtsa végre ezt a műveletet jegy frissítésekor?"
   help_conditions_all: "A művelet csak akkor kerül végrehajtásra, ha MINDEN megadott feltétel teljesül (ÉS)"
   help_model_id: "A lehetséges értékek a projekt egyedi mezőjéből, az „AI Model”-ből származnak. Kérjük, először oda vigye fel a további értékeket."

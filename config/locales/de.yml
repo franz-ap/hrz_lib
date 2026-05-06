@@ -81,7 +81,7 @@ de:
   help_only_once: "Dies nur einmal durchführen, auch wenn die Bedingungen später erneut ausgelöst werden?"
   help_key_abbr: "Für Tickets: Wird an den Betreff angehängt."
   help_cleanup: "Nachbereitende Schritte, normalerweise mit <HRZ>-Tags, optional"
-  help_on_new_ticket: "Diese Aktion beim Erstellen eines neuen Tickets ausführen?"
+  help_on_new_ticket: "Diese Aktion beim Erstellen eines neuen Tickets ausführen? Nicht zu verwechseln mit einem eventuellen Ticket-Status-NAMEN 'New'."
   help_on_ticket_update: "Diese Aktion beim Aktualisieren eines Tickets ausführen?"
   help_conditions_all: "Die Aktion wird nur ausgeführt, wenn ALLE angegebenen Bedingungen erfüllt sind (UND)"
   help_model_id: "Die möglichen Werte kommen aus dem Projekt-CustomField 'AI Model'. Zusätzliche Werte bitte zuerst dort eintragen."

@@ -81,7 +81,7 @@ en:
   help_only_once: "Perform this only once, even if the conditions trigger again, later?"
   help_key_abbr: "For issues: Will be appended to the subject."
   help_cleanup: "Things to do afterwards, usually including <HRZ> tags, optional"
-  help_on_new_ticket: "Perform this action when creating a new ticket?"
+  help_on_new_ticket: "Perform this action when creating a new ticket? Not to be confused with a possible ticket status NAME 'New'."
   help_on_ticket_update: "Perform this action when updating a ticket?"
   help_conditions_all: "The action will only be performed if ALL given conditions are met (AND)"
   help_model_id: "Possible values are from the 'AI Model' ProjectCustomField. Please add values to this field, if you want to use them here."
