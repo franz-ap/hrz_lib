@@ -17,7 +17,7 @@
   <div class="box">
     <p>
       <%= f.label :b_title, l(:field_action_title) %>
-      <%= f.text_field :b_title, size: 80, required: true, readonly: (method == :patch) %>
+      <%= f.text_field :b_title, size: 80, required: true %>
     </p>
     <p>
       <%= f.label :b_comment, l(:field_comment) %>
@@ -34,32 +34,32 @@
       <%= f.check_box :jq_on_ticket_update %>
       <em class="info"><%= l(:help_on_ticket_update) %></em>
     </p>
-    
+
     <fieldset class="box"><legend><%= l(:label_conditions) %></legend>
       <em class="info"><%= l(:help_conditions_all) %></em>
       <% (1..5).each do |i| %>
         <p>
           <%= f.label "j_cond#{i}_id".to_sym, "#{l(:field_condition)} #{i}" %>
-          <%= f.select "j_cond#{i}_id".to_sym, 
-              options_for_select(conditions.map { |c| [c.b_cond_question, c.j_condition_id] }, 
-              action.send("j_cond#{i}_id")), 
+          <%= f.select "j_cond#{i}_id".to_sym,
+              options_for_select(conditions.map { |c| [c.b_cond_question, c.j_condition_id] },
+              action.send("j_cond#{i}_id")),
               { include_blank: true } %>
         </p>
       <% end %>
     </fieldset>
-    
+
     <fieldset class="box"><legend><%= l(:label_steps) %></legend>
       <% (1..5).each do |i| %>
         <p>
           <%= f.label "j_step#{i}_id".to_sym, "#{l(:field_step)} #{i}" %>
-          <%= f.select "j_step#{i}_id".to_sym, 
-              options_for_select(steps.map { |s| [s.b_title, s.j_step_id] }, 
-              action.send("j_step#{i}_id")), 
+          <%= f.select "j_step#{i}_id".to_sym,
+              options_for_select(steps.map { |s| [s.b_title, s.j_step_id] },
+              action.send("j_step#{i}_id")),
               { include_blank: true } %>
         </p>
       <% end %>
     </fieldset>
-    
+
     <p>
       <%= f.submit method == :post ? l(:button_create) : l(:button_save) %>
       <% if method == :patch %>
