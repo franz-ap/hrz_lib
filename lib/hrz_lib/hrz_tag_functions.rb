@@ -80,7 +80,7 @@ module HrzLib
           HrzLogger.warning_msg "Unknown HRZ function: #{b_function}"
           raise HrzError.new("Unknown function: #{b_function}", { function: b_function })
       end  # case
-      HrzLogger.debug_msg "   +---> call_dispatcher: '#{b_ret}')"
+      HrzLogger.debug_msg "   +---> call_dispatcher: '#{b_ret}'"
       b_ret
     rescue HrzError
       # Pass HrzErrors on
