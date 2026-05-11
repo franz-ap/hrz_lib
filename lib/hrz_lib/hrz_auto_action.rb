@@ -287,11 +287,14 @@ module HrzLib
         b_test = nil
         if q_only_1x
           b_test = "e-mail notification {#{b_key_1x}} sent"
+          b_key_1x_apo = " '#{b_key_1x}'"
           # See, if the main ticket already contains the test text.
           if HrzLib::IssueHelper.issue_has_text_note?(issue_main_id, b_test, 'start_with')
             q_send = false
             HrzLogger.logger.info_msg "e-mail notification '#{b_key_1x}' already sent during a previous transition, not sending it again."
           end
+        else
+          b_key_1x_apo = ''
         end # if q_only_1x
         if q_send
           template_issue_data = HrzLib::IssueHelper.get_issue(hsh_opt[:issue_template_id])
@@ -352,7 +355,7 @@ module HrzLib
                 #},
                 text_body:      b_body
               )
-            HrzLogger.logger.info_msg "e-mail notification '#{b_key_1x}' #{j_usr_redirect > 0 ? '' : 'sent '}to " + arr_unam.join(', ') + b_inf_redir
+            HrzLogger.logger.info_msg "e-mail notification#{b_key_1x_apo} #{j_usr_redirect > 0 ? '' : 'sent '}to " + arr_unam.join(', ') + b_inf_redir
             if ! b_test.nil?
               # Remember, that we sent this e-mail: make a note in the issue.
               HrzLib::IssueHelper.add_comment(issue_main_id, b_test + " to " + arr_unam.join(', ') + b_inf_redir)
