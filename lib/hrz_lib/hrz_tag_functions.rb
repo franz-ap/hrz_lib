@@ -35,50 +35,53 @@ module HrzLib
     def self.call_dispatcher(b_function, params = [])
       # Im Dry-Run-Modus: Dummy-Wert zurückgeben ohne Funktion auszuführen
       if TagStringHelper.dry_run_mode?
-        HrzLogger.debug_msg "Dry-run: call_dispatcher #{b_function}(#{params.inspect})"
+        HrzLogger.debug_msg "Dry-run: call_dispatcher #{b_function}(#{params.inspect}) --> '1'"
         return "1"  # Standard-Dummy-Wert für Dry-Run
       end
       HrzLogger.debug_msg "call_dispatcher ('#{b_function}, #{params})"
+      b_ret = '?-?-? check case statement: missing assignment! ?-?-?'
 
       case b_function
         when 'get_param'
-          hrz_strfunc_get_param(params)
+          b_ret = hrz_strfunc_get_param(params)
         when 'tkt_old'
-          hrz_strfunc_tkt_old(params)
+          b_ret = hrz_strfunc_tkt_old(params)
         when 'tkt_new'
-          hrz_strfunc_tkt_new(params)
+          b_ret = hrz_strfunc_tkt_new(params)
         when 'set_param'
-          hrz_strfunc_set_param(params)
+          b_ret = hrz_strfunc_set_param(params)
         when 'show_info'
           HrzLogger.info_msg (params.join(' '))
-          ""
+          b_ret = ""
         when 'show_warning'
           HrzLogger.warning_msg (params.join(' '))
-          ""
+          b_ret = ""
         when 'show_error'
           HrzLogger.error_msg (params.join(' '))
-          ""
+          b_ret = ""
         when 'prep_clear_all'
-          HrzAutoAction.tkt_prep_clear_assignee_watchers()   # That's all for now.
+          b_ret = HrzAutoAction.tkt_prep_clear_assignee_watchers()   # That's all for now.
         when 'prep_add_asgn_watch'
           hsh_param    = analyze_named_params(['principal_id/id', 'set_assignee/assignee/asgn'], params, 'get_param', 1)
           bq_assignee  = hsh_param[:set_assignee] || 'true'
           q_assignee   = (bq_assignee.downcase == 'true')
           principal_id = hsh_param[:principal_id]
           HrzLogger.debug_msg "tkt_prep_set_assignee_add_watchers: set_assignee=#{bq_assignee}, but should be true or false. Taking it as false."  if (! q_assignee) && (bq_assignee.downcase != 'false')
-          HrzAutoAction.tkt_prep_set_assignee_add_watchers(principal_id, q_assignee)
+          b_ret = HrzAutoAction.tkt_prep_set_assignee_add_watchers(principal_id, q_assignee)
         when 'comment', "C"
-          ""
+          b_ret = ""
         when 'usr_name', 'user_name'
-          hrz_strfunc_usr_name(params)
+          b_ret = hrz_strfunc_usr_name(params)
         when 'usr_id', 'user_id'
-          hrz_strfunc_usr_id()
+          b_ret = hrz_strfunc_usr_id()
         when 'ai_query'
-          hrz_strfunc_ai_query(params)
+          b_ret = hrz_strfunc_ai_query(params)
         else
           HrzLogger.warning_msg "Unknown HRZ function: #{b_function}"
           raise HrzError.new("Unknown function: #{b_function}", { function: b_function })
       end  # case
+      HrzLogger.debug_msg "   +---> call_dispatcher: '#{b_ret}')"
+      b_ret
     rescue HrzError
       # Pass HrzErrors on
       raise
