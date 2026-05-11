@@ -19,7 +19,7 @@
 module HrzLib
   module HrzAutoActionWf
 
-    # Collect data for automatic actions from Redmine Custom Workflow plugin.
+    # Collect data for automatic actions from Redmine Custom Workflow plugin. Part 1
     # @param issue_wf     Issue object from Redmine Custom Workflow plugin: "self"
     # Usage: HrzLib::HrzAutoActionWf.collect_issue_data_wf(self)
     def self.collect_issue_data_wf(issue_wf)
@@ -255,6 +255,21 @@ module HrzLib
         HrzLib::HrzTagFunctions.set_context_value('tkt_old', 'is_new_ticket', true)
       end
     end  # collect_issue_data_wf
+
+
+    # Collect data for automatic actions from Redmine Custom Workflow plugin. Part 2
+    # @param issue_wf     Issue object from Redmine Custom Workflow plugin: "self"
+    # @param q_new_ticket  [Boolean]     Are we currently working on a new ticket? true=yes, false=no
+    # Usage: after saving the ticket:
+    #        HrzLib::HrzAutoActionWf.collect_issue_data_wf_after_save(self, q_new_ticket)
+    def self.collect_issue_data_wf_after_save(issue_wf, q_new_ticket)
+      # Collect the current ticket's data:
+      # c) after storing the ticket
+      if q_new_ticket
+        # A ticket was created right before. Store its new ID.
+        HrzLib::HrzTagFunctions.set_context_value('tkt_new', 'issue_id',           issue_wf.id)
+      end
+    end  # collect_issue_data_wf_after_save
 
   end  # module HrzAutoActionWf
 end  # module HrzLib
