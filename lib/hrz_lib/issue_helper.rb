@@ -730,10 +730,10 @@ module HrzLib
           when '=='
             q_ret = issue.journals.any? { |j| j.notes == b_txt_test }
           when 'start_with', 'start_with?'
-            q_ret = issue.journals.any? { |j| j.notes.start_with?(b_txt_test) }
+            q_ret = issue.journals.any? { |j| j.notes&.start_with?(b_txt_test) }
             b_inf =', that starts with'
           when 'include', 'include?'
-            q_ret = issue.journals.any? { |j| j.notes.include?(b_txt_test) }
+            q_ret = issue.journals.any? { |j| j.notes&.include?(b_txt_test) }
             b_inf =', that contains'
           else
             q_ret = nil
